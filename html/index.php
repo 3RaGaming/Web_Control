@@ -147,6 +147,7 @@ if(!isset($server_select)) {
 			if (this.files[0]) {
 				var file = this.files[0];
 				if ( file.size > 31457280 ) {
+					//This is also a server set limitation
 					document.getElementById('fileStatus').innerHTML = "File is too big. Must be less than 30M";
 					return;
 				}
@@ -157,7 +158,7 @@ if(!isset($server_select)) {
 			var fd = new FormData();
 			fd.append("file", file);
 			var xhr = new XMLHttpRequest();
-			xhr.open('POST', 'upload.php?d=<?php echo $server_select; ?>&upload', true);
+			xhr.open('POST', 'files.php?d=<?php echo $server_select; ?>&upload', true);
 
 			xhr.upload.addEventListener("progress", uploadProgress, false);
 			xhr.addEventListener("load", uploadComplete, false);
