@@ -212,6 +212,7 @@ if(isset($_REQUEST['archive'])) {
 			die('Error t: Invalid File');
 		}
 
+		$filename = preg_replace('/\s+/', '_', $filename);
 		$full_file_path = $base_dir.$server_select."/saves/".$filename;
 		//file already exists check
 		if(is_file($base_dir.$server_select."/saves/".$filename)) {
