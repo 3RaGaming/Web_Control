@@ -26,5 +26,13 @@ if(isset($_REQUEST['d'])) {
 		}
 	}
 }
-
+if(file_exists("repo_list.txt")) {
+	$server_version_dropdown = "";
+	$handle = fopen("repo_list.txt", "r");
+if ($handle) {
+    while (($line = fgets($handle)) !== false) {
+        $server_version_dropdown = $server_version_dropdown . '<option id="'.$line.'">'.$line.'</option>';
+    }
+    fclose($handle);
+}
 ?>
