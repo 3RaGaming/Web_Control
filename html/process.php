@@ -7,9 +7,7 @@ if(!isset($_SESSION['login'])) {
 	$current_user = $_SESSION['login']['user'];
 	if($_SERVER["HTTPS"] != "on")
 	{
-		header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-		exit();
-		die();
+		die('Must use HTTPS');
 	}
 }
 $base_dir="/var/www/factorio/";

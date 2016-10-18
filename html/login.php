@@ -60,7 +60,7 @@ if(!empty($userN) && !empty($passW)) {
 		<input type="hidden" name="login" value="submit" />
 		<input type="text" name="uname" <?php echo (empty($userN)?'placeholder="username"':'value="'.$userN.'"'); ?> />
 		<input type="password" name="passw" placeholder="password"/>
-		<button onclick="document.login.submit()">login</button>
+		<button onclick="document.login.submit();">login</button>
     </form>
 	<?php if(isset($report)) { echo $report; } ?>
   </div>
