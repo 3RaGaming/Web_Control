@@ -58,7 +58,7 @@ if(isset($_REQUEST['start'])) {
 					die('Invalid server-settings.json on game_password');
 				}
 				if($new_server_settings == true) {
-					$newJsonString = json_encode($data);
+					$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 					file_put_contents($server_settings_path, $newJsonString);
 				}
 			}
