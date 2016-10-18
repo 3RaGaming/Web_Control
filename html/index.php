@@ -7,16 +7,26 @@ if(!isset($_SESSION['login'])) {
 	if($_SERVER["HTTPS"] != "on")
 	{
 		header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-		exit();
 		die();
 	}
 }
+
 //Set the base directory the factorio servers will be stored
 $base_dir="/var/www/factorio/";
 include(getcwd().'/getserver.php');
 if(!isset($server_select)) {
-	//die('Invalid Server');
 	$server_select = "server1";
+}
+
+if(file_exists("repo_list.txt")) {
+	$server_version_dropdown = "";
+	$handle = fopen("repo_list.txt", "r");
+	if ($handle) {
+		while (($line = fgets($handle)) !== false) {
+			$server_version_dropdown = $server_version_dropdown . '<option id="'.$line.'">'.$line.'</option>';
+		}
+		fclose($handle);
+	}
 }
 ?>
 <html>
@@ -26,21 +36,20 @@ if(!isset($server_select)) {
 	<script type="text/javascript" language="javascript" src="/assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" language="javascript" src="/assets/jquery.tablesorter.js"></script>
 	<script type="text/javascript" language="javascript" src="/assets/console.php?d=<?php echo $server_select; ?>"></script>
-	<script type="text/javascript" language="javascript" src="/assets/chat.php?d=<?php echo $server_select; ?>"></script>
 	<script type="text/javascript">
 	function server_sss(cmd) {
 		var http = new XMLHttpRequest();
 		http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
 		http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		var server_name = $('#server_name').val();
-		var server_password = $('#server_password').val()
+		var server_password = $('#server_password').val();
 		var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
 		http.send(params);
 		http.onload = function() {
 			if(http.responseText) {
 				alert(http.responseText);
 			}
-		}
+		};
 	}
 	function command() {
 		var http = new XMLHttpRequest();
@@ -55,7 +64,7 @@ if(!isset($server_select)) {
 			if(http.responseText) {
 				alert(http.responseText);
 			}
-		}
+		};
 	}
 	function command_history(args) {
 		<?php
@@ -116,7 +125,7 @@ if(!isset($server_select)) {
 			format: function(table) {
 				if($.browser.msie) {
 					if(!this.init) {
-						$(":checkbox",table).change(function() { this.checkedState = this.checked});				
+						$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
 						this.init = true;
 					}
 					$(":checkbox",table).each(function() {
@@ -125,28 +134,30 @@ if(!isset($server_select)) {
 				}
 			}
 		});
-		$("fileTable").tablesorter({widgets: ['iecheckboxes']})
+		$("fileTable").tablesorter({widgets: ['iecheckboxes']});
 	});
 	<?php if($_SESSION['login']['user']!="guest") { ?>
 	function Download(url) {
 		document.getElementById('download_iframe').src = url;
-	};
+	}
 	<?php } ?>
 
 	function start(){
+		tc_console();
 		$('#server_select').on('change', function() {
 			window.location = "/?d=" + this.value ; // or $(this).val()
 		});
 	<?php if($_SESSION['login']['user']!="guest") { ?>
 
-		document.querySelector('#upload_file').addEventListener('change', function(e) {
-			if (this.value == "") {
+		document.querySelector('#upload_file').addEventListener('change', function() {
+			if (this.value === "") {
 				return;
 			}
+			var the_file;
 			document.getElementById('fileStatus').innerHTML = "";
 			if (this.files[0]) {
-				var file = this.files[0];
-				if ( file.size > 31457280 ) {
+				the_file = this.files[0];
+				if ( the_file.size > 31457280 ) {
 					//This is also a server set limitation
 					document.getElementById('fileStatus').innerHTML = "File is too big. Must be less than 30M";
 					return;
@@ -156,7 +167,7 @@ if(!isset($server_select)) {
 				return;
 			}
 			var fd = new FormData();
-			fd.append("file", file);
+			fd.append("file", the_file);
 			var xhr = new XMLHttpRequest();
 			xhr.open('POST', 'files.php?d=<?php echo $server_select; ?>&upload', true);
 
@@ -184,7 +195,7 @@ if(!isset($server_select)) {
 			document.getElementById('fileStatus').innerHTML = 'Error in percentage calculation';
 		}
 	}
-	function uploadComplete(evt) {
+	function uploadComplete() {
 		if(evt.target.readyState == 4 && evt.target.status == 200) {
 				document.getElementById('fileStatus').innerHTML = evt.target.responseText;
 				if(evt.target.responseText.includes("complete")) {
@@ -192,11 +203,11 @@ if(!isset($server_select)) {
 				}
 		}
 	}
-	function uploadFailed(evt) {
+	function uploadFailed() {
 		document.getElementById('fileStatus').innerHTML = "There was an error attempting to upload the file.";
 		document.getElementById("prog").style.display = "none";
 	}
-	function uploadCanceled(evt) {
+	function uploadCanceled() {
 		document.getElementById('fileStatus').innerHTML = "The upload has been canceled by the user or the browser dropped the connection.";
 		document.getElementById("prog").style.display = "none";
 	}
@@ -220,9 +231,9 @@ if(!isset($server_select)) {
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <?php echo $_SESSION['login']['user']; ?>&nbsp;-&nbsp;
-			<button onclick="server_sss('start')">Start</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('start');">Start</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('status');">Status</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('stop');">Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />
 			<select id="server_version"><?php if(isset($server_version_dropdown)) { echo $server_version_dropdown; } ?></select>
@@ -236,7 +247,7 @@ if(!isset($server_select)) {
 			<textarea id="console" style="width: 98%; height: 46%;"></textarea>
 			<textarea id="chat" style="width: 98%; height: 46%;"></textarea><br />
 			<input type="text" id="command" onkeydown = "if (event.keyCode == 13) document.getElementById('command_button').click();if (event.keyCode == 38) command_history('up'); if (event.keyCode == 40) command_history('down');" placeholder="Command Input (if no /c then will be displayed as chat)" style="width: 98%;" />&nbsp;
-			<button id="command_button" onclick="command()">Send</button>
+			<button id="command_button" onclick="command();">Send</button>
 		</div>
 		<!-- server files -->
 		<div style="width: 46%; height: 99%; float: left;">

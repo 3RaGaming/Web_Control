@@ -1,42 +1,45 @@
 <?php
-if(!isset($_SESSION)) { session_start(); }
-if(!isset($_SESSION['login'])) {
-	echo "And what do you think you're doing?";
-	die();
-}
-$base_dir="/var/www/factorio/";
-$html_dir="/var/www/html";
-include($html_dir.'/getserver.php');
-if(!isset($server_select)) {
-	//die('Invalid Server');
-	$server_select = "server1";
-}
+	if(!isset($_SESSION)) {
+		session_start();
+	}
+	if(!isset($_SESSION['login'])) {
+		die('//Eh');
+	}
+	$base_dir="/var/www/factorio/";
+	$html_dir="/var/www/html";
+	include($html_dir.'/getserver.php');
+	if(!isset($server_select)) {
+		//die('Invalid Server');
+		$server_select = "server1";
+	}
 ?>
 var refreshtime=500;
-function tc()
+function tc_console()
 {
-	asyncAjax("GET","/console.php?d=<?php echo $server_select; ?>&m=",Math.random(),display,{});
-	setTimeout(tc,refreshtime);
+	asyncAjax("GET","/console.php?d=<?php echo $server_select; ?>&s=console",Math.random(),display,{},"console");
+	asyncAjax("GET","/console.php?d=<?php echo $server_select; ?>&s=chat",Math.random(),display,{},"chat");
+	setTimeout(tc_console,refreshtime);
 }
-function display(xhr,cdat)
+
+function display(xhr,cdat,scr)
 {
 	if(xhr.readyState==4 && xhr.status==200)
 	{
-		var scrollContainer = document.getElementById('console');
+		var scrollContainer = document.getElementById(scr);
 		var shouldScroll = scrollContainer.scrollTop + scrollContainer.offsetHeight >= scrollContainer.scrollHeight;
-		document.getElementById("console").innerHTML=xhr.responseText;
+		scrollContainer.innerHTML=xhr.responseText;
 		if(shouldScroll) {
 			scrollContainer.scrollTop = scrollContainer.scrollHeight;
 		}
 	}
 }
-function asyncAjax(method,url,qs,callback,callbackData)
+function asyncAjax(method,url,qs,callback,callbackData,scr)
 {
     var xmlhttp=new XMLHttpRequest();
     //xmlhttp.cdat=callbackData;
     if(method=="GET")
     {
-        url+="?"+qs;
+        url+="&t="+qs;
     }
     var cb=callback;
     callback=function()
@@ -44,9 +47,9 @@ function asyncAjax(method,url,qs,callback,callbackData)
         var xhr=xmlhttp;
         //xhr.cdat=callbackData;
         var cdat2=callbackData;
-        cb(xhr,cdat2);
+        cb(xhr,cdat2,scr);
         return;
-    }
+    };
     xmlhttp.open(method,url,true);
     xmlhttp.onreadystatechange=callback;
     if(method=="POST"){
@@ -58,4 +61,7 @@ function asyncAjax(method,url,qs,callback,callbackData)
             xmlhttp.send(null);
     }
 }
-tc();
+//tc_console('chat');
+<?php
+ //end it
+?>
