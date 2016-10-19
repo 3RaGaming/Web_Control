@@ -198,7 +198,7 @@ if(file_exists("repo_list.txt")) {
 		$('#upload_button').click(function() {
 			$('#upload_file').click();
 		});
-		$('#command'.keydown(function(event) {
+		$('#command').keydown(function(event) {
 			if (event.keyCode == 13) document.getElementById('command_button').click();
 			if (event.keyCode == 38) command_history('up');
 			if (event.keyCode == 40) command_history('down');
