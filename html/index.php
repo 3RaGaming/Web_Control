@@ -94,8 +94,6 @@
 		}
 	}
 	//table sorter
-		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
-		var user_level = "<?php if(isset($_SESSION['login']['level'])) { echo $_SESSION['login']['level']; }  else { echo "guest"; } ?>";
 	</script>
 </head>
 <body>

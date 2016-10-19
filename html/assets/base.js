@@ -1035,12 +1035,12 @@
 
 
 function Download(url) {
-    if (level == "guest") { return; }
+    if (user_level == "guest") { return; }
 	document.getElementById('download_iframe').src = url;
 }
 
 function server_sss(cmd) {
-    if(level == "guest" && (cmd == "start" || cmd =="stop" )) {
+    if(user_level == "guest" && (cmd == "start" || cmd =="stop" )) {
         alert("Guest's may not start/stop the server");
         return;
     }
@@ -1058,7 +1058,7 @@ function server_sss(cmd) {
 	};
 }
 function command() {
-    if(level == "guest") {
+    if(user_level == "guest") {
         alert("Guests may not send commands :(");
         return;
     }
@@ -1172,7 +1172,7 @@ $(document).ready(function() {
 	});
 	$("#fileTable").tablesorter( {sortList: [[3,1]]} );
 	$('#upload_button').on('click', function() {
-        if(level == "guest") {
+        if(user_level == "guest") {
             alert("guests may not upload files");
             return;
         }
@@ -1180,7 +1180,7 @@ $(document).ready(function() {
 	});
 	$('#command').keydown(function(event) {
 		if (event.keyCode == 13) command();
-        if (level == "guest") { return; }
+        if (user_level == "guest") { return; }
 		if (event.keyCode == 38) command_history('up');
 		if (event.keyCode == 40) command_history('down');
 	});
