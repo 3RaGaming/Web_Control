@@ -202,7 +202,7 @@ if(file_exists("repo_list.txt")) {
 			if (event.keyCode == 13) document.getElementById('command_button').click();
 			if (event.keyCode == 38) command_history('up');
 			if (event.keyCode == 40) command_history('down');
-		}));
+		});
 	}); 
 	$(function() {
 		// add ie checkbox widget
