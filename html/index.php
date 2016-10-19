@@ -186,7 +186,7 @@ if(file_exists("repo_list.txt")) {
 			<select id="server_version"><?php if(isset($server_version_dropdown)) { echo $server_version_dropdown; } ?></select>
 			<div style="float: right;">
 				<select id="server_select"><?php if(isset($server_select_dropdown)) { echo $server_select_dropdown; } ?></select>&nbsp;-&nbsp;
-				<a href="/login.php?logout">Logout</a>
+				<a href="login.php?logout">Logout</a>
 			</div>
 		</div>
 		<!-- console and chat windows -->

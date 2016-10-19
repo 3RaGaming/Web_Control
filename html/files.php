@@ -274,7 +274,7 @@ if(isset($_REQUEST['archive'])) {
 		if($_SESSION['login']['user']!="guest") {
 			echo '<input type="file" name="upload_file" id="upload_file" style="display: none;"> <progress id="prog" value="0" max="100.0" style="display: none;"></progress>';
 			echo '
-			<button id="upload" name="upload_button" onClick="upload_click()" style="background-color: #ffffff;">Upload</button>
+			<button id="upload" name="upload_button" style="background-color: #ffffff;">Upload</button>
 			<button id="Transfer" style="background-color: #ffffff;">Transfer</button>
 			:
 			<button id="archive" style="background-color: #ffffff;">Archive</button>
