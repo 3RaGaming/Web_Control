@@ -14,8 +14,7 @@ if(!isset($_SESSION['login'])) {
 $base_dir="/var/www/factorio/";
 include(getcwd().'/getserver.php');
 if(!isset($server_select)) {
-	//We want to know exactly which fie to download. If we don't have one, die!
-	die('Invalid Server');
+	die('Error in server selection files.php');
 }
 
 if(isset($_REQUEST['archive'])) {

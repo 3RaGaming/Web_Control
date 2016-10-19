@@ -15,7 +15,7 @@ if(!isset($_SESSION['login'])) {
 $base_dir="/var/www/factorio/";
 include(getcwd().'/getserver.php');
 if(!isset($server_select)) {
-	$server_select = "server1";
+	die('Error in server selection index.php');
 }
 
 if(file_exists("repo_list.txt")) {

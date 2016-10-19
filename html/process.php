@@ -13,8 +13,7 @@ if(!isset($_SESSION['login'])) {
 $base_dir="/var/www/factorio/";
 include(getcwd().'/getserver.php');
 if(!isset($server_select)) {
-	//die('Invalid Server');
-	$server_select = "server1";
+	die('Error in server selection process.php');
 }
 
 if(isset($_REQUEST['start'])) {

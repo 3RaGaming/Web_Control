@@ -13,7 +13,7 @@ if(!isset($base_dir)) { die(); }
 if(isset($_REQUEST['d'])) {
 	$temp_select=$_REQUEST['d'];
 } else {
-	$temp_select="server1";
+	$temp_select="servertest";
 }
 
 $server_select_dropdown = "";
