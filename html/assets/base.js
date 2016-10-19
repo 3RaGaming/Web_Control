@@ -1,4 +1,4 @@
-function server_sss(cmd, server_select) {
+function server_sss(cmd) {
 	var http = new XMLHttpRequest();
 	http.open("POST", "process.php?d=" + server_select, true);
 	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
@@ -12,7 +12,7 @@ function server_sss(cmd, server_select) {
 		}
 	};
 }
-function command(server_select) {
+function command() {
 	var http = new XMLHttpRequest();
 	http.open("POST", "process.php?d=" + server_select, true);
 	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
