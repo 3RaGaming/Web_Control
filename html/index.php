@@ -38,62 +38,16 @@
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
 		var user_level = "<?php if(isset($_SESSION['login']['level'])) { echo $_SESSION['login']['level']; }  else { echo "guest"; } ?>";
+		his_array = ["/players", "/c print(\"hello\")"];
+		<?php
+		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
+			//echo "his_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
+		}
+		?>
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/console.php?d=<?php echo $server_select; ?>"></script>
-	<script type="text/javascript">
-	function command_history(args) {
-<?php
-		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
-			//his_array = ["/players", "/c print(\"hello\")"];
-			echo "his_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
-		}
-?>
-		if (typeof his_ind == 'undefined') {
-			his_ind = -1;
-		}
-		if (typeof his_array == 'undefined') {
-			his_array = [];
-		}
-		his_cou = his_array.length - 1;
-		if (his_ind == -1) { sav_val = document.getElementById('command').value; }
-		if (args == "up") {
-			if (his_ind <= 23 && his_ind < his_cou) {
-				his_ind = his_ind + 1;
-			}
-			if(his_ind == -1) {
-				dis_val = sav_val;
-			} else {
-				dis_val = his_array[his_ind];
-			}
-			document.getElementById('command').value = dis_val;
-		} else if (args == "down") {
-			if (his_ind > 0) {
-				his_ind = his_ind - 1;
-				dis_val = his_array[his_ind];
-			} else {
-				his_ind = -1;
-				dis_val = sav_val;
-			}
-			document.getElementById('command').value = dis_val;
-		} else if (args == "add") {
-			command_history_add();
-		}
-		
-		//PHp injecting command history breaks this function. Haven't looked into why yet.
-		function command_history_add() {
-			if (args == "add") {
-				his_array.unshift(document.getElementById('command').value);
-				if (his_array.length > 25) {
-					his_array.pop();
-				}
-			}
-			his_ind = -1;
-			document.getElementById('command').value = "";
-		}
-	}
-	</script>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">

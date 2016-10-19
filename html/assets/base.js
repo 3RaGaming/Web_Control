@@ -1161,6 +1161,51 @@ function upload() {
 	$('#upload_file').val("");
 }
 
+function command_history(args) {
+	if (typeof his_ind == 'undefined') {
+		his_ind = -1;
+	}
+	if (typeof his_array == 'undefined') {
+		his_array = [];
+	}
+	his_cou = his_array.length - 1;
+	if (his_ind == -1) { sav_val = document.getElementById('command').value; }
+	if (args == "up") {
+		if (his_ind <= 23 && his_ind < his_cou) {
+			his_ind = his_ind + 1;
+		}
+		if(his_ind == -1) {
+			dis_val = sav_val;
+		} else {
+			dis_val = his_array[his_ind];
+		}
+		document.getElementById('command').value = dis_val;
+	} else if (args == "down") {
+		if (his_ind > 0) {
+			his_ind = his_ind - 1;
+			dis_val = his_array[his_ind];
+		} else {
+			his_ind = -1;
+			dis_val = sav_val;
+		}
+		document.getElementById('command').value = dis_val;
+	} else if (args == "add") {
+		command_history_add();
+	}
+	
+	//PHP injecting command history breaks this function. Haven't looked into why yet.
+	function command_history_add() {
+		if (args == "add") {
+			his_array.unshift(document.getElementById('command').value);
+			if (his_array.length > 25) {
+				his_array.pop();
+			}
+		}
+		his_ind = -1;
+		document.getElementById('command').value = "";
+	}
+}
+
 //Things to only start doing after the page has finished loading
 $(document).ready(function() {
     tc_console();
