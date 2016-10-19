@@ -32,15 +32,17 @@ if(!empty($userN) && !empty($passW)) {
 		$user_details = explode('|', $user);
 		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
 			$userN = $user_details[0];
+			$userL = $user_details[2];
 			$success = true;
 			break;
 		}
 	}
 	if ($success) {
 		$_SESSION['login']['user']=$userN;
+		$_SESSION['login']['level']=$userL;
 		//Send home if logged in
-		header("Location: ./?d=server1");
-		die();
+		//header("Location: ./?d=server1");
+		die($userL);
 	} else {
 		$report =  "<br />You have entered the wrong username or password. Please try again.<br />";
 	}
