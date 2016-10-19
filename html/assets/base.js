@@ -1,52 +1,3 @@
-function server_sss(cmd) {
-	var http = new XMLHttpRequest();
-	http.open("POST", "process.php?d=" + server_select, true);
-	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	var server_name = $('#server_name').val();
-	var server_password = $('#server_password').val();
-	var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
-	http.send(params);
-	http.onload = function() {
-		if(http.responseText) {
-			alert(http.responseText);
-		}
-	};
-}
-function command() {
-	var http = new XMLHttpRequest();
-	http.open("POST", "process.php?d=" + server_select, true);
-	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	var params = "command=" + encodeURIComponent(document.getElementById('command').value);
-	command_history('add');
-	document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-	document.getElementById('console').scrollTop = document.getElementById('console').scrollHeight;
-	http.send(params);
-	http.onload = function() {
-		if(http.responseText) {
-			alert(http.responseText);
-		}
-	};
-}
-
-$(function() {
-	// add ie checkbox widget
-	$.tablesorter.addWidget({
-		id: "iecheckboxes",
-		format: function(table) {
-			if($.browser.msie) {
-				if(!this.init) {
-					$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
-					this.init = true;
-				}
-				$(":checkbox",table).each(function() {
-					$(this).attr("checked",this.checkedState);
-				});
-			}
-		}
-	});
-	$("fileTable").tablesorter({widgets: ['iecheckboxes']});
-});
-
 /*
  * 
  * TableSorter 2.0 - Client-side table sorting with ease!
@@ -1078,3 +1029,162 @@ $(function() {
         }
     });
 })(jQuery);
+
+
+///Start other javascript junk
+
+
+function Download(url) {
+    if (level == "guest") { return; }
+	document.getElementById('download_iframe').src = url;
+}
+
+function server_sss(cmd) {
+    if(level == "guest" && (cmd == "start" || cmd =="stop" )) {
+        alert("Guest's may not start/stop the server");
+        return;
+    }
+	var http = new XMLHttpRequest();
+	http.open("POST", "process.php?d=" + server_select, true);
+	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	var server_name = $('#server_name').val();
+	var server_password = $('#server_password').val();
+	var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
+	http.send(params);
+	http.onload = function() {
+		if(http.responseText) {
+			alert(http.responseText);
+		}
+	};
+}
+function command() {
+    if(level == "guest") {
+        alert("Guests may not send commands :(");
+        return;
+    }
+    var http = new XMLHttpRequest();
+    http.open("POST", "process.php?d=" + server_select, true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "command=" + encodeURIComponent(document.getElementById('command').value);
+    command_history('add');
+    document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+    document.getElementById('console').scrollTop = document.getElementById('console').scrollHeight;
+    http.send(params);
+    http.onload = function() {
+        if(http.responseText) {
+            alert(http.responseText);
+        }
+    };
+}
+
+//what does this even do?
+$(function() {
+	// add ie checkbox widget
+	$.tablesorter.addWidget({
+		id: "iecheckboxes",
+		format: function(table) {
+			if($.browser.msie) {
+				if(!this.init) {
+					$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
+					this.init = true;
+				}
+				$(":checkbox",table).each(function() {
+					$(this).attr("checked",this.checkedState);
+				});
+			}
+		}
+	});
+	$("fileTable").tablesorter({widgets: ['iecheckboxes']});
+});
+
+function uploadProgress(evt) {
+	if (evt.lengthComputable) {
+		var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+		document.getElementById('prog').value = percentComplete;
+		if(document.getElementById('prog').value<100) {
+			document.getElementById("prog").style.display = "block";
+		} else {
+			document.getElementById("prog").style.display = "none";
+		}
+	} else {
+		document.getElementById('fileStatus').innerHTML = 'Error in percentage calculation';
+	}
+}
+
+function uploadComplete() {
+	if(evt.target.readyState == 4 && evt.target.status == 200) {
+			document.getElementById('fileStatus').innerHTML = evt.target.responseText;
+			if(evt.target.responseText.includes("complete")) {
+				location.reload();
+			}
+	}
+}
+
+function uploadFailed() {
+	document.getElementById('fileStatus').innerHTML = "There was an error attempting to upload the file.";
+	document.getElementById("prog").style.display = "none";
+}
+
+function uploadCanceled() {
+	document.getElementById('fileStatus').innerHTML = "The upload has been canceled by the user or the browser dropped the connection.";
+	document.getElementById("prog").style.display = "none";
+}
+
+function upload() {
+	if (this.value === "" || level == "guest") {
+		return;
+	}
+	var the_file;
+	document.getElementById('fileStatus').innerHTML = "";
+	if (this.files[0]) {
+		the_file = this.files[0];
+		if ( the_file.size > 31457280 ) {
+			//This is also a server set limitation
+			document.getElementById('fileStatus').innerHTML = "File is too big. Must be less than 30M";
+			return;
+		}
+	} else {
+		document.getElementById('fileStatus').innerHTML = "Error finding file.";
+		return;
+	}
+	var fd = new FormData();
+	fd.append("file", the_file);
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'files.php?d=<?php echo $server_select; ?>&upload', true);
+
+	xhr.upload.addEventListener("progress", uploadProgress, false);
+	xhr.addEventListener("load", uploadComplete, false);
+	xhr.addEventListener("error", uploadFailed, false);
+	xhr.addEventListener("abort", uploadCanceled, false);
+
+	xhr.send(fd);
+	this.value = "";
+}
+
+//Things to only start doing after the page has finished loading
+$(document).ready(function() {
+    tc_console();
+    $('#upload_file').on('change', function() {
+        upload();
+    });
+	$('#server_select').on('change', function() {
+		window.location = "./?d=" + this.value ; // or $(this).val()
+	});
+	$("#fileTable").tablesorter( {sortList: [[3,1]]} );
+	$('#upload_button').on('click', function() {
+        if(level == "guest") {
+            alert("guests may not upload files");
+            return;
+        }
+		$('#upload_file').click();
+	});
+	$('#command').keydown(function(event) {
+		if (event.keyCode == 13) command();
+        if (level == "guest") { return; }
+		if (event.keyCode == 38) command_history('up');
+		if (event.keyCode == 40) command_history('down');
+	});
+	$('#command_button').on('click', function() {
+		command();
+	});
+});

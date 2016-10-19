@@ -32,7 +32,7 @@
 </script>
 <html>
 <head>
-	<style type="text/css">@import "/assets/style_table.css";</style>
+	<style type="text/css">@import "assets/base.css";</style>
 	<script type="text/javascript">
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
@@ -94,111 +94,9 @@
 		}
 	}
 	//table sorter
-	<?php if($_SESSION['login']['user']!="guest") { ?>
-	function Download(url) {
-		document.getElementById('download_iframe').src = url;
-	}
-	<?php } ?>
-
-	function start(){
-		tc_console();
-		$('#server_select').on('change', function() {
-			window.location = "./?d=" + this.value ; // or $(this).val()
-		});
-	<?php if($_SESSION['login']['user']!="guest") { ?>
-
-		document.querySelector('#upload_file').addEventListener('change', function() {
-			if (this.value === "") {
-				return;
-			}
-			var the_file;
-			document.getElementById('fileStatus').innerHTML = "";
-			if (this.files[0]) {
-				the_file = this.files[0];
-				if ( the_file.size > 31457280 ) {
-					//This is also a server set limitation
-					document.getElementById('fileStatus').innerHTML = "File is too big. Must be less than 30M";
-					return;
-				}
-			} else {
-				document.getElementById('fileStatus').innerHTML = "Error finding file.";
-				return;
-			}
-			var fd = new FormData();
-			fd.append("file", the_file);
-			var xhr = new XMLHttpRequest();
-			xhr.open('POST', 'files.php?d=<?php echo $server_select; ?>&upload', true);
-
-			xhr.upload.addEventListener("progress", uploadProgress, false);
-			xhr.addEventListener("load", uploadComplete, false);
-			xhr.addEventListener("error", uploadFailed, false);
-			xhr.addEventListener("abort", uploadCanceled, false);
-
-			xhr.send(fd);
-			this.value = "";
-		}, false);
-	<?php } ?>
-	}
-	<?php if($_SESSION['login']['user']!="guest") { ?>
-	function uploadProgress(evt) {
-		if (evt.lengthComputable) {
-			var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-			document.getElementById('prog').value = percentComplete;
-			if(document.getElementById('prog').value<100) {
-				document.getElementById("prog").style.display = "block";
-			} else {
-				document.getElementById("prog").style.display = "none";
-			}
-		} else {
-			document.getElementById('fileStatus').innerHTML = 'Error in percentage calculation';
-		}
-	}
-	function uploadComplete() {
-		if(evt.target.readyState == 4 && evt.target.status == 200) {
-				document.getElementById('fileStatus').innerHTML = evt.target.responseText;
-				if(evt.target.responseText.includes("complete")) {
-					location.reload();
-				}
-		}
-	}
-	function uploadFailed() {
-		document.getElementById('fileStatus').innerHTML = "There was an error attempting to upload the file.";
-		document.getElementById("prog").style.display = "none";
-	}
-	function uploadCanceled() {
-		document.getElementById('fileStatus').innerHTML = "The upload has been canceled by the user or the browser dropped the connection.";
-		document.getElementById("prog").style.display = "none";
-	}
-
-	<?php } ?>
-	window.addEventListener("load", start, false);
-
-	$(document).ready(function() {
-		$("#fileTable").tablesorter( {sortList: [[3,1]]} );
-		$('#upload_button').on('click', function() {
-			$('#upload_file').click();
-		});
-		$('#command').keydown(function(event) {
-			if (event.keyCode == 13) command();
-			if (event.keyCode == 38) command_history('up');
-			if (event.keyCode == 40) command_history('down');
-		});
-		$('#command_button').on('click', function() {
-			command();
-		});
-	});
-
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		var user_level = "<?php if(isset($_SESSION['login']['level'])) { echo $_SESSION['login']['level']; }  else { echo "guest"; } ?>";
 	</script>
-	<style type="text/css">
-		a:visited{
-		  color:blue;
-		}
-		a:hover{
-		  color:orange;
-		}
-	</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
