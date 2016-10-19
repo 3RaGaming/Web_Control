@@ -1,7 +1,7 @@
 <?php
 if(!isset($_SESSION)) { session_start(); }
 if(!isset($_SESSION['login'])) {
-	header("Location: https://" . $_SERVER["HTTP_HOST"] . "/login.php");
+	header("Location: /login.php");
 	die();
 } else {
 	$current_user = $_SESSION['login']['user'];
@@ -58,7 +58,7 @@ if(isset($_REQUEST['start'])) {
 					die('Invalid server-settings.json on game_password');
 				}
 				if($new_server_settings == true) {
-					$newJsonString = json_encode($data);
+					$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
 					file_put_contents($server_settings_path, $newJsonString);
 				}
 			}

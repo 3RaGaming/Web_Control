@@ -1,7 +1,7 @@
 <?php
 if(!isset($_SESSION)) { session_start(); }
 if(!isset($_SESSION['login'])) {
-	header("Location: https://" . $_SERVER["HTTP_HOST"] . "/login.php");
+	header("Location: ./login.php");
 	die();
 } else {
 	if($_SERVER["HTTPS"] != "on")

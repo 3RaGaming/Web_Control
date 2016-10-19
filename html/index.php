@@ -1,7 +1,7 @@
 <?php
 if(!isset($_SESSION)) { session_start(); }
 if(!isset($_SESSION['login'])) {
-	header("Location: https://" . $_SERVER["HTTP_HOST"] . "/login.php");
+	header("Location: ./login.php");
 	die();
 } else {
 	if($_SERVER["HTTPS"] != "on")
@@ -33,46 +33,17 @@ if(file_exists("repo_list.txt")) {
 <head>
 	<style type="text/css">@import "/assets/style_table.css";</style>
 	
-	<script type="text/javascript" language="javascript" src="/assets/jquery-3.1.1.min.js"></script>
-	<script type="text/javascript" language="javascript" src="/assets/jquery.tablesorter.js"></script>
-	<script type="text/javascript" language="javascript" src="/assets/console.php?d=<?php echo $server_select; ?>"></script>
+	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
+	<script type="text/javascript" language="javascript" src="assets/console.php?d=<?php echo $server_select; ?>"></script>
 	<script type="text/javascript">
-	function server_sss(cmd) {
-		var http = new XMLHttpRequest();
-		http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
-		http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-		var server_name = $('#server_name').val();
-		var server_password = $('#server_password').val();
-		var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
-		http.send(params);
-		http.onload = function() {
-			if(http.responseText) {
-				alert(http.responseText);
-			}
-		};
-	}
-	function command() {
-		var http = new XMLHttpRequest();
-		http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
-		http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-		var params = "command=" + encodeURIComponent(document.getElementById('command').value);
-		command_history('add');
-		document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-		document.getElementById('console').scrollTop = document.getElementById('console').scrollHeight;
-		http.send(params);
-		http.onload = function() {
-			if(http.responseText) {
-				alert(http.responseText);
-			}
-		};
-	}
 	function command_history(args) {
-		<?php
+<?php
 		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
 			//his_array = ["/players", "/c print(\"hello\")"];
 			echo "his_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
 		}
-		?>
+?>
 		if (typeof his_ind == 'undefined') {
 			his_ind = -1;
 		}
@@ -115,27 +86,6 @@ if(file_exists("repo_list.txt")) {
 		}
 	}
 	//table sorter
-	$(document).ready(function() { 
-        $("#fileTable").tablesorter( {sortList: [[3,1]]} ); 
-    }); 
-	$(function() {
-		// add ie checkbox widget
-		$.tablesorter.addWidget({
-			id: "iecheckboxes",
-			format: function(table) {
-				if($.browser.msie) {
-					if(!this.init) {
-						$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
-						this.init = true;
-					}
-					$(":checkbox",table).each(function() {
-						$(this).attr("checked",this.checkedState);
-					});
-				}
-			}
-		});
-		$("fileTable").tablesorter({widgets: ['iecheckboxes']});
-	});
 	<?php if($_SESSION['login']['user']!="guest") { ?>
 	function Download(url) {
 		document.getElementById('download_iframe').src = url;
@@ -211,11 +161,8 @@ if(file_exists("repo_list.txt")) {
 		document.getElementById('fileStatus').innerHTML = "The upload has been canceled by the user or the browser dropped the connection.";
 		document.getElementById("prog").style.display = "none";
 	}
-	function upload_click() {
-		$('#upload_file').click();
-	}
+
 	<?php } ?>
-		
 	window.addEventListener("load", start, false);
 	</script>
 	<style type="text/css">
@@ -246,7 +193,7 @@ if(file_exists("repo_list.txt")) {
 		<div style="width: 52%; height: 99%; float: left;">
 			<textarea id="console" style="width: 98%; height: 46%;"></textarea>
 			<textarea id="chat" style="width: 98%; height: 46%;"></textarea><br />
-			<input type="text" id="command" onkeydown = "if (event.keyCode == 13) document.getElementById('command_button').click();if (event.keyCode == 38) command_history('up'); if (event.keyCode == 40) command_history('down');" placeholder="Command Input (if no /c then will be displayed as chat)" style="width: 98%;" />&nbsp;
+			<input type="text" id="command" placeholder="" style="width: 98%;" />&nbsp;
 			<button id="command_button" onclick="command();">Send</button>
 		</div>
 		<!-- server files -->
