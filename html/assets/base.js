@@ -1111,7 +1111,7 @@ function uploadProgress(evt) {
 	}
 }
 
-function uploadComplete() {
+function uploadComplete(evt) {
 	if(evt.target.readyState == 4 && evt.target.status == 200) {
 			document.getElementById('fileStatus').innerHTML = evt.target.responseText;
 			if(evt.target.responseText.includes("complete")) {
@@ -1131,26 +1131,26 @@ function uploadCanceled() {
 }
 
 function upload() {
-	if (this.value === "" || user_level == "guest") {
+	if ($('#upload_file').val == "" || user_level == "guest") {
 		return;
 	}
 	var the_file;
-	document.getElementById('fileStatus').innerHTML = "";
-	if (this.files[0]) {
-		the_file = this.files[0];
+	$('#fileStatus').html("");
+	if ($('#upload_file')[0].files[0]) {
+		the_file = $('#upload_file')[0].files[0];
 		if ( the_file.size > 31457280 ) {
 			//This is also a server set limitation
-			document.getElementById('fileStatus').innerHTML = "File is too big. Must be less than 30M";
+			$('#fileStatus').html("File is too big. Must be less than 30M");
 			return;
 		}
 	} else {
-		document.getElementById('fileStatus').innerHTML = "Error finding file.";
+		$('#fileStatus').html("Error finding file.");
 		return;
 	}
 	var fd = new FormData();
 	fd.append("file", the_file);
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', 'files.php?d=<?php echo $server_select; ?>&upload', true);
+	xhr.open('POST', 'files.php?d=' + server_select + '&upload', true);
 
 	xhr.upload.addEventListener("progress", uploadProgress, false);
 	xhr.addEventListener("load", uploadComplete, false);
@@ -1158,7 +1158,7 @@ function upload() {
 	xhr.addEventListener("abort", uploadCanceled, false);
 
 	xhr.send(fd);
-	this.value = "";
+	$('#upload_file').val("");
 }
 
 //Things to only start doing after the page has finished loading
