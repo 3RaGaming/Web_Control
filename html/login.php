@@ -41,8 +41,8 @@ if(!empty($userN) && !empty($passW)) {
 		$_SESSION['login']['user']=$userN;
 		$_SESSION['login']['level']=$userL;
 		//Send home if logged in
-		//header("Location: ./?d=server1");
-		die($userL);
+		header("Location: ./?d=server1");
+		die();
 	} else {
 		$report =  "<br />You have entered the wrong username or password. Please try again.<br />";
 	}

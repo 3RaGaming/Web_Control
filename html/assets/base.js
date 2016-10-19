@@ -1131,7 +1131,7 @@ function uploadCanceled() {
 }
 
 function upload() {
-	if (this.value === "" || level == "guest") {
+	if (this.value === "" || user_level == "guest") {
 		return;
 	}
 	var the_file;
