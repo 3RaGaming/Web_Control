@@ -1,3 +1,33 @@
+function server_sss(cmd) {
+	var http = new XMLHttpRequest();
+	http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
+	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	var server_name = $('#server_name').val();
+	var server_password = $('#server_password').val();
+	var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
+	http.send(params);
+	http.onload = function() {
+		if(http.responseText) {
+			alert(http.responseText);
+		}
+	};
+}
+function command() {
+	var http = new XMLHttpRequest();
+	http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
+	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	var params = "command=" + encodeURIComponent(document.getElementById('command').value);
+	command_history('add');
+	document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+	document.getElementById('console').scrollTop = document.getElementById('console').scrollHeight;
+	http.send(params);
+	http.onload = function() {
+		if(http.responseText) {
+			alert(http.responseText);
+		}
+	};
+}
+
 /*
  * 
  * TableSorter 2.0 - Client-side table sorting with ease!
