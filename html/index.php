@@ -95,7 +95,7 @@ if(file_exists("repo_list.txt")) {
 	function start(){
 		tc_console();
 		$('#server_select').on('change', function() {
-			window.location = "/?d=" + this.value ; // or $(this).val()
+			window.location = "./?d=" + this.value ; // or $(this).val()
 		});
 	<?php if($_SESSION['login']['user']!="guest") { ?>
 
@@ -195,9 +195,9 @@ if(file_exists("repo_list.txt")) {
 	}
 	$(document).ready(function() {
 		$("#fileTable").tablesorter( {sortList: [[3,1]]} );
-		$('#upload_button'.click(function() {
+		$('#upload_button').click(function() {
 			$('#upload_file').click();
-		}));
+		});
 		$('#command'.keydown(function(event) {
 			if (event.keyCode == 13) document.getElementById('command_button').click();
 			if (event.keyCode == 38) command_history('up');
