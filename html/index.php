@@ -164,6 +164,64 @@ if(file_exists("repo_list.txt")) {
 
 	<?php } ?>
 	window.addEventListener("load", start, false);
+	function server_sss(cmd) {
+		var http = new XMLHttpRequest();
+		http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
+		http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		var server_name = $('#server_name').val();
+		var server_password = $('#server_password').val();
+		var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
+		http.send(params);
+		http.onload = function() {
+			if(http.responseText) {
+				alert(http.responseText);
+			}
+		};
+	}
+	function command() {
+		var http = new XMLHttpRequest();
+		http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
+		http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		var params = "command=" + encodeURIComponent(document.getElementById('command').value);
+		command_history('add');
+		document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+		document.getElementById('console').scrollTop = document.getElementById('console').scrollHeight;
+		http.send(params);
+		http.onload = function() {
+			if(http.responseText) {
+				alert(http.responseText);
+			}
+		};
+	}
+	$(document).ready(function() {
+		$("#fileTable").tablesorter( {sortList: [[3,1]]} );
+		$('#upload_button'.click(function() {
+			$('#upload_file').click();
+		}));
+		$('#command'.keydown(function(event) {
+			if (event.keyCode == 13) document.getElementById('command_button').click();
+			if (event.keyCode == 38) command_history('up');
+			if (event.keyCode == 40) command_history('down');
+		}));
+	}); 
+	$(function() {
+		// add ie checkbox widget
+		$.tablesorter.addWidget({
+			id: "iecheckboxes",
+			format: function(table) {
+				if($.browser.msie) {
+					if(!this.init) {
+						$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
+						this.init = true;
+					}
+					$(":checkbox",table).each(function() {
+						$(this).attr("checked",this.checkedState);
+					});
+				}
+			}
+		});
+		$("fileTable").tablesorter({widgets: ['iecheckboxes']});
+	});
 	</script>
 	<style type="text/css">
 		a:visited{
