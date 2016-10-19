@@ -1,3 +1,62 @@
+function server_sss(cmd) {
+	var http = new XMLHttpRequest();
+	http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
+	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	var server_name = $('#server_name').val();
+	var server_password = $('#server_password').val();
+	var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
+	http.send(params);
+	http.onload = function() {
+		if(http.responseText) {
+			alert(http.responseText);
+		}
+	};
+}
+function command() {
+	var http = new XMLHttpRequest();
+	http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
+	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	var params = "command=" + encodeURIComponent(document.getElementById('command').value);
+	command_history('add');
+	document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+	document.getElementById('console').scrollTop = document.getElementById('console').scrollHeight;
+	http.send(params);
+	http.onload = function() {
+		if(http.responseText) {
+			alert(http.responseText);
+		}
+	};
+}
+$(document).ready(function() {
+    $("#fileTable").tablesorter( {sortList: [[3,1]]} );
+    $('#upload_button'.click(function() {
+        $('#upload_file').click();
+    }));
+    $('#command'.keydown(function(event) {
+        if (event.keyCode == 13) document.getElementById('command_button').click();
+        if (event.keyCode == 38) command_history('up');
+        if (event.keyCode == 40) command_history('down');
+    }));
+}); 
+$(function() {
+	// add ie checkbox widget
+	$.tablesorter.addWidget({
+		id: "iecheckboxes",
+		format: function(table) {
+			if($.browser.msie) {
+				if(!this.init) {
+					$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
+					this.init = true;
+				}
+				$(":checkbox",table).each(function() {
+					$(this).attr("checked",this.checkedState);
+				});
+			}
+		}
+	});
+	$("fileTable").tablesorter({widgets: ['iecheckboxes']});
+});
+
 /*
  * 
  * TableSorter 2.0 - Client-side table sorting with ease!
@@ -100,11 +159,9 @@
  * 
  * @author Christian Bach/christian.bach@polyester.se
  */
-
 (function ($) {
     $.extend({
-        tablesorter: new
-        function () {
+        tablesorter: new function () {
 
             var parsers = [],
                 widgets = [];
@@ -135,13 +192,11 @@
             };
 
             /* debuging utils */
-
             function benchmark(s, d) {
                 log(s + "," + (new Date().getTime() - d.getTime()) + "ms");
             }
 
             this.benchmark = benchmark;
-
             function log(s) {
                 if (typeof console != "undefined" && typeof console.debug != "undefined") {
                     console.log(s);
@@ -149,28 +204,19 @@
                     alert(s);
                 }
             }
-
             /* parsers utils */
-
             function buildParserCache(table, $headers) {
-
                 if (table.config.debug) {
                     var parsersDebug = "";
                 }
-
-                if (table.tBodies.length == 0) return; // In the case of empty tables
+                if (table.tBodies.length === 0) return; // In the case of empty tables
                 var rows = table.tBodies[0].rows;
-
                 if (rows[0]) {
-
                     var list = [],
                         cells = rows[0].cells,
                         l = cells.length;
-
                     for (var i = 0; i < l; i++) {
-
                         var p = false;
-
                         if ($.metadata && ($($headers[i]).metadata() && $($headers[i]).metadata().sorter)) {
 
                             p = getParserById($($headers[i]).metadata().sorter);
@@ -183,28 +229,24 @@
 
                             p = detectParserForColumn(table, rows, -1, i);
                         }
-
                         if (table.config.debug) {
                             parsersDebug += "column:" + i + " parser:" + p.id + "\n";
                         }
-
                         list.push(p);
                     }
                 }
-
                 if (table.config.debug) {
                     log(parsersDebug);
                 }
-
                 return list;
-            };
+            }
 
             function detectParserForColumn(table, rows, rowIndex, cellIndex) {
                 var l = parsers.length,
                     node = false,
                     nodeValue = false,
                     keepLooking = true;
-                while (nodeValue == '' && keepLooking) {
+                while (nodeValue === '' && keepLooking) {
                     rowIndex++;
                     if (rows[rowIndex]) {
                         node = getNodeFromRowAndCellIndex(rows, rowIndex, cellIndex);
@@ -224,15 +266,12 @@
                 // 0 is always the generic parser (text)
                 return parsers[0];
             }
-
             function getNodeFromRowAndCellIndex(rows, rowIndex, cellIndex) {
                 return rows[rowIndex].cells[cellIndex];
             }
-
             function trimAndGetNodeText(config, node) {
                 return $.trim(getElementText(config, node));
             }
-
             function getParserById(name) {
                 var l = parsers.length;
                 for (var i = 0; i < l; i++) {
@@ -242,15 +281,12 @@
                 }
                 return false;
             }
-
             /* utils */
-
             function buildCache(table) {
 
                 if (table.config.debug) {
                     var cacheTime = new Date();
                 }
-
                 var totalRows = (table.tBodies[0] && table.tBodies[0].rows.length) || 0,
                     totalCells = (table.tBodies[0].rows[0] && table.tBodies[0].rows[0].cells.length) || 0,
                     parsers = table.config.parsers,
@@ -258,13 +294,10 @@
                         row: [],
                         normalized: []
                     };
-
                 for (var i = 0; i < totalRows; ++i) {
-
                     /** Add the table data to main data array */
                     var c = $(table.tBodies[0].rows[i]),
                         cols = [];
-
                     // if this is a child row, add it to the last row's children and
                     // continue to the next row
                     if (c.hasClass(table.config.cssChildRow)) {
@@ -272,33 +305,23 @@
                         // go to the next for loop
                         continue;
                     }
-
                     cache.row.push(c);
-
                     for (var j = 0; j < totalCells; ++j) {
                         cols.push(parsers[j].format(getElementText(table.config, c[0].cells[j]), table, c[0].cells[j]));
                     }
-
                     cols.push(cache.normalized.length); // add position for rowCache
                     cache.normalized.push(cols);
                     cols = null;
-                };
-
+                }
                 if (table.config.debug) {
                     benchmark("Building cache for " + totalRows + " rows:", cacheTime);
                 }
-
                 return cache;
-            };
-
+            }
             function getElementText(config, node) {
-
                 var text = "";
-
                 if (!node) return "";
-
                 if (!config.supportsTextContent) config.supportsTextContent = node.textContent || false;
-
                 if (config.textExtraction == "simple") {
                     if (config.supportsTextContent) {
                         text = node.textContent;
@@ -318,13 +341,10 @@
                 }
                 return text;
             }
-
             function appendToTable(table, cache) {
-
                 if (table.config.debug) {
-                    var appendTime = new Date()
+                    var appendTime = new Date();
                 }
-
                 var c = cache,
                     r = c.row,
                     n = c.normalized,
@@ -332,26 +352,17 @@
                     checkCell = (n[0].length - 1),
                     tableBody = $(table.tBodies[0]),
                     rows = [];
-
-
                 for (var i = 0; i < totalRows; i++) {
                     var pos = n[i][checkCell];
-
                     rows.push(r[pos]);
-
                     if (!table.config.appender) {
-
                         //var o = ;
                         var l = r[pos].length;
                         for (var j = 0; j < l; j++) {
                             tableBody[0].appendChild(r[pos][j]);
                         }
-
-                        // 
                     }
                 }
-
-
 
                 if (table.config.appender) {
 
@@ -372,7 +383,7 @@
                     $(table).trigger("sortEnd");
                 }, 0);
 
-            };
+            }
 
             function buildHeaders(table) {
 
@@ -412,7 +423,7 @@
 
                 return $tableHeaders;
 
-            };
+            }
 
             // from:
             // http://www.javascripttoolbox.com/lib/table/examples.php
@@ -433,7 +444,7 @@
                         var rowIndex = c.parentNode.rowIndex;
                         var cellId = rowIndex + "-" + c.cellIndex;
                         var rowSpan = c.rowSpan || 1;
-                        var colSpan = c.colSpan || 1
+                        var colSpan = c.colSpan || 1;
                         var firstAvailCol;
                         if (typeof(matrix[rowIndex]) == "undefined") {
                             matrix[rowIndex] = [];
@@ -478,19 +489,19 @@
                     }
                 }
                 return arr;
-            };
+            }
 
             function checkHeaderMetadata(cell) {
                 if (($.metadata) && ($(cell).metadata().sorter === false)) {
                     return true;
-                };
+                }
                 return false;
             }
 
             function checkHeaderOptions(table, i) {
                 if ((table.config.headers[i]) && (table.config.headers[i].sorter === false)) {
                     return true;
-                };
+                }
                 return false;
             }
 			
@@ -516,7 +527,7 @@
                         return widgets[i];
                     }
                 }
-            };
+            }
 
             function formatSortingOrder(v) {
                 if (typeof(v) != "Number") {
@@ -561,7 +572,7 @@
                         colgroup.append($('<col>').css('width', $(this).width()));
                     });
                     $(table).prepend(colgroup);
-                };
+                }
             }
 
             function updateHeaderSortCount(table, sortList) {
@@ -597,7 +608,7 @@
                     // var s = (table.config.parsers[c].type == "text") ? ((order == 0)
                     // ? makeSortText(c) : makeSortTextDesc(c)) : ((order == 0) ?
                     // makeSortNumeric(c) : makeSortNumericDesc(c));
-                    var s = (table.config.parsers[c].type == "text") ? ((order == 0) ? makeSortFunction("text", "asc", c) : makeSortFunction("text", "desc", c)) : ((order == 0) ? makeSortFunction("numeric", "asc", c) : makeSortFunction("numeric", "desc", c));
+                    var s = (table.config.parsers[c].type == "text") ? ((order === 0) ? makeSortFunction("text", "asc", c) : makeSortFunction("text", "desc", c)) : ((order === 0) ? makeSortFunction("numeric", "asc", c) : makeSortFunction("numeric", "desc", c));
                     var e = "e" + i;
 
                     dynamicExp += "var " + e + " = " + s; // + "(a[" + c + "],b[" + c
@@ -606,33 +617,24 @@
                     dynamicExp += "else { ";
 
                 }
-
                 // if value is the same keep orignal order
                 var orgOrderCol = cache.normalized[0].length - 1;
                 dynamicExp += "return a[" + orgOrderCol + "]-b[" + orgOrderCol + "];";
-
                 for (var i = 0; i < l; i++) {
                     dynamicExp += "}; ";
                 }
-
                 dynamicExp += "return 0; ";
                 dynamicExp += "}; ";
-
                 if (table.config.debug) {
                     benchmark("Evaling expression:" + dynamicExp, new Date());
                 }
-
                 eval(dynamicExp);
-
                 cache.normalized.sort(sortWrapper);
-
                 if (table.config.debug) {
                     benchmark("Sorting on " + sortList.toString() + " and dir " + order + " time:", sortTime);
                 }
-
                 return cache;
-            };
-
+            }
             function makeSortFunction(type, direction, index) {
                 var a = "a[" + index + "]",
                     b = "b[" + index + "]";
@@ -645,45 +647,37 @@
                 } else if (type == 'numeric' && direction == 'desc') {
                     return "(" + a + " === null && " + b + " === null) ? 0 :(" + a + " === null ? Number.POSITIVE_INFINITY : (" + b + " === null ? Number.NEGATIVE_INFINITY : " + b + " - " + a + "));";
                 }
-            };
-
+            }
             function makeSortText(i) {
                 return "((a[" + i + "] < b[" + i + "]) ? -1 : ((a[" + i + "] > b[" + i + "]) ? 1 : 0));";
-            };
-
+            }
             function makeSortTextDesc(i) {
                 return "((b[" + i + "] < a[" + i + "]) ? -1 : ((b[" + i + "] > a[" + i + "]) ? 1 : 0));";
-            };
-
+            }
             function makeSortNumeric(i) {
                 return "a[" + i + "]-b[" + i + "];";
-            };
-
+            }
             function makeSortNumericDesc(i) {
                 return "b[" + i + "]-a[" + i + "];";
-            };
-
+            }
             function sortText(a, b) {
                 if (table.config.sortLocaleCompare) return a.localeCompare(b);
                 return ((a < b) ? -1 : ((a > b) ? 1 : 0));
-            };
-
+            }
             function sortTextDesc(a, b) {
                 if (table.config.sortLocaleCompare) return b.localeCompare(a);
                 return ((b < a) ? -1 : ((b > a) ? 1 : 0));
-            };
-
+            }
             function sortNumeric(a, b) {
                 return a - b;
-            };
-
+            }
             function sortNumericDesc(a, b) {
                 return b - a;
-            };
-
+            }
             function getCachedSortType(parsers, i) {
                 return parsers[i].type;
-            }; /* public methods */
+            }
+            /* public methods */
             this.construct = function (settings) {
                 return this.each(function () {
                     // if no thead or tbody quit.
@@ -733,7 +727,7 @@
                             if (!e[config.sortMultiSortKey]) {
                                 // flush the sort list
                                 config.sortList = [];
-                                if (config.sortForce != null) {
+                                if (config.sortForce !== null) {
                                     var a = config.sortForce;
                                     for (var j = 0; j < a.length; j++) {
                                         if (a[j][0] != i) {
@@ -763,7 +757,7 @@
                                     // add column to sort list array
                                     config.sortList.push([i, this.order]);
                                 }
-                            };
+                            }
                             setTimeout(function () {
                                 // set css for headers
                                 setHeadersCss($this[0], $headers, config.sortList, sortCSS);
@@ -779,7 +773,7 @@
                     }).mousedown(function () {
                         if (config.cancelSelection) {
                             this.onselectstart = function () {
-                                return false
+                                return false;
                             };
                             return false;
                         }
@@ -841,7 +835,7 @@
                 }
                 if (a) {
                     parsers.push(parser);
-                };
+                }
             };
             this.addWidget = function (widget) {
                 widgets.push(widget);
@@ -943,7 +937,7 @@
         is: function (s) {
             return /^\d{4}[\/-]\d{1,2}[\/-]\d{1,2}$/.test(s);
         }, format: function (s) {
-            return $.tablesorter.formatFloat((s != "") ? new Date(s.replace(
+            return $.tablesorter.formatFloat((s !== "") ? new Date(s.replace(
             new RegExp(/-/g), "/")).getTime() : "0");
         }, type: "numeric"
     });
@@ -1018,10 +1012,10 @@
                 // style children rows the same way the parent
                 // row was styled
                 if (!$tr.hasClass(table.config.cssChildRow)) row++;
-                odd = (row % 2 == 0);
+                odd = (row % 2 === 0);
                 $tr.removeClass(
                 table.config.widgetZebra.css[odd ? 0 : 1]).addClass(
-                table.config.widgetZebra.css[odd ? 1 : 0])
+                table.config.widgetZebra.css[odd ? 1 : 0]);
             });
             if (table.config.debug) {
                 $.tablesorter.benchmark("Applying Zebra widget", time);
