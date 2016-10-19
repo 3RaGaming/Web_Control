@@ -176,24 +176,8 @@ if(file_exists("repo_list.txt")) {
 			if (event.keyCode == 40) command_history('down');
 		});
 	}); 
-	$(function() {
-		// add ie checkbox widget
-		$.tablesorter.addWidget({
-			id: "iecheckboxes",
-			format: function(table) {
-				if($.browser.msie) {
-					if(!this.init) {
-						$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
-						this.init = true;
-					}
-					$(":checkbox",table).each(function() {
-						$(this).attr("checked",this.checkedState);
-					});
-				}
-			}
-		});
-		$("fileTable").tablesorter({widgets: ['iecheckboxes']});
-	});
+
+	var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 	</script>
 	<style type="text/css">
 		a:visited{
@@ -208,9 +192,9 @@ if(file_exists("repo_list.txt")) {
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <?php echo $_SESSION['login']['user']; ?>&nbsp;-&nbsp;
-			<button onclick="server_sss('start');">Start</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('status');">Status</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('stop');">Stop</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('start', server_select);">Start</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('status', server_select);">Status</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('stop', server_select);">Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />
 			<select id="server_version"><?php if(isset($server_version_dropdown)) { echo $server_version_dropdown; } ?></select>
@@ -224,7 +208,7 @@ if(file_exists("repo_list.txt")) {
 			<textarea id="console" style="width: 98%; height: 46%;"></textarea>
 			<textarea id="chat" style="width: 98%; height: 46%;"></textarea><br />
 			<input type="text" id="command" placeholder="" style="width: 98%;" />&nbsp;
-			<button id="command_button" onclick="command();">Send</button>
+			<button id="command_button" onclick="command(server_select);">Send</button>
 		</div>
 		<!-- server files -->
 		<div style="width: 46%; height: 99%; float: left;">

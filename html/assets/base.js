@@ -1,6 +1,6 @@
-function server_sss(cmd) {
+function server_sss(cmd, server_select) {
 	var http = new XMLHttpRequest();
-	http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
+	http.open("POST", "process.php?d=" + server_select, true);
 	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	var server_name = $('#server_name').val();
 	var server_password = $('#server_password').val();
@@ -12,9 +12,9 @@ function server_sss(cmd) {
 		}
 	};
 }
-function command() {
+function command(server_select) {
 	var http = new XMLHttpRequest();
-	http.open("POST", "process.php?d=<?php echo $server_select; ?>", true);
+	http.open("POST", "process.php?d=" + server_select, true);
 	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	var params = "command=" + encodeURIComponent(document.getElementById('command').value);
 	command_history('add');
@@ -27,6 +27,25 @@ function command() {
 		}
 	};
 }
+
+$(function() {
+	// add ie checkbox widget
+	$.tablesorter.addWidget({
+		id: "iecheckboxes",
+		format: function(table) {
+			if($.browser.msie) {
+				if(!this.init) {
+					$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
+					this.init = true;
+				}
+				$(":checkbox",table).each(function() {
+					$(this).attr("checked",this.checkedState);
+				});
+			}
+		}
+	});
+	$("fileTable").tablesorter({widgets: ['iecheckboxes']});
+});
 
 /*
  * 
