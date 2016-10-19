@@ -93,7 +93,6 @@
 			document.getElementById('command').value = "";
 		}
 	}
-	//table sorter
 	</script>
 </head>
 <body>
@@ -122,10 +121,10 @@
 		<div style="width: 46%; height: 99%; float: left;">
 			<div>
 				<input type="file" name="upload_file" id="upload_file" style="display: none;">
-				<button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>&nbsp;:&nbsp;
+				<button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
 				<button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
 				<button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
-				<button id="delete" style="background-color: #ffcccc;">Delete</button>&nbsp;:&nbsp;
+				<button id="delete" style="background-color: #ffcccc;">Delete</button>
 				<a id="fileStatus"></a>
 				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 			</div>
