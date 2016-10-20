@@ -234,8 +234,9 @@ if(isset($_REQUEST['archive'])) {
 		foreach ($file_editors as $line) {
 			$user_details = explode('|', $line);
 			if($values[0]==$filename) {
-				//if the file is listed, omit it from the array
+				//if the file is listed, omit it from the array and report it
 				$file_replaced = true;
+				$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
 			} else {
 				$rows_array[] = $line;
 			}
