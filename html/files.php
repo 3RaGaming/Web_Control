@@ -229,18 +229,21 @@ if(isset($_REQUEST['archive'])) {
 		//}
 		$file_replaced = false;
 		$file_users_path = "$base_dir$server_select/saves.txt";
-		$file_editors = file($file_users_path);
 		$rows_array = array();
-		foreach ($file_editors as $line) {
-			$user_details = explode('|', $line);
-			if($values[0]==$filename) {
-				//if the file is listed, omit it from the array and report it
-				$file_replaced = true;
-				$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
-			} else {
-				$rows_array[] = $line;
+		if(file_exists($file_users_path)) {
+			$file_editors = file($file_users_path);
+			foreach ($file_editors as $line) {
+				$values = explode('|', $line);
+				if($values[0]==$filename) {
+					//if the file is listed, omit it from the array and report it
+					$file_replaced = true;
+					$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
+				} else {
+					$rows_array[] = $line;
+				}
 			}
 		}
+			
 		
 		$rows_array[] = $filename . "|" . $_SESSION['login']['user'];
 		$lines_to_write = implode("\n", $rows_array);
