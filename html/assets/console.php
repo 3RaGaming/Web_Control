@@ -10,7 +10,7 @@ if(!isset($_SESSION['login'])) {
 }
 
 		//var_dump($_REQUEST);
-if(isset($_REQUEST['d']&&isset($_REQUEST['s']))) {
+if(isset($_REQUEST['d'])&&isset($_REQUEST['s'])) {
 	$base_dir="/var/www/factorio/";
 	$html_dir="/var/www/html";
 	include($html_dir.'/getserver.php');
