@@ -96,7 +96,7 @@ if(isset($_REQUEST['start'])) {
 			}
 			if(substr($command_decode,0,1) != "/") {
 				$command = str_replace(array("\""), array('\\\"'), $command_decode);
-				$command = "/silent-command server_message(\"".$current_user."\", \"".$command."\")";
+				$command = "/silent-command game.print(\"[WEB]".$current_user.": \"..\"".$command."\")";
 			}
 			$command = str_replace(array("'", "^"), array("'\"'\"'", "\^"), $command);
 			system("sudo -u www-data /usr/bin/screen -S ".$server_select." -X at 0 stuff '".$command."\n'");
