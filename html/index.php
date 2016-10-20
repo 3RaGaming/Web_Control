@@ -33,6 +33,7 @@
 <html>
 <head>
 	<style type="text/css">@import "assets/base.css";</style>
+	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript">
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
@@ -43,7 +44,7 @@
 		$(document).ready(function() {
 		<?php
 		if(isset($_SESSION['login']['reload_report'])) {
-			echo "$('#fileStatus').html('".$_SESSION['login']['reload_report']."')";
+			echo "$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
 			unset($_SESSION['login']['reload_report']);
 		}
 		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
@@ -52,7 +53,6 @@
 		?>
 		});
 	</script>
-	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
 </head>
