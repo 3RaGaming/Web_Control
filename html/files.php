@@ -10,6 +10,9 @@ if(!isset($_SESSION['login'])) {
 		die();
 	}
 }
+if(!isset($_SESSION['login']['level'])) {
+	die('error with user permissions');
+}
 //Set the base directory the factorio servers will be stored
 $base_dir="/var/www/factorio/";
 include(getcwd().'/getserver.php');
@@ -39,6 +42,9 @@ if(isset($_REQUEST['archive'])) {
 	}
 	die();
 } elseif(isset($_REQUEST['download'])) {
+	if($_SESSION['login']['level']=="guest") {
+		die('Guests may not download files\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
+	} 
 	if(empty($_REQUEST['download']))
 	{
 		header("HTTP/1.0 400 Bad Request");
@@ -154,7 +160,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 } elseif(isset($_REQUEST['upload'])) {
-	if($_SESSION['login']['user']=="guest") {
+	if($_SESSION['login']['level']=="guest") {
 		die('Guests may not upload files');
 	} else {
 		//Valdidate name
@@ -212,11 +218,7 @@ if(isset($_REQUEST['archive'])) {
 
 		$filename = preg_replace('/\s+/', '_', $filename);
 		$full_file_path = $base_dir.$server_select."/saves/".$filename;
-		//file already exists check
-		if(is_file($base_dir.$server_select."/saves/".$filename)) {
-			die('file already exists');
-		}
-		
+		////This didn't work. The fopen stream was adding strange data to the file, which would corrupt the zip archive somehow. 
 		//$fh = fopen('php://input','r') or die("Error opening the file");
 		//$blob = fgets($fh, 5);
 		//if (strpos($blob, 'PK') !== false) {
@@ -225,13 +227,25 @@ if(isset($_REQUEST['archive'])) {
 			//fclose($fh);
 			//die( "invalid zip file" );
 		//}
+		$file_replaced = false;
 		$file_users_path = "$base_dir$server_select/saves.txt";
-		if( strpos(file_get_contents($file_users_path),$filename) == false) {
-			$file_users = fopen($file_users_path, 'a+');
-			$line_to_write = $filename . "|" . $_SESSION['login']['user'] . "\n";
-			fwrite($file_users, $line_to_write);
-			fclose($file_users);
+		$file_editors = file($file_users_path);
+		$rows_array();
+		foreach ($file_editors as $line) {
+			$user_details = explode('|', $line);
+			if($values[0]==$filename) {
+				//if the file is listed, omit it from the array
+				$file_replaced = true;
+			} else {
+				$rows_array[] = $line;
+			}
 		}
+		
+		$rows_array[] = $filename . "|" . $_SESSION['login']['user'];
+		$lines_to_write = implode("\n", $rows_array);
+		$file_users = fopen($file_users_path, 'w');
+		fwrite($file_users, $lines_to_write);
+		fclose($file_users);
 		if ($_FILES["file"]["error"] == UPLOAD_ERR_OK) {
 			move_uploaded_file($fileTmp, $full_file_path);
 			echo "complete";
@@ -241,10 +255,24 @@ if(isset($_REQUEST['archive'])) {
 		//$pre = file_put_contents($full_file_path, $fh);
 		//fwrite($fh, $pre);
 		//fclose($fh);
-		
-		//no reason to carry on
-		die();
 	}
+	//no reason to carry on
+	die();
+	
+}  elseif(isset($_REQUEST['delete'])) {
+	if($_SESSION['login']['level']=="guest") {
+		die('Guests may not delete files');
+	} else {
+		if(empty($_REQUEST['delete']))
+		{
+			die('No files selected for deletion');
+		}
+		
+		
+	}
+	//no reason to carry on
+	die();
+	
 } else {
 	/* THIS IS FOR FILE LIST AND SUCH */
 	//This part is included from index.php
