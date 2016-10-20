@@ -14,8 +14,7 @@ if(!isset($_SESSION['login'])) {
 $base_dir="/var/www/factorio/";
 include(getcwd().'/getserver.php');
 if(!isset($server_select)) {
-	//We want to know exactly which fie to download. If we don't have one, die!
-	die('Invalid Server');
+	die('Error in server selection files.php');
 }
 
 if(isset($_REQUEST['archive'])) {
@@ -271,18 +270,6 @@ if(isset($_REQUEST['archive'])) {
 
 	if(isset($server_select)) {
 		$full_dir="$base_dir$server_select/saves/";
-		if($_SESSION['login']['user']!="guest") {
-			echo '<input type="file" name="upload_file" id="upload_file" style="display: none;"> <progress id="prog" value="0" max="100.0" style="display: none;"></progress>';
-			echo '
-			<button id="upload" name="upload_button" onClick="upload_click()" style="background-color: #ffffff;">Upload</button>
-			<button id="Transfer" style="background-color: #ffffff;">Transfer</button>
-			:
-			<button id="archive" style="background-color: #ffffff;">Archive</button>
-			:										
-			<button id="delete" style="background-color: #ffcccc;">Delete</button>
-			';
-			echo '<a id="fileStatus"></a>';
-		}
 		echo $tables;
 		echo "<thead><tr><th><input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" checked=\"false\" /></th><th>File</th><th>Size</th><th>Creation</th><th>Editor</th></tr></thead>
 		<tbody>

@@ -13,7 +13,7 @@ if(isset($_SESSION['login'])) {
 		$report = "<br />You have been logged out</br >";
 	} else {
 		//if not requesting to logout... Take back home
-		header("Location: https://" . $_SERVER["HTTP_HOST"] . "/?d=server1");
+		header("Location: ./?d=server1");
 	}
 }
 
@@ -26,20 +26,22 @@ if(isset($_POST['passw'])) {
 	$passW = addslashes(md5(trim($_POST['passw'])));
 }
 if(!empty($userN) && !empty($passW)) {
-	$userlist = file ('../users.txt');
+	$userlist = file ('/var/www/users.txt');
 	$success = false;
 	foreach ($userlist as $user) {
 		$user_details = explode('|', $user);
 		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
 			$userN = $user_details[0];
+			$userL = $user_details[2];
 			$success = true;
 			break;
 		}
 	}
 	if ($success) {
 		$_SESSION['login']['user']=$userN;
+		$_SESSION['login']['level']=$userL;
 		//Send home if logged in
-		header("Location: https://" . $_SERVER["HTTP_HOST"] . "/?d=server1");
+		header("Location: ./?d=server1");
 		die();
 	} else {
 		$report =  "<br />You have entered the wrong username or password. Please try again.<br />";
@@ -51,7 +53,7 @@ if(!empty($userN) && !empty($passW)) {
 ?>
 <html>
 <head>
-<link rel="stylesheet" media="all" href="/assets/login.css" />
+<link rel="stylesheet" media="all" href="assets/login.css" />
 </head>
 <body>
 <div class="login-page">

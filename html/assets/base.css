@@ -1,3 +1,9 @@
+a:visited{
+  color:blue;
+}
+a:hover{
+  color:orange;
+}
 /* tables */
 table.tablesorter {
 	font-family:arial;
