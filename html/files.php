@@ -230,7 +230,7 @@ if(isset($_REQUEST['archive'])) {
 		$file_replaced = false;
 		$file_users_path = "$base_dir$server_select/saves.txt";
 		$file_editors = file($file_users_path);
-		$rows_array();
+		$rows_array = array();
 		foreach ($file_editors as $line) {
 			$user_details = explode('|', $line);
 			if($values[0]==$filename) {
