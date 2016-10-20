@@ -91,12 +91,15 @@ if(isset($_REQUEST['start'])) {
 			//DOnt want anyone with command access to inject false data into a server-message
 			//.*[Ss][Ee][Rr][Vv][Ee][Rr]_[Mm][Ee][Ss][Ss][Aa][Gg][Ee]\s*\(\s*".*
 			//must implement this later
+			if(strpos($command_decode, "\\") !== false) {
+				die("Cannot use \\ in commands. Makes things angry :(");
+			}
 			if(substr($command_decode,0,1) != "/") {
-				$command = str_replace(array("\"", "^"), array('\\\"', "\^"), $command_decode);
-				$command = "/silent-command server_message(\"$current_user\", \"$command\")";
+				$command = str_replace(array("\""), array('\\\"'), $command_decode);
+				$command = "/silent-command server_message(\"".$current_user."\", \"".$command."\")";
 			}
 			$command = str_replace(array("'", "^"), array("'\"'\"'", "\^"), $command);
-			shell_exec("sudo -u www-data /usr/bin/screen -S ".$server_select." -X at 0 stuff '$command\n'");
+			system("sudo -u www-data /usr/bin/screen -S ".$server_select." -X at 0 stuff '".$command."\n'");
 
 			//used for up arrow history
 			$cmd_history = $command_decode;
