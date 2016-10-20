@@ -48,7 +48,3 @@ function asyncAjax(method,url,qs,callback,callbackData,scr)
             xmlhttp.send(null);
     }
 }
-//tc_console('chat');
-<?php
- //end it
-?>
