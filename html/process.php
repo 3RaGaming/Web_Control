@@ -92,10 +92,10 @@ if(isset($_REQUEST['start'])) {
 			//.*[Ss][Ee][Rr][Vv][Ee][Rr]_[Mm][Ee][Ss][Ss][Aa][Gg][Ee]\s*\(\s*".*
 			//must implement this later
 			if(substr($command_decode,0,1) != "/") {
-				$command = str_replace(array("\""), array('\\\"'), $command_decode);
+				$command = str_replace(array("\"", "^"), array('\\\"', "\^"), $command_decode);
 				$command = "/silent-command server_message(\"$current_user\", \"$command\")";
 			}
-			$command = str_replace(array("'"), array("'\"'\"'"), $command);
+			$command = str_replace(array("'", "^"), array("'\"'\"'", "\^"), $command);
 			shell_exec("sudo -u www-data /usr/bin/screen -S ".$server_select." -X at 0 stuff '$command\n'");
 
 			//used for up arrow history

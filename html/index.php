@@ -38,16 +38,16 @@
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
 		var user_level = "<?php if(isset($_SESSION['login']['level'])) { echo $_SESSION['login']['level']; }  else { echo "guest"; } ?>";
-		his_array = ["/players", "/c print(\"hello\")"];
+		//his_array = ["/players", "/c print(\"hello\")"];
 		<?php
 		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
-			//echo "his_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
+			echo "his_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
 		}
 		?>
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
-	<script type="text/javascript" language="javascript" src="assets/console.php?d=<?php echo $server_select; ?>"></script>
+	<script type="text/javascript" language="javascript" src="assets/console.js.php?d=<?php echo $server_select; ?>"></script>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
