@@ -311,7 +311,9 @@ if(isset($_REQUEST['archive'])) {
 			$filelist = file($file_users_path);
 			foreach ($filelist as $fileuser) {
 				$user_details = explode('|', $fileuser);
-				$file_list[$user_details[0]]=$user_details[1];
+				if(isset($user_details[0])&&isset($user_details[1])) {
+					$file_list[$user_details[0]]=$user_details[1];
+				}
 			}
 		}
 		
