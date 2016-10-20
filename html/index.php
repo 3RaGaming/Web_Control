@@ -47,7 +47,7 @@
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
-	<script type="text/javascript" language="javascript" src="assets/console.js.php?d=<?php echo $server_select; ?>"></script>
+	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">

@@ -10,7 +10,7 @@ if(!isset($_SESSION['login'])) {
 }
 
 		//var_dump($_REQUEST);
-if(isset($_REQUEST['d'])) {
+if(isset($_REQUEST['d']&&isset($_REQUEST['s'])) {
 	$base_dir="/var/www/factorio/";
 	$html_dir="/var/www/html";
 	include($html_dir.'/getserver.php');
@@ -18,7 +18,7 @@ if(isset($_REQUEST['d'])) {
 		if($_REQUEST['s']) {
 			$screen = $_REQUEST['s'];
 			$filename = '/var/www/factorio/'.$server_select.'/screenlog.0';  //about 500MB
-			$find=array("<", ">", "/\/");
+			$find=array("<", ">", "\\");
 			$repl=array("&lt;", "&gt;", "&#92;");
 			if($screen=="chat") {
 				$output = str_replace($find, $repl, shell_exec('grep -E -i \'CHAT|shout|\\[WEB\' '.$filename.' | tail -n 75'));

@@ -1,23 +1,10 @@
-<?php
-	if(!isset($_SESSION)) {
-		session_start();
-	}
-	if(!isset($_SESSION['login'])) {
-		die('//Eh');
-	}
-	$base_dir="/var/www/factorio/";
-	$html_dir="/var/www/html";
-	include($html_dir.'/getserver.php');
-	if(!isset($server_select)) {
-		//die('Invalid Server');
-		$server_select = "server1";
-	}
-?>
+var loc = window.location.pathname;
+var dir = loc.substring(0, loc.lastIndexOf('/'));
 var refreshtime=500;
 function tc_console()
 {
-	asyncAjax("GET","console.php?d=<?php echo $server_select; ?>&s=console",Math.random(),display,{},"console");
-	asyncAjax("GET","console.php?d=<?php echo $server_select; ?>&s=chat",Math.random(),display,{},"chat");
+	asyncAjax("GET",dir + "/assets/console.php?d=" + server_select + "&s=console",Math.random(),display,{},"console");
+	asyncAjax("GET",dir + "/assets/console.php?d=" + server_select + "&s=chat",Math.random(),display,{},"chat");
 	setTimeout(tc_console,refreshtime);
 }
 
