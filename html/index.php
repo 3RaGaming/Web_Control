@@ -50,7 +50,7 @@
 			echo "his_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
 		}
 		?>
-		}
+		});
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
