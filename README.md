@@ -1,7 +1,13 @@
 # Web_Control
 Quick and dirty web gui used to control the game servers. Game and Apache are run on the same server, for now.
 
-#To add
+# Installation
+(Realized this was kind of important... so we're working on it)
+Ubuntu 16.06 (or any other linux of your choosing, if you have the know-how to figure it out
+Apache2
+php7
+
+# To add
 Add delete/replace option for files.
 
 Organize code so it's more uniform and compatible to be put anywhere in a template (almost done)
