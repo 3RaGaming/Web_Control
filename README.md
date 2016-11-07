@@ -10,20 +10,26 @@ Apache2
 
 php7
 
-# To add
-Add delete/replace option for files.
+# In Development
+Add delete/replace option for files. (almost done)
 
 Organize code so it's more uniform and compatible to be put anywhere in a template (almost done)
 
-Use javascript to ajax stream everything! Better updates to push to multiple admins/mods online.
+Verify player-data.json
 
-Create archive option for files.
+Verify config.ini
+
+Create archive option for save files.
+
+Better version control to update factorio/purge old factorio instances. (could just do an update, which a python git already exists for, but want more flexability for downgrades in the event an experimental version is badly bugged.)
+
+MapGen and git-linking
 
 Allow selecting which file to start the server with (manual override of load-latest)
 
-Add zip/tmp dir checker to ensure chat function is inside the scenario, or else, send messages as "server"
+Use javascript to ajax stream everything! Better updates to push to multiple admins/mods online.
 
-Better version control to update factorio/purge old factorio instances. (could just do an update, which a python git already exists for, but want more flexability for downgrades in the event an experimental version is badly bugged.)
+Syncronized server banning.
 
 production reports and a public front end for player viewing. Even if we tie this front end into our main godaddy page for better control and display.
 
