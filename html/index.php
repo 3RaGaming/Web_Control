@@ -13,7 +13,7 @@
 	
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
-	include(getcwd().'/getserver.php');
+	include('./getserver.php');
 	if(!isset($server_select)) {
 		die('Error in server selection index.php');
 	}
