@@ -13,7 +13,7 @@
 	
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
-	include(getcwd().'/getserver.php');
+	include('./getserver.php');
 	if(!isset($server_select)) {
 		die('Error in server selection index.php');
 	}
@@ -32,13 +32,13 @@
 </script>
 <html>
 <head>
-	<style type="text/css">@import "assets/base.css";</style>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript">
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
 		var user_level = "<?php if(isset($_SESSION['login']['level'])) { echo $_SESSION['login']['level']; }  else { echo "guest"; } ?>";
+		var user_name = "<?php if(isset($_SESSION['login']['user'])) { echo $_SESSION['login']['user']; }  else { echo "guest"; } ?>";
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		$(document).ready(function() {
@@ -50,16 +50,52 @@
 		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
 			echo "his_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
 		}
+		
+		// This is for displaying the server name & password in an input box
+		if(file_exists("$base_dir$server_select/server-settings.json")) {
+			// 
+			$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
+			if($server_settings != NULL) {
+				//Do we have a server
+				if(isset($server_settings["name"])) {
+					$server_name = htmlspecialchars($server_settings["name"]);
+					$server_name_length = strlen($server_name);
+					if($server_name_length<20) {
+						$server_name_length = 20;
+					}
+					//$server_name = str_replace(array("'"), array("'\"'\"'"), htmlspecialchars($server_name));
+					echo 'document.getElementById(\'server_name\').value = "'.addslashes($server_name).'";$(\'#server_name\').attr(\'size\','.$server_name_length.');';
+					/*var_dump($server_settings);*/
+				}
+				if(isset($server_settings["game_password"])) {
+					$server_password = $server_settings["game_password"];
+					if(!empty($server_password)) {
+						$server_password_length = strlen($server_password);
+						if($server_password_length<14) {
+							$server_password_length = 14;
+						}
+						echo 'document.getElementById(\'server_password\').value = "'.addslashes($server_password).'";$(\'#server_password\').attr(\'size\','.$server_password_length.');';
+					}
+				}
+			} else {
+				// Report file came back invalid
+				echo 'document.getElementById(\'server_name\').value = "#ERROR WITH SERVER NAME#";$(\'#server_name\').attr(\'size\',30);'; 
+			}
+		} else {
+			// Report server-settings missing";
+			echo 'document.getElementById(\'server_name\').value = "#ERROR: server-settings.json NOT FOUND#";$(\'#server_name\').attr(\'size\',40);'; 
+		}
 		?>
 		});
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
+	<style type="text/css">@import "assets/base.css";</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
-			Welcome, <?php echo $_SESSION['login']['user']; ?>&nbsp;-&nbsp;
+			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
 			<button onclick="server_sss('start');">Start</button>&nbsp;-&nbsp;
 			<button onclick="server_sss('status');">Status</button>&nbsp;-&nbsp;
 			<button onclick="server_sss('stop');">Stop</button>&nbsp;-&nbsp;
@@ -89,7 +125,21 @@
 				<a id="fileStatus"></a>
 				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 			</div>
-			<?php $cur_serv=$server_select; include(getcwd().'/files.php'); ?>
+			<table id="fileTable" class="tablesorter">
+				<thead>
+					<tr>
+						<th><input type="checkbox" style="margin: 0; padding: 0; height:13px;" checked="false" /></th>
+						<th>File</th>
+						<th>Size</th>
+						<th>Creation</th>
+						<th>Editor</th>
+					</tr>
+				</thead>
+				<tbody>
+					
+				</tbody>
+			</table>
+			<iframe id="download_iframe" style="display:none;"></iframe>
 		</div>
 	</div>
 </body>
