@@ -1216,7 +1216,8 @@ $(document).ready(function() {
 		window.location = "./?d=" + this.value ; // or $(this).val()
 	});
 	$("#fileTable").tablesorter( {sortList: [[3,1]]} );
-	$.get("assets/files_table.php?d=" + server_select, function(html) {
+    console.print("files_table.php?d=" + server_select);
+	$.get("files_table.php?d=" + server_select, function(html) {
 		// append the "ajax'd" data to the table body
 		$("#fileTable tbody").append(html);
 		// let the plugin know that we made a update
