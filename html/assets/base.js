@@ -1208,6 +1208,7 @@ function command_history(args) {
 
 //Things to only start doing after the page has finished loading
 $(document).ready(function() {
+    $('#welcome_user').text(user_name);
     tc_console();
     $('#upload_file').on('change', function() {
         upload();

@@ -32,13 +32,13 @@
 </script>
 <html>
 <head>
-	<style type="text/css">@import "assets/base.css";</style>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript">
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
 		var user_level = "<?php if(isset($_SESSION['login']['level'])) { echo $_SESSION['login']['level']; }  else { echo "guest"; } ?>";
+		var user_name = "<?php if(isset($_SESSION['login']['user'])) { echo $_SESSION['login']['user']; }  else { echo "guest"; } ?>";
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		$(document).ready(function() {
@@ -90,11 +90,12 @@
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
+	<style type="text/css">@import "assets/base.css";</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
-			Welcome, <?php echo $_SESSION['login']['user']; ?>&nbsp;-&nbsp;
+			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
 			<button onclick="server_sss('start');">Start</button>&nbsp;-&nbsp;
 			<button onclick="server_sss('status');">Status</button>&nbsp;-&nbsp;
 			<button onclick="server_sss('stop');">Stop</button>&nbsp;-&nbsp;

@@ -281,5 +281,4 @@ if(isset($_REQUEST['archive'])) {
 	die('No action requested');
 }
 
-
 ?>
