@@ -1218,13 +1218,13 @@ $(document).ready(function() {
 	$("#fileTable").tablesorter( {sortList: [[3,1]]} );
 	$.get("assets/files_table.php?d=" + server_select, function(html) {
 		// append the "ajax'd" data to the table body
-		$("table tbody").append(html);
+		$("#fileTable tbody").append(html);
 		// let the plugin know that we made a update
-		$("table").trigger("update");
+		$("#fileTable").trigger("update");
 		// set sorting column and direction, this will sort on the first and third column
 		var sorting = [[3,1]];
 		// sort on the first column
-		$("table").trigger("sorton",[sorting]);
+		$("#fileTable").trigger("sorton",[sorting]);
 	}); 
 	return false;
 	$('#upload_button').on('click', function() {

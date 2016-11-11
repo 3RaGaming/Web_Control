@@ -124,7 +124,7 @@
 				<a id="fileStatus"></a>
 				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 			</div>
-			<table id="fileTable" class="tablesorter">';
+			<table id="fileTable" class="tablesorter">
 				<thead>
 					<tr>
 						<th><input type="checkbox" style="margin: 0; padding: 0; height:13px;" checked="false" /></th>
