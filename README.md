@@ -11,25 +11,6 @@ Apache2
 php7
 
 # In Development
-Add delete/replace option for files. (almost done)
+Organize code so it's more uniform and compatible to be put anywhere in a template (almost done. This will be the last feature update to this version of the master)
 
-Organize code so it's more uniform and compatible to be put anywhere in a template (almost done)
-
-Verify player-data.json
-
-Verify config.ini
-
-Create archive option for save files.
-
-Better version control to update factorio/purge old factorio instances. (could just do an update, which a python git already exists for, but want more flexability for downgrades in the event an experimental version is badly bugged.)
-
-MapGen and git-linking
-
-Allow selecting which file to start the server with (manual override of load-latest)
-
-Use javascript to ajax stream everything! Better updates to push to multiple admins/mods online.
-
-Syncronized server banning.
-
-production reports and a public front end for player viewing. Even if we tie this front end into our main godaddy page for better control and display.
-
+We are in development of Discord bot integreation to factorio. A new repo will handle the discord bot itself, and a new branch in this repo (dev-bot) will handle the integration of Discord bot to the Web Control. Since this master version of web control work's as is, it will remain for others to use. Once dev-bot can handle being used with or without the discord bot, then this master will be replaced. Bug-fixes will still be applied to this master, but new features will be implemente only to 'dev' and 'dev-bot'. Consider 'dev-bot' as the "unstable" master version of Web_Control
