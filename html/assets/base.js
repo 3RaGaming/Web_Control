@@ -1215,7 +1215,6 @@ $(document).ready(function() {
 	$('#server_select').on('change', function() {
 		window.location = "./?d=" + this.value ; // or $(this).val()
 	});
-    console.log("assets/files_table.php?d=" + server_select);
 	$.get("assets/files_table.php?d=" + server_select, function(html) {
 		// append the "ajax'd" data to the table body
 		$("#fileTable tbody").append(html);
