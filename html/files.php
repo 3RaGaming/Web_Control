@@ -15,7 +15,7 @@ if(!isset($_SESSION['login']['level'])) {
 }
 //Set the base directory the factorio servers will be stored
 $base_dir="/var/www/factorio/";
-include(getcwd().'/getserver.php');
+include('./getserver.php');
 if(!isset($server_select)) {
 	die('Error in server selection files.php');
 }
@@ -278,96 +278,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 } else {
-	/* THIS IS FOR FILE LIST AND SUCH */
-	//This part is included from index.php
-	if(!isset($base_dir)) { exit(); die(); }
-	if(!isset($server_select)) { exit(); die(); }
-
-	// function to print files size in human-readable form
-	function human_filesize($file, $decimals = 2) {
-		$bytes = filesize($file);
-		$sz = 'BKMGTP';
-		$factor = floor((strlen($bytes) - 1) / 3);
-		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
-	}
-
-	//I should make this cleaner...
-	$tables='<table id="fileTable" class="tablesorter">';
-	$tablee='</tbody></table>';
-	$trs='<tr>';
-	$tre='</tr>';
-	$tds='<td>';
-	$tdc='</td><td>';
-	$tde='</td>';
-
-	if(isset($server_select)) {
-		$full_dir="$base_dir$server_select/saves/";
-		echo $tables;
-		echo "<thead><tr><th><input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" checked=\"false\" /></th><th>File</th><th>Size</th><th>Creation</th><th>Editor</th></tr></thead>
-		<tbody>
-		";
-		$file_users_path = "$base_dir$server_select/saves.txt";
-		if(file_exists($file_users_path)) {
-			$filelist = file($file_users_path);
-			foreach ($filelist as $fileuser) {
-				$user_details = explode('|', $fileuser);
-				if(isset($user_details[0])&&isset($user_details[1])) {
-					$file_list[$user_details[0]]=$user_details[1];
-				}
-			}
-		}
-		
-		foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
-			$file_full_path = "$full_dir$file";
-			$size = human_filesize("$file_full_path");
-			$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
-			if($_SESSION['login']['user']=="guest") {
-				echo "$trs$tds <input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc $file $tdc $size $tdc $date $tdc ";
-			} else {
-				echo "$trs$tds <input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc <a href=\"#\" onClick=\"Download('files.php?d=".$server_select."&download=".$file."')\">$file</a> $tdc $size $tdc $date $tdc ";
-			}
-			if(isset($file_list[$file])) { echo $file_list[$file]; } else { echo "server"; }
-			echo " $tde $tre
-			";
-		}
-		echo $tablee;
-	
-		// This is for displaying the server name in an input box
-		if(file_exists("$base_dir$server_select/server-settings.json")) {
-			// 
-			$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
-			if($server_settings != NULL) {
-				//Do we have a server
-				if(isset($server_settings["name"])) {
-					$server_name = htmlspecialchars($server_settings["name"]);
-					$server_name_length = strlen($server_name);
-					if($server_name_length<20) {
-						$server_name_length = 20;
-					}
-					//$server_name = str_replace(array("'"), array("'\"'\"'"), htmlspecialchars($server_name));
-					echo '<script>document.getElementById(\'server_name\').value = "'.addslashes($server_name).'";$(\'#server_name\').attr(\'size\','.$server_name_length.');</script>';
-					/*var_dump($server_settings);*/
-					echo '<iframe id="download_iframe" style="display:none;"></iframe>';
-				}
-				if(isset($server_settings["game_password"])) {
-					$server_password = $server_settings["game_password"];
-					if(!empty($server_password)) {
-						$server_password_length = strlen($server_password);
-						if($server_password_length<14) {
-							$server_password_length = 14;
-						}
-						echo '<script>document.getElementById(\'server_password\').value = "'.addslashes($server_password).'";$(\'#server_password\').attr(\'size\','.$server_password_length.');</script>';
-					}
-				}
-			} else {
-				// Report file came back invalid
-				echo '<script>document.getElementById(\'server_name\').value = "#ERROR WITH SERVER NAME#";$(\'#server_name\').attr(\'size\',30);</script>'; 
-			}
-		} else {
-			// Report server-settings missing";
-			echo '<script>document.getElementById(\'server_name\').value = "#ERROR: server-settings.json NOT FOUND#";$(\'#server_name\').attr(\'size\',40);</script>'; 
-		}
-	}
+	die('No action requested');
 }
 
 
