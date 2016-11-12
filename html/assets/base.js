@@ -1208,29 +1208,35 @@ function command_history(args) {
 
 //Things to only start doing after the page has finished loading
 $(document).ready(function() {
-    $('#welcome_user').text(user_name);
-    tc_console();
-    $('#upload_file').on('change', function() {
-        upload();
-    });
+	$('#welcome_user').text(user_name);
+	tc_console();
+	$('#upload_file').on('change', function() {
+		upload();
+	});
 	$('#server_select').on('change', function() {
 		window.location = "./?d=" + this.value ; // or $(this).val()
 	});
+	$("#fileTable").tablesorter( );
+	//Get the files! Can use this in a function to update without page reload too.
 	$.get("assets/files_table.php?d=" + server_select, function(html) {
 		// append the "ajax'd" data to the table body
 		$("#fileTable tbody").append(html);
 		// let the plugin know that we made a update
 		$("#fileTable").trigger("update");
-		// set sorting column and direction, this will sort on the first and third column
+		return false;
+	});
+	//Monitor the table data for updates, and resort the data 
+	$('#fileTable').on('update', function(){
 		var sorting = [[3,1]];
-		// sort on the first column
-		$("#fileTable").trigger("sorton",[sorting]);
-	}); 
-	return false;
+		setTimeout(function() {
+			$("#fileTable").trigger("sorton",[sorting]);
+		},100);
+	});
+	//Upload button click event
 	$('#upload_button').on('click', function() {
         if(user_level == "guest") {
-            alert("guests may not upload files");
-            return;
+        	alert("guests may not upload files");
+        	return;
         }
 		$('#upload_file').click();
 	});
