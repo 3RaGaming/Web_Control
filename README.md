@@ -6,7 +6,7 @@ Quick and dirty web gui used to control the game servers. Game and Apache are ru
 
 Ubuntu 16.06 (or any other linux of your choosing, if you have the know-how to figure it out
 
-Apache2
+Apache2 with SSL Enabled. (Web Control is set to only work on a an https connection)
 
 php7
 
