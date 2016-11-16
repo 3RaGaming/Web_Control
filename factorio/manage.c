@@ -78,9 +78,9 @@ char * send_threaded_chat(char * name, char * message) {
 char * get_server_status(char * name) {
 	//Check to see if a server is running or not
 	struct ServerData * server = find_server(name);
-	if (server == NULL) return "Server Stopped\n";
-	else if (strcmp(server->status, "Stopped") == 0) return "Server Stopped\n";
-	else return "Server Running\n";
+	if (server == NULL) return "Server Does Not Exist";
+	else if (strcmp(server->status, "Stopped") == 0) return "Server Stopped";
+	else return "Server Running";
 }
 
 //Function to be called by threads in order to monitor input
@@ -139,7 +139,7 @@ void * input_monitoring(void * server_ptr) {
 				strcat(message, ")\n\0");
 				free(chat_args);
 				for (int i = 0; i < servers; i++) {
-					send_threaded_chat(server_list[i]->name, message);
+					if (strcmp(server_list[i]->status, "Started") == 0) send_threaded_chat(server_list[i]->name, message);
 				}
 				free(message);
 			} else if (strcmp(servername, "PLAYER") == 0) {
