@@ -18,9 +18,9 @@ Node.js (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based
 
 2) Open a Terminal window and navigate to (Where you extracted the program)/Web_Control/factorio
 
-3) Run the command 'gcc -o manage -pthread manage.c'
+3) Run the command `gcc -o manage -pthread manage.c`
 
-4) Run the command 'npm i --save --no-optional discord.js' (If a message appears saying missing requirements, ignore it. It's only the voice server parts, which are not used in this program)
+4) Run the command `npm i --save --no-optional discord.js` (If a message appears saying missing requirements, ignore it. It's only the voice server parts, which are not used in this program)
 
 5) Servers can be controlled from the webserver using its interface
 
