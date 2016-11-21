@@ -221,7 +221,7 @@ pip-log.txt
 #############
 
 # Compiled file manage file
-factorio/manage
+factorio/managepgm
 
 # NodeJS/Discord.js
 factorio/node_modules/
