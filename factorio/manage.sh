@@ -18,8 +18,18 @@ function sanitize() {
 #global way to get status of server.
 function get_status() {
 	local work="$1"
-	check=$(sudo -u www-data screen -ls | grep $work | awk '$1=$1');
-	#ps auxw|grep -i screen|grep -v grep | awk '{ s = ""; for (i = 11; i <= NF; i++) s = s $i " "; print $1,$2,$9, s }'
+	firstcheck=$(sudo -u www-data screen -ls | grep $work | awk '$1=$1');
+	if [ "$firstcheck" ]; then
+		sudo -u www-data screen -S manage -X at 0 stuff '$work\$status'
+		secondcheck = $(tail -1 screenlog.0);
+		if [ "$secondcheck" = "Server Running\n" ]; then
+			check = "Server Running"
+		else
+			check = "Server Stopped"
+		fi
+	else
+		check = "Manage Stopped"
+	fi
 }
 
 for dir in `ls -d */ | sed 's|/||'`; do
@@ -57,7 +67,7 @@ else
 	sanitize "${args[2]}"
 	cur_user="$clean"
 	sanitize "${args[1]}"
-	cd $dir_server
+	#cd $dir_server #This may need to be changed to the location of managepgm, not sure
 	case "$clean" in
 	    'prestart')
 			get_status "$server"
@@ -71,8 +81,19 @@ else
             ;;
         'start')
 			get_status "$server"
-			if [ "$check" ]; then 
+			if [ "$check" = "Server Running" ]; then 
 				echo -e "Attempted Start by $cur_user: Server is already running\n\n" >> $dir_server/screenlog.0 ;
+			elif [ "$check" = "Manage Stopped" ]; then
+				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
+				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M"
+				sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M"
+				sudo -u www-data /usr/bin/screen -r manage -X colon "logfile flush 0^M"
+				sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M"
+				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M"
+				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M"
+				
+				sudo -u www-data screen -S manage -X at 0 stuff '$work\$start\$true,$port,$dir_server'
+				
 			else
 				if [ "$var_cont" = false ] ; then
 					echo "Cannot start server";
@@ -85,23 +106,19 @@ else
 					
 					#echo "Server under going Updates...";
 					#exit
-					sudo -u www-data /usr/bin/screen -d -m -L -S $server /usr/share/factorio/bin/x64/factorio --start-server-load-latest --port $port -c $dir_server/config/config.ini --server-setting $dir_server/server-settings.json
-					sudo -u www-data /usr/bin/screen -r $server -X colon "log on^M"
-					sudo -u www-data /usr/bin/screen -r $server -X colon "logfile filename screenlog.0^M"
-					sudo -u www-data /usr/bin/screen -r $server -X colon "logfile flush 0^M"
-					sudo -u www-data /usr/bin/screen -r $server -X colon "multiuser on^M"
-					sudo -u www-data /usr/bin/screen -r $server -X colon "acladd root^M"
-					sudo -u www-data /usr/bin/screen -r $server -X colon "acladd user^M"
+					
+					sudo -u www-data screen -S manage -X at 0 stuff '$work\$start\$true,$port,$dir_server'
+					
 				fi
 			fi
             ;;
          
         'stop')
 			get_status "$server"
-			if [ "$check" ]; then 
+			if [ "$check" = "Server Running" ]; then 
 				#echo "Server Shuttind Down" ;
 				echo -e "Server Shutting Down. Initiated by $cur_user\n\n" >> screenlog.0 ;
-				sudo -u www-data /usr/bin/screen -S $server -X at 0 stuff ^C
+				sudo -u www-data screen -S manage -X at 0 stuff '$work\$stop'
 			else
 				echo "Server is already Stopped.";
 			fi
@@ -109,8 +126,8 @@ else
          
         'status')
 			get_status "$server"
-			if [ "$check" ]; then 
-				echo -e "${check}"
+			if [ "$check" = "Server Running" ]; then 
+				#echo -e "${check}"
 				echo "Server is Running" ;
 			else
 				echo "Server is Stopped";
