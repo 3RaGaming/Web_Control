@@ -18,17 +18,17 @@ function sanitize() {
 #global way to get status of server.
 function get_status() {
 	local work="$1"
-	firstcheck=$(sudo -u www-data screen -ls | grep $work | awk '$1=$1');
+	firstcheck=$(sudo -u www-data screen -ls | grep manage | awk '$1=$1');
 	if [ "$firstcheck" ]; then
-		sudo -u www-data screen -S manage -X at 0 stuff '$work\$status'
-		secondcheck = $(tail -1 screenlog.0);
+		sudo -u www-data screen -S manage -X at 0 stuff $work'\$status\n'
+		secondcheck=$(tail -1 screenlog.0);
 		if [ "$secondcheck" = "Server Running\n" ]; then
-			check = "Server Running"
+			check="Server Running"
 		else
-			check = "Server Stopped"
+			check="Server Stopped"
 		fi
 	else
-		check = "Manage Stopped"
+		check="Manage Stopped"
 	fi
 }
 
@@ -81,9 +81,9 @@ else
             ;;
         'start')
 			get_status "$server"
-			if [ "$check" = "Server Running" ]; then 
+			if [ "$check" == "Server Running" ]; then 
 				echo -e "Attempted Start by $cur_user: Server is already running\n\n" >> $dir_server/screenlog.0 ;
-			elif [ "$check" = "Manage Stopped" ]; then
+			elif [ "$check" == "Manage Stopped" ]; then
 				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
 				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M"
@@ -92,10 +92,10 @@ else
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M"
 				
-				sudo -u www-data screen -S manage -X at 0 stuff '$work\$start\$true,$port,$dir_server'
+				sudo -u www-data screen -S manage -X at 0 stuff $work'\$start\$true,'$port,$dir_server'\n'
 				
 			else
-				if [ "$var_cont" = false ] ; then
+				if [ "$var_cont" == false ] ; then
 					echo "Cannot start server";
 				else
 					echo -e "Starting Server. Initiated by $cur_user\n\n" >> $dir_server/screenlog.0 ;
@@ -107,7 +107,7 @@ else
 					#echo "Server under going Updates...";
 					#exit
 					
-					sudo -u www-data screen -S manage -X at 0 stuff '$work\$start\$true,$port,$dir_server'
+					sudo -u www-data screen -S manage -X at 0 stuff $work'\$start\$true,'$port,$dir_server'\n'
 					
 				fi
 			fi
@@ -115,7 +115,7 @@ else
          
         'stop')
 			get_status "$server"
-			if [ "$check" = "Server Running" ]; then 
+			if [ "$check" == "Server Running" ]; then 
 				#echo "Server Shuttind Down" ;
 				echo -e "Server Shutting Down. Initiated by $cur_user\n\n" >> screenlog.0 ;
 				sudo -u www-data screen -S manage -X at 0 stuff '$work\$stop'
@@ -126,7 +126,7 @@ else
          
         'status')
 			get_status "$server"
-			if [ "$check" = "Server Running" ]; then 
+			if [ "$check" == "Server Running" ]; then 
 				#echo -e "${check}"
 				echo "Server is Running" ;
 			else
