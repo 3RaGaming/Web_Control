@@ -92,7 +92,7 @@ else
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M"
 				
-				sudo -u www-data screen -S manage -X at 0 stuff $work'\$start\$true,'$port,$dir_server'\n'
+				sudo -u www-data screen -S manage -X at 0 stuff ''$work'\$start\$true,'$port,$dir_server'\n'
 				
 			else
 				if [ "$var_cont" == false ] ; then
@@ -107,7 +107,7 @@ else
 					#echo "Server under going Updates...";
 					#exit
 					
-					sudo -u www-data screen -S manage -X at 0 stuff $work'\$start\$true,'$port,$dir_server'\n'
+					sudo -u www-data screen -S manage -X at 0 stuff ''$work'\$start\$true,'$port,$dir_server'\n'
 					
 				fi
 			fi
@@ -118,7 +118,7 @@ else
 			if [ "$check" == "Server Running" ]; then 
 				#echo "Server Shuttind Down" ;
 				echo -e "Server Shutting Down. Initiated by $cur_user\n\n" >> screenlog.0 ;
-				sudo -u www-data screen -S manage -X at 0 stuff '$work\$stop'
+				sudo -u www-data screen -S manage -X at 0 stuff ''$work'\$stop\n'
 			else
 				echo "Server is already Stopped.";
 			fi
