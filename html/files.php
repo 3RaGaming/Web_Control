@@ -271,8 +271,7 @@ if(isset($_REQUEST['archive'])) {
 		{
 			die('No files selected for deletion');
 		}
-		
-		
+		die('Deletion almost possible!');
 	}
 	//no reason to carry on
 	die();
