@@ -20,9 +20,9 @@ function get_status() {
 	local work="$1"
 	firstcheck=$(sudo -u www-data screen -ls | grep manage | awk '$1=$1');
 	if [ "$firstcheck" ]; then
-		sudo -u www-data screen -S manage -X at 0 stuff $work'\$status\n'
+		sudo -u www-data screen -S manage -X at 0 stuff "${work}\\\$status\n"
 		secondcheck=$(tail -1 screenlog.0);
-		if [ "$secondcheck" = "Server Running\n" ]; then
+		if [ "$secondcheck"="Server Running\n" ]; then
 			check="Server Running"
 		else
 			check="Server Stopped"
@@ -91,8 +91,10 @@ else
 				sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M"
+
+				echo -e "Starting Server. Initiated by $cur_user\n\n" >> $dir_server/screenlog.0 ;
 				
-				sudo -u www-data screen -S manage -X at 0 stuff ''$work'\$start\$true,'$port,$dir_server'\n'
+				sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
 				
 			else
 				if [ "$var_cont" == false ] ; then
@@ -107,7 +109,7 @@ else
 					#echo "Server under going Updates...";
 					#exit
 					
-					sudo -u www-data screen -S manage -X at 0 stuff ''$work'\$start\$true,'$port,$dir_server'\n'
+					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
 					
 				fi
 			fi
@@ -116,9 +118,9 @@ else
         'stop')
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
-				#echo "Server Shuttind Down" ;
+				#echo "Server Shutting Down" ;
 				echo -e "Server Shutting Down. Initiated by $cur_user\n\n" >> screenlog.0 ;
-				sudo -u www-data screen -S manage -X at 0 stuff ''$work'\$stop\n'
+				sudo -u www-data screen -S manage -X at 0 stuff "${server}\$stop\n"
 			else
 				echo "Server is already Stopped.";
 			fi

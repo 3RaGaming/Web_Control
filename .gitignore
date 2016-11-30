@@ -232,3 +232,6 @@ factorio/token.json
 # Bot Channel List
 factorio/channel_list.json
 
+# Log File
+factorio/screenlog.0
+
