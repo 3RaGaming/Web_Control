@@ -115,7 +115,10 @@ void * input_monitoring(void * server_ptr) {
 			char * new_data = (char *) malloc(strlen(data + separator_index + 1)*sizeof(char));
 			strcpy(new_data, data + separator_index + 1);
 			if (strchr(new_data,'\n') != NULL) new_data[strchr(new_data,'\n') - new_data] = '\0';
-			if (strcmp(servername, "chat") == 0) {
+			if (strcmp(servername, "DEBUG") == 0) {
+				//Handle debug messages
+				fprintf(stderr, "%s\n", new_data);
+			} else if (strcmp(servername, "chat") == 0) {
 				//Handle Articulating's Chat Program
 				char *token;
 				char *delim = ",\n\t";
@@ -444,6 +447,8 @@ int main() {
 	botargs[1] = "./3RaFactorioBot.js\0";
 	botargs[2] = (char *) NULL;
 	launch_server("bot", botargs, "bot");
+	fprintf(stdout, "Bot is starting up, please wait\n");
+	sleep(5); //Wait for bot to launch fully before continuing
 	free(botargs);
 
 	//Input scan loop
