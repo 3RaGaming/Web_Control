@@ -245,7 +245,7 @@ void * input_monitoring(void * server_ptr) {
 //Contrary to what the name suggests, this function can launch either the bot or a server successfully
 //This will return a struct containing the name of the server
 //The struct also contains the file descriptors relating to the input and output of the server
-char * launch_server(char * name, char ** args) {
+char * launch_server(char * name, char ** args, char * logpath) {
 	char *server_status = get_server_status(name);
 
 	//Check to see if server is already running
@@ -260,9 +260,8 @@ char * launch_server(char * name, char ** args) {
 	char *logfile;
 	if (strcmp(name_copy,"bot") != 0) {
 		// "/var/www/factorio/name/screenlog.0"
-		logfile = (char *) malloc((strlen("/var/www/factorio/") + strlen(name_copy) + strlen("/screenlog.0") + 1)*sizeof(char));
-		strcpy(logfile, "/var/www/factorio/");
-		strcat(logfile, name_copy);
+		logfile = (char *) malloc((strlen(logpath) + strlen("/screenlog.0") + 1)*sizeof(char));
+		strcpy(logfile, logpath);
 		strcat(logfile, "/screenlog.0\0");
 	} else {
 		logfile = "bot";
@@ -371,7 +370,7 @@ char * start_server(char * name, char * input) {
 	i++;
 	launchargs[i] = (char *) NULL;
 
-	char * result = launch_server(name, launchargs);
+	char * result = launch_server(name, launchargs, args[j]);
 
 	free(launchargs[i-1]);
 	free(launchargs[i-3]);
@@ -444,7 +443,7 @@ int main() {
 	botargs[0] = "nodejs\0";
 	botargs[1] = "./3RaFactorioBot.js\0";
 	botargs[2] = (char *) NULL;
-	launch_server("bot", botargs);
+	launch_server("bot", botargs, "bot");
 	free(botargs);
 
 	//Input scan loop
