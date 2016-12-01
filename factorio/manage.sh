@@ -55,6 +55,9 @@ else
 		echo "Missing config.ini"; var_cont=false;
 	else 
 		port=$(echo "$dir_server" | grep -o -E '[0-9]+')
+		if [ -z "$port" ]; then
+			port="0";
+		fi
                 port="3429$port"
 	fi
 	#server_settings.ini
