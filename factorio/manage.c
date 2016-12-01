@@ -178,11 +178,12 @@ void * input_monitoring(void * server_ptr) {
 					free(command);
 				} else {
 					//Admin Warning System is being sent back to the bot
-					char *message = (char *) malloc((strlen("admin$") + strlen(server->name) + strlen("$") + strlen(new_data) + 1)*sizeof(char));
+					char *message = (char *) malloc((strlen("admin$") + strlen(server->name) + strlen("$") + strlen(new_data) + 3)*sizeof(char));
 					strcpy(message, "admin$");
 					strcat(message, server->name);
 					strcat(message, "$");
 					strcat(message, new_data);
+					strcat(message, "\n");
 					send_threaded_chat("bot", message);
 					free(message);
 				}
@@ -227,10 +228,11 @@ void * input_monitoring(void * server_ptr) {
 			//Also includes check to prevent echoing
 			char * new_data = (char *) malloc(strlen(strstr(data, " [CHAT] ") + strlen(" [CHAT] "))*sizeof(char));
 			strcpy(new_data, strstr(data, " [CHAT] ") + strlen(" [CHAT] "));
-			char *message = (char *) malloc((strlen(server->name) + strlen(data) + 2)*sizeof(char));
+			char *message = (char *) malloc((strlen(server->name) + strlen(data) + 4)*sizeof(char));
 			strcpy(message, server->name);
 			strcat(message, "$");
 			strcat(message, new_data);
+			strcat(message, "\n");
 			send_threaded_chat("bot", message);
 			free(message);
 			free(new_data);
