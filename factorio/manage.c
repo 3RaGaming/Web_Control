@@ -103,7 +103,7 @@ void * input_monitoring(void * server_ptr) {
 
 		if (strcmp(server->name, "bot") != 0) {
 			char *output = (char *) malloc((strlen(data) + 3)*sizeof(char));
-			sprintf(output, "%s\n", data);
+			sprintf(output, "%s\r\n", data);
 			fputs(output, logfile);
 			fflush(logfile);
 			free(output);
