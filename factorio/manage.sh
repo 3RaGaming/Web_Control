@@ -43,8 +43,12 @@ else
 	#config/config.ini
 	if [ ! -e "$dir_server/config/config.ini" ]; then
 		echo "Missing config.ini"; var_cont=false;
-	else
-		port=$(grep "port=" $dir_server/config/config.ini | grep -o -E '[0-9]+')
+	else 
+		port=$(echo "$dir_server" | grep -o -E '[0-9]+')
+		if [ -z "$port" ]; then
+			port="0";
+		fi
+                port="3429$port"
 	fi
 	#server_settings.ini
 	if [ ! -e "$dir_server/server-settings.json" ]; then echo "Missing server-settings.json"; var_cont=false; fi
