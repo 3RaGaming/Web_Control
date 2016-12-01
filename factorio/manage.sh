@@ -124,7 +124,7 @@ else
 			if [ "$check" == "Server Running" ]; then 
 				#echo "Server Shutting Down" ;
 				echo -e "Server Shutting Down. Initiated by $cur_user\n\n" >> screenlog.0 ;
-				sudo -u www-data screen -S manage -X at 0 stuff "${server}\$stop\n"
+				sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$stop\n"
 			else
 				echo "Server is already Stopped.";
 			fi
