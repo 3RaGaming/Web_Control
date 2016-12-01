@@ -102,8 +102,11 @@ void * input_monitoring(void * server_ptr) {
 		}
 
 		if (strcmp(server->name, "bot") != 0) {
+			char *output = (char *) malloc((strlen(data) + 3)*sizeof(char));
+			sprintf(output, "%s\n", data);
 			fputs(data, logfile);
 			fflush(logfile);
+			free(output);
 		}
 
 		if (strchr(data,'$') != NULL && strstr(data, " [CHAT] ") == NULL) {
