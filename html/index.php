@@ -62,7 +62,7 @@
 				//Do we have a server
 				if(isset($server_settings["name"])) {
 					if($user_level == "guest" ) {
-						echo "$('#server_name').attr('display','none');\xA";
+						echo "$('#server_name').hide();\xA";
 					} else {
 						$server_name = htmlspecialchars($server_settings["name"]);
 						$server_name_length = strlen($server_name);
@@ -76,7 +76,7 @@
 				}
 				if(isset($server_settings["game_password"])) {
 					if($user_level == "guest" ) {
-						echo "$('#server_password').attr('display','none');\xA";
+						echo "$('#server_password').hide();\xA";
 					} else {
 						$server_password = $server_settings["game_password"];
 						if(!empty($server_password)) {
