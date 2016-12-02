@@ -10,6 +10,7 @@
 			die();
 		}
 	}
+	header( 'Content-type: text/html; charset=utf-8' );
 	
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "guest"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
@@ -26,5 +27,6 @@
 		}
 	} else {
 		header("Location: ./login.php");
+		die();
 	}
 ?>
