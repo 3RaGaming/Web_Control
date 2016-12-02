@@ -16,24 +16,24 @@ if(isset($_REQUEST['d'])) {
 	$temp_select="servertest";
 }
 
-$server_select_dropdown = "toSelect = document.getElementById(\"server_version\");";
+$server_select_dropdown = "toSelect = document.getElementById(\"server_select\");";
 foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 	$dir = str_replace($base_dir, '', $dir);
 	if($dir!="node_modules") {
 		if($temp_select=="$dir") {
 			$server_select = $dir;
 			$server_select_dropdown = $server_select_dropdown . '
-			option = document.createElement("option");
-			option.innerHTML = "'.$server_select.'";
-			option.value = "'.$server_select.'";
-			toSelect.add(option);
+			var opt = document.createElement("option");
+			opt.value = "'.$server_select.'";
+			opt.innerHTML = "'.$server_select.'";
+			toSelect.add(opt);
 			toSelect.options[toSelect.options.selectedIndex].selected = true;';
 		} else {
 			$server_select_dropdown = $server_select_dropdown . '
-			var option = document.createElement("option");
-			option.innerHTML = "'.$dir.'";
-			option.value = "'.$dir.'";
-			toSelect.appendChild(option);';
+			var opt = document.createElement("option");
+			opt.innerHTML = "'.$dir.'";
+			opt.value = "'.$dir.'";
+			toSelect.appendChild(opt);';
 		}
 	}
 }
