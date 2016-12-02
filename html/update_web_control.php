@@ -17,23 +17,27 @@
 
 	if($user_level=="admin") {
 		if(isset($_POST['update'])) {
+			echo "<span id=\"result\"></span>";
 			if($_POST['update']=="yes") {
 				echo "<pre>Updating...\r\n";
 				ob_flush();
 				flush();
-				$count = system('bash update.sh count');
-				$i = $count;
+				exec('bash update.sh count', $count);
 				ob_flush();
 				flush();
-				for($n=1; $n<=$i; $n++) {
+				for($n=1; $n<=$count[0]; $n++) {
 					system('bash update.sh '.$n.'');
 					ob_flush();
 					flush();
 				}
-				echo "Done\r\n</pre>";
+				echo "Done\r\n</pre>\r\n\r\n";
+				echo "<script>document.getElementById(result).innerHTML = \"Done! <a onclick=\\\"window.history.back();\\\" href=\\\"#goback\\\">Go Back</a>\";</script>";
 				ob_flush();
 				flush();
 			}
+		} else {
+			header("Location: ./login.php");
+			die();
 		}
 	} else {
 		header("Location: ./login.php");
