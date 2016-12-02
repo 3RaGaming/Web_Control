@@ -116,7 +116,7 @@
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />
 			<select id="server_version"><?php if(isset($server_version_dropdown)) { echo $server_version_dropdown; } ?></select>
-			<button onclick="update_web_control(user_name);">Update Web Control</button>
+			<button onclick="update_web_control(user_level);">Update Web Control</button>
 			<form action="./update_web_control.php" method="POST" id="update_web_control">
 				<input type="hidden" id="update" name="update" value="yes" />
 			</form>
