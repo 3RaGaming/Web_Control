@@ -40,12 +40,12 @@
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
-		var user_level = "<?php echo $user_level; ?>";
-		var user_name = "<?php echo $user_name; ?>";
+<?php
+		echo "var user_level = \"$user_level\";\xA";
+		echo "var user_name = \"$user_name\";\xA";
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
-		$(document).ready(function() {
-		<?php
+		echo "$(document).ready(function() {\xA";
 		if(isset($_SESSION['login']['reload_report'])) {
 			echo "$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
 			unset($_SESSION['login']['reload_report']);
@@ -99,8 +99,8 @@
 			echo "document.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
 			echo "$('#server_name').attr('size',40);\xA";
 		}
-		?>
-		});
+		echo "})\xA";
+?>
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
@@ -110,9 +110,9 @@
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-			<button onclick="server_sss('start');">Start</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('status');">Status</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('stop');">Stop</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
+			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />
 			<select id="server_version"><?php if(isset($server_version_dropdown)) { echo $server_version_dropdown; } ?></select>
