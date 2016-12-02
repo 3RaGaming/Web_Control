@@ -21,8 +21,12 @@
 				echo "Updating... <br />";
 				ob_flush();
 				flush();
-				sleep(5);
+				system('bash update.sh');
+				ob_flush();
+				flush();
 				echo "Done <br />";
+				ob_flush();
+				flush();
 			}
 		}
 	} else {
