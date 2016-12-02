@@ -14,5 +14,9 @@
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "guest"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 	
-	echo $_SERVER['HTTP_REFERER'];
+	if(isset($_POST)) {
+		echo "<pre>";
+		print_r($_POST);
+		echo "</pre>";
+	}
 ?>

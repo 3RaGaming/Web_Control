@@ -1206,10 +1206,14 @@ function command_history(args) {
 	}
 }
 
-function update_web_control() {
-    var r = confirm("Update webgui and server control files?");
-    if (r == true) {
-        window.location = "./update_web_control.php"; // or $(this).val()
+function update_web_control(user_name) {
+    if(user_name=="admin") {
+        var r = confirm("Update webgui and server control files?" + user_name);
+        if (r == true) {
+            $("#update_web_control").submit();
+        }
+    } else {
+        alert('Must be a web admin to update gui :(');
     }
 }
 
