@@ -15,7 +15,7 @@ if [ "${args[0]}" ]; then
 
         '2')
             printf "Step ${args[0]} \r\n";
-            unzip -u /tmp/dev-bot-manage.zip
+            unzip -u /tmp/dev-bot-manage.zip -d /tmp/
             ;;
 
         '3')
