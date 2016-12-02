@@ -99,6 +99,7 @@
 			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
 			echo "\t\t\t$('#server_name').attr('size',40);\xA";
 		}
+		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
 ?>
 	</script>
@@ -121,7 +122,7 @@
 				<input type="hidden" id="update" name="update" value="yes" />
 			</form>
 			<div style="float: right;">
-				<select id="server_select"><?php if(isset($server_select_dropdown)) { echo $server_select_dropdown; } ?></select>&nbsp;-&nbsp;
+				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
 			</div>
 		</div>

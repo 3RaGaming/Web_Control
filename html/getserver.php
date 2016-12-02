@@ -16,15 +16,23 @@ if(isset($_REQUEST['d'])) {
 	$temp_select="servertest";
 }
 
-$server_select_dropdown = "";
+$server_select_dropdown = "var x = document.getElementById(\"server_version\");";
 foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 	$dir = str_replace($base_dir, '', $dir);
 	if($dir!="node_modules") {
 		if($temp_select=="$dir") {
-			$server_select = $dir;
-			$server_select_dropdown = $server_select_dropdown . '<option value="' . $server_select . '" selected>' . $server_select . '</option>';
+			$server_select_dropdown = $server_select_dropdown . '
+			var option = document.createElement("option");
+			option.text = "'.$dir.'";
+			option.value = "'.$dir.'";
+			x.add(option);
+			x.options[x.options.selectedIndex].selected = true;';
 		} else {
-			$server_select_dropdown = $server_select_dropdown . '<option value="' . $dir . '">' . $dir . '</option>';
+			$server_select_dropdown = $server_select_dropdown . '
+			var option = document.createElement("option");
+			option.text = "'.$dir.'";
+			option.value = "'.$dir.'";
+			x.add(option);';
 		}
 	}
 }
