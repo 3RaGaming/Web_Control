@@ -116,7 +116,7 @@
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />
 			<select id="server_version"><?php if(isset($server_version_dropdown)) { echo $server_version_dropdown; } ?></select>
-			<button onclick="update_web_control()">Update Web Control</button>
+			<button onclick="update_web_control();">Update Web Control</button>
 			<div style="float: right;">
 				<select id="server_select"><?php if(isset($server_select_dropdown)) { echo $server_select_dropdown; } ?></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
