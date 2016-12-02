@@ -139,7 +139,7 @@
 					
 				</tbody>
 			</table>
-			<iframe id="download_iframe" style="display:none;"></iframe>
+			<iframe id="file_iframe" style="display:none;"></iframe>
 		</div>
 	</div>
 </body>

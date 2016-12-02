@@ -1036,7 +1036,7 @@
 
 function Download(url) {
     if (user_level == "guest") { return; }
-	document.getElementById('download_iframe').src = url;
+	document.getElementById('file_iframe').src = url;
 }
 
 function server_sss(cmd) {

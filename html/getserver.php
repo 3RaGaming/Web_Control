@@ -19,11 +19,13 @@ if(isset($_REQUEST['d'])) {
 $server_select_dropdown = "";
 foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 	$dir = str_replace($base_dir, '', $dir);
-	if($temp_select=="$dir") {
-		$server_select = $dir;
-		$server_select_dropdown = $server_select_dropdown . '<option value="' . $server_select . '" selected>' . $server_select . '</option>';
-	} else {
-		$server_select_dropdown = $server_select_dropdown . '<option value="' . $dir . '">' . $dir . '</option>';
+	if($dir!="node_modules") {
+		if($temp_select=="$dir") {
+			$server_select = $dir;
+			$server_select_dropdown = $server_select_dropdown . '<option value="' . $server_select . '" selected>' . $server_select . '</option>';
+		} else {
+			$server_select_dropdown = $server_select_dropdown . '<option value="' . $dir . '">' . $dir . '</option>';
+		}
 	}
 }
 
