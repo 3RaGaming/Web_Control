@@ -41,8 +41,8 @@
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
 <?php
-		echo "var user_level = \"$user_level\";\xA";
-		echo "var user_name = \"$user_name\";\xA";
+		echo "\t\tvar user_level = \"$user_level\";\xA";
+		echo "\t\tvar user_name = \"$user_name\";\xA";
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
