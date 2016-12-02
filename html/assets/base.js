@@ -1036,7 +1036,7 @@
 
 function Download(url) {
     if (user_level == "guest") { return; }
-	document.getElementById('download_iframe').src = url;
+	document.getElementById('file_iframe').src = url;
 }
 
 function server_sss(cmd) {
@@ -1204,6 +1204,17 @@ function command_history(args) {
 		his_ind = -1;
 		document.getElementById('command').value = "";
 	}
+}
+
+function update_web_control(user_name) {
+    if(user_name=="admin") {
+        var r = confirm("Update webgui and server control files?" + user_name);
+        if (r == true) {
+            $("#update_web_control").submit();
+        }
+    } else {
+        alert('Must be a web admin to update gui :(');
+    }
 }
 
 //Things to only start doing after the page has finished loading
