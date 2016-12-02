@@ -62,21 +62,21 @@
 				//Do we have a server
 				if(isset($server_settings["name"])) {
 					if($user_level == "guest" ) {
-						echo '$(\'#server_name\').attr(\'display\',\'none\');\xA';
+						echo "$('#server_name').attr('display','none');\xA";
 					} else {
 						$server_name = htmlspecialchars($server_settings["name"]);
 						$server_name_length = strlen($server_name);
 						if($server_name_length<20) {
 							$server_name_length = 20;
 						}
-						echo 'document.getElementById(\'server_name\').value = "'.addslashes($server_name).'";\xA';
-						echo '$(\'#server_name\').attr(\'size\','.$server_name_length.');\xA';
+						echo "document.getElementById('server_name').value = \"".addslashes($server_name)."\";\xA";
+						echo "$('#server_name').attr('size',$server_name_length);\xA";
 					}
 					/*var_dump($server_settings);*/
 				}
 				if(isset($server_settings["game_password"])) {
 					if($user_level == "guest" ) {
-						echo '$(\'#server_password\').attr(\'display\',\'none\');';
+						echo "$('#server_password').attr('display','none');\xA";
 					} else {
 						$server_password = $server_settings["game_password"];
 						if(!empty($server_password)) {
@@ -84,17 +84,20 @@
 							if($server_password_length<14) {
 								$server_password_length = 14;
 							}
-							echo 'document.getElementById(\'server_password\').value = "'.addslashes($server_password).'";$(\'#server_password\').attr(\'size\','.$server_password_length.');';
+							echo "document.getElementById('server_password').value = \"".addslashes($server_password)."\";\xA";
+							echo "$('#server_password').attr('size',$server_password_length);\xA";
 						}
 					}
 				}
 			} else {
 				// Report file came back invalid
-				echo 'document.getElementById(\'server_name\').value = "#ERROR WITH SERVER NAME#";$(\'#server_name\').attr(\'size\',30);'; 
+				echo "document.getElementById('server_name').value = \"#ERROR WITH SERVER NAME#\";\xA";
+				echo "$('#server_name').attr('size',30);\xA"; 
 			}
 		} else {
 			// Report server-settings missing";
-			echo 'document.getElementById(\'server_name\').value = "#ERROR: server-settings.json NOT FOUND#";$(\'#server_name\').attr(\'size\',40);'; 
+			echo "document.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
+			echo "$('#server_name').attr('size',40);\xA";
 		}
 		?>
 		});
