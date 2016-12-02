@@ -19,8 +19,8 @@
 		if(isset($_POST['update'])) {
 			if($_POST['update']=="yes") {
 				echo "Updating... <br />";
-				flush();
 				ob_flush();
+				flush();
 				sleep(5);
 				echo "Done <br />";
 			}
