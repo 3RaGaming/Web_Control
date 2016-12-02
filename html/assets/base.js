@@ -1208,7 +1208,7 @@ function command_history(args) {
 
 function update_web_control(user_name) {
     if(user_name=="admin") {
-        var r = confirm("Update webgui and server control files?" + user_name);
+        var r = confirm("Update webgui and server control files?");
         if (r == true) {
             $("#update_web_control").submit();
         }
