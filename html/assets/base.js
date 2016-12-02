@@ -1206,6 +1206,13 @@ function command_history(args) {
 	}
 }
 
+update_web_control() {
+    var r = confirm("Update webgui and server control files?");
+    if (r == true) {
+        window.location = "./update_web_control.php"; // or $(this).val()
+    }
+}
+
 //Things to only start doing after the page has finished loading
 $(document).ready(function() {
 	$('#welcome_user').text(user_name);
