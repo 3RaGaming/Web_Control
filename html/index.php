@@ -45,13 +45,13 @@
 		echo "var user_name = \"$user_name\";\xA";
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
-		echo "$(document).ready(function() {\xA";
+		echo "\t\t$(document).ready(function() {\xA";
 		if(isset($_SESSION['login']['reload_report'])) {
-			echo "$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
+			echo "\t\t\t$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
 			unset($_SESSION['login']['reload_report']);
 		}
 		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
-			echo "his_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
+			echo "\t\t\this_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
 		}
 		
 		// This is for displaying the server name & password in an input box
@@ -62,21 +62,21 @@
 				//Do we have a server
 				if(isset($server_settings["name"])) {
 					if($user_level == "guest" ) {
-						echo "$('#server_name').hide();\xA";
+						echo "\t\t\t$('#server_name').hide();\xA";
 					} else {
 						$server_name = htmlspecialchars($server_settings["name"]);
 						$server_name_length = strlen($server_name);
 						if($server_name_length<20) {
 							$server_name_length = 20;
 						}
-						echo "document.getElementById('server_name').value = \"".addslashes($server_name)."\";\xA";
-						echo "$('#server_name').attr('size',$server_name_length);\xA";
+						echo "\t\t\tdocument.getElementById('server_name').value = \"".addslashes($server_name)."\";\xA";
+						echo "\t\t\t$('#server_name').attr('size',$server_name_length);\xA";
 					}
 					/*var_dump($server_settings);*/
 				}
 				if(isset($server_settings["game_password"])) {
 					if($user_level == "guest" ) {
-						echo "$('#server_password').hide();\xA";
+						echo "\t\t\t$('#server_password').hide();\xA";
 					} else {
 						$server_password = $server_settings["game_password"];
 						if(!empty($server_password)) {
@@ -84,22 +84,22 @@
 							if($server_password_length<14) {
 								$server_password_length = 14;
 							}
-							echo "document.getElementById('server_password').value = \"".addslashes($server_password)."\";\xA";
-							echo "$('#server_password').attr('size',$server_password_length);\xA";
+							echo "\t\t\tdocument.getElementById('server_password').value = \"".addslashes($server_password)."\";\xA";
+							echo "\t\t\t$('#server_password').attr('size',$server_password_length);\xA";
 						}
 					}
 				}
 			} else {
 				// Report file came back invalid
-				echo "document.getElementById('server_name').value = \"#ERROR WITH SERVER NAME#\";\xA";
-				echo "$('#server_name').attr('size',30);\xA"; 
+				echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH SERVER NAME#\";\xA";
+				echo "\t\t\t$('#server_name').attr('size',30);\xA"; 
 			}
 		} else {
 			// Report server-settings missing";
-			echo "document.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
-			echo "$('#server_name').attr('size',40);\xA";
+			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
+			echo "\t\t\t$('#server_name').attr('size',40);\xA";
 		}
-		echo "})\xA";
+		echo "\t\t})\xA";
 ?>
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
