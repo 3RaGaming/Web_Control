@@ -11,6 +11,9 @@
 		}
 	}
 	
+	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "guest"; }
+	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
+	
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
@@ -37,8 +40,8 @@
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
-		var user_level = "<?php if(isset($_SESSION['login']['level'])) { echo $_SESSION['login']['level']; }  else { echo "guest"; } ?>";
-		var user_name = "<?php if(isset($_SESSION['login']['user'])) { echo $_SESSION['login']['user']; }  else { echo "guest"; } ?>";
+		var user_level = "<?php echo $user_level; ?>";
+		var user_name = "<?php echo $user_name; ?>";
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		$(document).ready(function() {
@@ -58,23 +61,31 @@
 			if($server_settings != NULL) {
 				//Do we have a server
 				if(isset($server_settings["name"])) {
-					$server_name = htmlspecialchars($server_settings["name"]);
-					$server_name_length = strlen($server_name);
-					if($server_name_length<20) {
-						$server_name_length = 20;
+					if($user_level == "guest" ) {
+						echo '$(\'#server_name\').attr(\'display\',\'none\');\xA';
+					} else {
+						$server_name = htmlspecialchars($server_settings["name"]);
+						$server_name_length = strlen($server_name);
+						if($server_name_length<20) {
+							$server_name_length = 20;
+						}
+						echo 'document.getElementById(\'server_name\').value = "'.addslashes($server_name).'";\xA';
+						echo '$(\'#server_name\').attr(\'size\','.$server_name_length.');\xA';
 					}
-					//$server_name = str_replace(array("'"), array("'\"'\"'"), htmlspecialchars($server_name));
-					echo 'document.getElementById(\'server_name\').value = "'.addslashes($server_name).'";$(\'#server_name\').attr(\'size\','.$server_name_length.');';
 					/*var_dump($server_settings);*/
 				}
 				if(isset($server_settings["game_password"])) {
-					$server_password = $server_settings["game_password"];
-					if(!empty($server_password)) {
-						$server_password_length = strlen($server_password);
-						if($server_password_length<14) {
-							$server_password_length = 14;
+					if($user_level == "guest" ) {
+						echo '$(\'#server_password\').attr(\'display\',\'none\');';
+					} else {
+						$server_password = $server_settings["game_password"];
+						if(!empty($server_password)) {
+							$server_password_length = strlen($server_password);
+							if($server_password_length<14) {
+								$server_password_length = 14;
+							}
+							echo 'document.getElementById(\'server_password\').value = "'.addslashes($server_password).'";$(\'#server_password\').attr(\'size\','.$server_password_length.');';
 						}
-						echo 'document.getElementById(\'server_password\').value = "'.addslashes($server_password).'";$(\'#server_password\').attr(\'size\','.$server_password_length.');';
 					}
 				}
 			} else {
