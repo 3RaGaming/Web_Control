@@ -10,22 +10,22 @@ if [ "${args[0]}" ]; then
 
         '1')
             printf "Step ${args[0]} \r\n";
-            wget -q https://github.com/3RaGaming/Web_Control/archive/dev-bot-manage.zip -O dev-bot-manage.zip
+            wget -q https://github.com/3RaGaming/Web_Control/archive/dev-bot-manage.zip -O /tmp/dev-bot-manage.zip
             ;;
 
         '2')
             printf "Step ${args[0]} \r\n";
-            unzip -u dev-bot-manage.zip
+            unzip -u /tmp/dev-bot-manage.zip
             ;;
 
         '3')
             printf "Step ${args[0]} \r\n";
-            rsync -a -v Web_Control-dev-bot-manage/html/* ./
+            rsync -a -v /tmp/Web_Control-dev-bot-manage/html/* ./
             ;;
 
         '4')
             printf "Step ${args[0]} \r\n";
-            rm -Rf dev-bot-manage.zip Web_Control-dev-bot-manage/
+            rm -Rf /tmp/dev-bot-manage.zip /tmp/Web_Control-dev-bot-manage/
             ;;
 
         *)
