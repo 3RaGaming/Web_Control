@@ -252,11 +252,6 @@ void * input_monitoring(void * server_ptr) {
 					log_chat(actual_server_name, message_to_send);
 
 					message = (char *) malloc((strlen("/silent-command game.forces[''].print('')") + strlen(force_name) + strlen(message_to_send) + 4)*sizeof(char));
-					strcpy(message, "/silent-command game.forces['");
-					strcat(message, force_name);
-					strcat(message, "'].print('");
-					strcat(message, message_to_send);
-					strcat(message, "')\n");
 					sprintf(message, "/silent-command game.forces['%s'].print('%s')\n", force_name, message_to_send);
 					send_threaded_chat(actual_server_name, message);
 					free(message);
