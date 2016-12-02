@@ -28,7 +28,7 @@ var commandlist = {
         //Check to see if serverid is already registered
         let serverid = command[1];
         if (channels[serverid]) {
-            message.channel.print("Server " + serverid + " is already registered to another Discord channel! Please go ::unset the original first.\n");
+            message.channel.sendMessage("Server " + serverid + " is already registered to another Discord channel! Please go ::unset the original first.\n");
             return;
         }
         //Check to see if this channel is already registered
@@ -52,7 +52,7 @@ var commandlist = {
         //Check to see if channelid is already registered
         let channelid = command[1];
         if (channels[channelid]) {
-            message.channel.print("Channel " + channelid + " is already registered to another Discord channel! Please go ::unset the original first.\n");
+            message.channel.sendMessage("Channel " + channelid + " is already registered to another Discord channel! Please go ::unset the original first.\n");
             return;
         }
         //Check to see if this channel is already registered
@@ -104,6 +104,12 @@ var commandlist = {
         if (remove === null) {
             message.channel.sendMessage("There is nothing registered to this channel");
             return;
+        }
+        if (channels[remove].type == "pvp") {
+            let main_name = sendto.substring(0, sendto.indexOf("-"));
+            let main_channel = channels[main_name];
+            main_channel.forces.splice(main_channel.forces.indexOf(remove), 1);
+            if (main_channel.forces.length === 0) delete channels[main_name];
         }
         //Delete the server registration and update the channel_list.json
         delete channels[remove];
@@ -226,9 +232,9 @@ var commandlist = {
             "**::setchannel** *channelid channelname* - Same as above, but using chat channels (coded by Articulating) rather than servers\n\n" +
             "**::setpvp** *serverid forcename servername* - Only the messages from a specific force (forcename) of a PvP server will be sent to this channel (other arguments same as above)\n\n" +
             "**::unset** - Unsets a channel that was previously registered using ::setserver, ::setchannel, or ::setpvp\n\n" +
-            "**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to. All admin commands will have to be called from the admin channel." +
-            "All commands following this command must be run in the admin channel that this command registers\n\n" + 
-            "**::sendadmin** *[serverid/all] command* - Sends 'command' to 'serverid' as if you were typing directly into the console (/silent-command will automatically be attached to the beginning)." +
+            "**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to. " +
+            "All commands following this command are admin commads and must be run in the admin channel that this command registers.\n\n" + 
+            "**::sendadmin** *[serverid/all] command* - Sends 'command' to 'serverid' as if you were typing directly into the console (/silent-command will automatically be attached to the beginning). " +
             "Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
             "**::adminannounce** *[serverid/all] announcement* - Sends an announcement to 'serverid'. Replace serverid with \"all\" to send to all running servers. Serverid must be registered\n\n" +
             "**::registerserver** *serverid* - Register a server for use, but do not attach a Discord channel to it. (Allows ::sendadmin and ::adminanounce to work)\n\n" +
@@ -345,11 +351,14 @@ process.stdin.on('readable', () => {
                     }
                 } else if (message == "[ANNOUNCEMENT] Server has stopped!") {
                     //Close the channel for chat if the server is stopped
+                    let mainserver = channelid;
                     let forces = channels[channelid].forces;
                     for (let i = 0; i < forces.length; i++) {
                         channelid = forces[i];
-                        bot.channels.get(channels[channelid].id).sendMessage("[" + channels[mainserver].name + "] " + message);
-                        bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
+                        let message_sent = bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + input.substring(separator + 1));
+                        message_sent.then((message) => {
+                            bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
+                        });
                     }
                 } else {
                     //Server is a PvP server, send to correct channel

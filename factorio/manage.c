@@ -13,6 +13,7 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <time.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -27,6 +28,8 @@ struct ServerData {
 	pthread_mutex_t mutex; //Thread safety
 	char * status; //Started or Stopped
 	char * logfile; //Location of logfile to write to
+	char * chatlog; //Location of chatlog to write to
+	pthread_mutex_t chat_mutex; //Mutex for chatlog protection
 };
 
 //Set up global variables
@@ -48,7 +51,53 @@ struct ServerData * find_server(char * name) {
 	return (struct ServerData *) NULL;
 }
 
-//Function to write chat using thread safe methods
+//Function to log chat using thread safe methods
+char * log_chat(char * name, char * message) {
+	//Get the server that data is being sent to
+	struct ServerData * sendto;
+	if (strcmp(name, "bot") == 0) {
+		sendto = server_list[0];
+	} else {
+		sendto = find_server(name);
+		if (sendto == NULL) return "Server Not Running";
+		if (strcmp(sendto->status, "Stopped") == 0) return "Server Not Running";
+	}
+
+	//Strip trailing characters if present
+	if (message[strlen(message) - 1] == '\n') message[strlen(message) - 1] = '\0';
+	if (message[strlen(message) - 1] == ')') message[strlen(message) - 1] = '\0';
+
+	//Set up the timestamp
+	//YYYY-MM-DD HH:MM:SS
+	time_t current_time = time(NULL);
+	struct tm *time_data = localtime(&current_time);
+	char *timestamp = (char *) malloc((strlen("YYYY-MM-DD HH:MM:SS") + 3) * sizeof(char));
+	sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
+
+	//Set up timestamped message, also prefixes chats coming in from servers with [CHAT]
+	char *output_message = (char *) malloc((strlen(timestamp) + strlen(message) + 13)*sizeof(char));
+	if (strstr(output_message, "[DISCORD]") != NULL || strstr(output_message, "[WEB]") != NULL) sprintf(output_message, "%s %s\r\n", timestamp, message);
+	else sprintf(output_message, "%s [CHAT] %s\r\n", timestamp, message);
+
+	//Attempt to lock the mutex - If another thread is currently writing to this place, the code will wait here
+	pthread_mutex_lock(&sendto->chat_mutex);
+
+	//Write data
+	FILE *output = fopen(sendto->chatlog, "a");
+	fputs(output_message, output);
+	fclose(output);
+
+	//Unlock the mutex so that another thread can send data to this server
+	pthread_mutex_unlock(&sendto->chat_mutex);
+
+	//Free memory
+	free(timestamp);
+	free(output_message);
+
+	return "Successful";
+}
+
+//Function to write data using thread safe methods
 char * send_threaded_chat(char * name, char * message) {
 	//Get the server that data is being sent to
 	struct ServerData * sendto;
@@ -60,7 +109,7 @@ char * send_threaded_chat(char * name, char * message) {
 		if (strcmp(sendto->status, "Stopped") == 0) return "Server Not Running";
 	}
 
-	//Attempt to lock the mutex - If another thread is current writing to this place, the code will halt here
+	//Attempt to lock the mutex - If another thread is currently writing to this place, the code will wait here
 	pthread_mutex_lock(&sendto->mutex);
 
 	//Write data
@@ -85,6 +134,19 @@ char * get_server_status(char * name) {
 
 //Function to be called by threads in order to monitor input
 void * input_monitoring(void * server_ptr) {
+	//Declare variables used in input parsing
+	char *message;
+	char *new_data;
+	char *actual_server_name;
+	char *output;
+	char *token;
+	char *delim = ",\n\t";
+	char **chat_args;
+	char *command;
+	char *force_name;
+	char *message_to_send;
+
+	//Declare server variables
 	struct ServerData *server = (struct ServerData *) server_ptr;
 	int separator_index;
 	char *servername = (char *) malloc(sizeof(char));
@@ -101,8 +163,8 @@ void * input_monitoring(void * server_ptr) {
 			break;
 		}
 
-		if (strcmp(server->name, "bot") != 0) {
-			char *output = (char *) malloc((strlen(data) + 3)*sizeof(char));
+		if (strcmp(server->name, "bot") != 0 && strstr(data, " [CHAT] ") == NULL) {
+			output = (char *) malloc((strlen(data) + 5)*sizeof(char));
 			sprintf(output, "%s\r\n", data);
 			fputs(output, logfile);
 			fflush(logfile);
@@ -113,9 +175,9 @@ void * input_monitoring(void * server_ptr) {
 			//Handles the rare occasion a chat message will have a '$' inside it
 			separator_index = strchr(data,'$') - data;
 			data[separator_index] = '\0';
-			servername = (char *) realloc(servername, (separator_index + 2)*sizeof(char));
+			servername = (char *) realloc(servername, (separator_index + 4)*sizeof(char));
 			strcpy(servername, data);
-			char * new_data = (char *) malloc(strlen(data + separator_index + 1)*sizeof(char));
+			new_data = (char *) malloc((strlen(data + separator_index + 1) + 3)*sizeof(char));
 			strcpy(new_data, data + separator_index + 1);
 			if (strchr(new_data,'\n') != NULL) new_data[strchr(new_data,'\n') - new_data] = '\0';
 			if (strcmp(servername, "DEBUG") == 0) {
@@ -123,9 +185,7 @@ void * input_monitoring(void * server_ptr) {
 				fprintf(stderr, "%s\n", new_data);
 			} else if (strcmp(servername, "chat") == 0) {
 				//Handle Articulating's Chat Program
-				char *token;
-				char *delim = ",\n\t";
-				char **chat_args = (char **) malloc(4*sizeof(char *));
+				chat_args = (char **) malloc(4*sizeof(char *));
 				int i = 0;
 
 				token = strtok(new_data, delim);
@@ -135,14 +195,8 @@ void * input_monitoring(void * server_ptr) {
 					chat_args[i++] = token;
 				}
 
-				char *message = (char *) malloc((strlen("/silent-command push_message(,,)") + strlen(chat_args[0]) + strlen(chat_args[1]) + strlen(chat_args[2]) + 2)*sizeof(char));
-				strcpy(message, "/silent-command push_message(");
-				strcat(message, chat_args[0]); //channel
-				strcat(message, ",");
-				strcat(message, chat_args[1]); //color
-				strcat(message, ",");
-				strcat(message, chat_args[2]); //message
-				strcat(message, ")\n\0");
+				message = (char *) malloc((strlen("/silent-command push_message('','','')") + strlen(chat_args[0]) + strlen(chat_args[1]) + strlen(chat_args[2]) + 2)*sizeof(char));
+				sprintf(message, "/silent-command push_message('%s','%s','%s')\n", chat_args[0], chat_args[1], chat_args[2]);
 				free(chat_args);
 				for (int i = 0; i < servers; i++) {
 					if (strcmp(server_list[i]->status, "Started") == 0) send_threaded_chat(server_list[i]->name, message);
@@ -150,11 +204,8 @@ void * input_monitoring(void * server_ptr) {
 				free(message);
 			} else if (strcmp(servername, "PLAYER") == 0) {
 				//This is a player update, used for the bot to keep track of PvP Player Teams
-				char *message = (char *) malloc((strlen("PLAYER$") + strlen(server->name) + strlen("$") + strlen(new_data) + 1)*sizeof(char));
-				strcpy(message, "PLAYER$");
-				strcat(message, server->name);
-				strcat(message, "$");
-				strcat(message, new_data);
+				message = (char *) malloc((strlen("PLAYER$") + strlen(server->name) + strlen("$") + strlen(new_data) + 3)*sizeof(char));
+				sprintf(message, "PLAYER$%s$%s\n", server->name, new_data);
 				send_threaded_chat("bot", message);
 				free(message);
 			} else if (strcmp(servername, "admin") == 0) {
@@ -162,11 +213,11 @@ void * input_monitoring(void * server_ptr) {
 					//Bot is sending a command or announcement to a server
 					separator_index = strchr(new_data, '$') - new_data;
 					new_data[separator_index] = '\0';
-					char *actual_server_name = (char *) malloc(strlen(new_data));
+					actual_server_name = (char *) malloc(strlen(new_data));
 					strcpy(actual_server_name, new_data);
-					char *command = (char *) malloc((strlen(new_data + separator_index + 1) + 2)*sizeof(char));
+					command = (char *) malloc((strlen(new_data + separator_index + 1) + 4)*sizeof(char));
 					strcpy(command, new_data + separator_index + 1);
-					strcat(command, "\n\0");
+					strcat(command, "\n");
 					if (strcmp(actual_server_name,"all") == 0) {
 						for (int i = 1; i < servers; i++) {
 							send_threaded_chat(server_list[i]->name, command);
@@ -178,12 +229,8 @@ void * input_monitoring(void * server_ptr) {
 					free(command);
 				} else {
 					//Admin Warning System is being sent back to the bot
-					char *message = (char *) malloc((strlen("admin$") + strlen(server->name) + strlen("$") + strlen(new_data) + 3)*sizeof(char));
-					strcpy(message, "admin$");
-					strcat(message, server->name);
-					strcat(message, "$");
-					strcat(message, new_data);
-					strcat(message, "\n");
+					message = (char *) malloc((strlen("admin$") + strlen(server->name) + strlen("$") + strlen(new_data) + 5)*sizeof(char));
+					sprintf(message, "admin$%s$%s\n", server->name, new_data);
 					send_threaded_chat("bot", message);
 					free(message);
 				}
@@ -192,32 +239,34 @@ void * input_monitoring(void * server_ptr) {
 					//Bot is sending chat to a PvP server through default chat
 					separator_index = strchr(new_data, '$') - new_data;
 					new_data[separator_index] = '\0';
-					char *actual_server_name = (char *) malloc(strlen(new_data));
+					actual_server_name = (char *) malloc(strlen(new_data));
 					strcpy(actual_server_name, new_data);
-					char *force_name = (char *) malloc((strlen(new_data + separator_index + 1) + 1)*sizeof(char));
+					force_name = (char *) malloc((strlen(new_data + separator_index + 1) + 3)*sizeof(char));
 					strcpy(force_name, new_data + separator_index + 1);
 
 					separator_index = strchr(force_name, '$') - force_name;
 					force_name[separator_index] = '\0';
-					char *message_to_send = (char *) malloc((strlen(force_name + separator_index + 1) + 1)*sizeof(char));
+					message_to_send = (char *) malloc((strlen(force_name + separator_index + 1) + 3)*sizeof(char));
 					strcpy(message_to_send, force_name + separator_index + 1);
 
-					char *message = (char *) malloc((strlen("/silent-command game.forces[''].print('')") + strlen(force_name) + strlen(message_to_send) + 2)*sizeof(char));
+					log_chat(actual_server_name, message_to_send);
+
+					message = (char *) malloc((strlen("/silent-command game.forces[''].print('')") + strlen(force_name) + strlen(message_to_send) + 4)*sizeof(char));
 					strcpy(message, "/silent-command game.forces['");
 					strcat(message, force_name);
 					strcat(message, "'].print('");
 					strcat(message, message_to_send);
-					strcat(message, "')\n\0");
+					strcat(message, "')\n");
+					sprintf(message, "/silent-command game.forces['%s'].print('%s')\n", force_name, message_to_send);
 					send_threaded_chat(actual_server_name, message);
 					free(message);
 					free(message_to_send);
 					free(force_name);
 				} else {
 					//Bot is sending chat to a normal server through default chat
-					char *message = (char *) malloc((strlen("/silent-command game.print('')") + strlen(new_data) + 3)*sizeof(char));
-					strcpy(message, "/silent-command game.print('");
-					strcat(message, new_data);
-					strcat(message, "')\n\0");
+					log_chat(servername, new_data);
+					message = (char *) malloc((strlen("/silent-command game.print('')") + strlen(new_data) + 5)*sizeof(char));
+					sprintf(message, "/silent-command game.print('%s')\n", new_data);
 					send_threaded_chat(servername, message);
 					free(message);
 				}
@@ -226,13 +275,11 @@ void * input_monitoring(void * server_ptr) {
 		} else if (strstr(data, " [CHAT] ") != NULL && strstr(data, "[DISCORD]") == NULL) {
 			//Server is sending chat through default chat, relay it to bot
 			//Also includes check to prevent echoing
-			char * new_data = (char *) malloc(strlen(strstr(data, " [CHAT] ") + strlen(" [CHAT] "))*sizeof(char));
+			new_data = (char *) malloc(strlen(strstr(data, " [CHAT] ") + strlen(" [CHAT] "))*sizeof(char));
 			strcpy(new_data, strstr(data, " [CHAT] ") + strlen(" [CHAT] "));
-			char *message = (char *) malloc((strlen(server->name) + strlen(data) + 4)*sizeof(char));
-			strcpy(message, server->name);
-			strcat(message, "$");
-			strcat(message, new_data);
-			strcat(message, "\n");
+			log_chat(server->name, new_data);
+			message = (char *) malloc((strlen(server->name) + strlen(data) + 4)*sizeof(char));
+			sprintf(message, "%s$%s\n", server->name, new_data);
 			send_threaded_chat("bot", message);
 			free(message);
 			free(new_data);
@@ -261,18 +308,29 @@ char * launch_server(char * name, char ** args, char * logpath) {
 
 	//Create copy of name, because of the weirdness of how C pointers works
 	//Required to allow multiple servers
-	char * name_copy = (char *) malloc(strlen(name)*sizeof(char));
+	char * name_copy = (char *) malloc((strlen(name) + 2)*sizeof(char));
 	strcpy(name_copy, name);
 
 	//Create logfile filepath, if this is not the bot
 	char *logfile;
 	if (strcmp(name_copy,"bot") != 0) {
 		// "/var/www/factorio/name/screenlog.0"
-		logfile = (char *) malloc((strlen(logpath) + strlen("/screenlog.0") + 1)*sizeof(char));
+		logfile = (char *) malloc((strlen(logpath) + strlen("/screenlog.0") + 2)*sizeof(char));
 		strcpy(logfile, logpath);
 		strcat(logfile, "/screenlog.0\0");
 	} else {
 		logfile = "bot";
+	}
+
+	//Create chatlog filepath, if this is not the bot
+	char *chatlog;
+	if (strcmp(name_copy,"bot") != 0) {
+		// "/var/www/factorio/name/screenlog.0"
+		chatlog = (char *) malloc((strlen(logpath) + strlen("/screenlog.0") + 2)*sizeof(char));
+		strcpy(chatlog, logpath);
+		strcat(chatlog, "/chatlog.0\0");
+	} else {
+		chatlog = "bot";
 	}
 
 	//Create pipes
@@ -319,6 +377,9 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		server->mutex = mymutex;
 		server->status = "Started";
 		server->logfile = logfile;
+		server->chatlog = chatlog;
+		pthread_mutex_t mymutex2 = PTHREAD_MUTEX_INITIALIZER;
+		server->chat_mutex = mymutex2;
 		server_list[servers] = server;
 		thread_list = (pthread_t *) realloc(thread_list, ((servers + 1) * sizeof(pthread_t)));
 		pthread_create(&thread_list[servers], &thread_attr, input_monitoring, (void *) server_list[servers]);
@@ -415,7 +476,7 @@ void stop_all_servers() {
 		fprintf(stdout, "Server %s Shutdown\n", server_list[i]->name);
 		char *announcement = malloc((strlen(server_list[i]->name) + strlen("$[ANNOUNCEMENT] Server has stopped!") + 1)*sizeof(char));
 		strcpy(announcement, server_list[i]->name);
-		strcpy(announcement, "$[ANNOUNCEMENT] Server has stopped!");
+		strcat(announcement, "$[ANNOUNCEMENT] Server has stopped!");
 		send_threaded_chat("bot", announcement);
 		free(announcement);
 	}
@@ -456,6 +517,12 @@ int main() {
 	sleep(5); //Wait for bot to launch fully before continuing
 	free(botargs);
 
+	//Declare variables used in input parsing
+	char *new_input;
+	char *server_args;
+	char *announcement;
+	char *message;
+
 	//Input scan loop
 	while (1) {
 		if (fgets(input, 1000, stdin) == NULL || input[0] == '\n') {
@@ -468,7 +535,7 @@ int main() {
 		input[separator_index] = '\0';
 		servername = (char *) realloc(servername, (separator_index + 2)*sizeof(char));
 		strcpy(servername, input);
-		char * new_input = (char *) malloc(strlen(input + separator_index + 1)*sizeof(char));
+		new_input = (char *) malloc(strlen(input + separator_index + 1)*sizeof(char));
 		strcpy(new_input, input + separator_index + 1);
 		if (strchr(new_input,'\n') != NULL) new_input[strchr(new_input,'\n') - new_input] = '\0';
 
@@ -477,7 +544,7 @@ int main() {
 			//Start command
 			separator_index = strchr(new_input,'$') - new_input;
 			new_input[separator_index] = '\0';
-			char *server_args = (char *) malloc(strlen(new_input + separator_index + 1)*sizeof(char));
+			server_args = (char *) malloc(strlen(new_input + separator_index + 1)*sizeof(char));
 			strcpy(server_args, new_input + separator_index + 1);
 			if (strcmp(start_server(servername, server_args), "Server Running") == 0) {
 				fprintf(stdout, "Server %s Already Running\n", servername);
@@ -486,7 +553,7 @@ int main() {
 				continue;
 			}
 			fprintf(stdout, "Server %s Started\n", servername);
-			char *announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has started!") + 1)*sizeof(char));
+			announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has started!") + 1)*sizeof(char));
 			strcpy(announcement, servername);
 			strcat(announcement, "$[ANNOUNCEMENT] Server has started!");
 			send_threaded_chat("bot", announcement);
@@ -501,7 +568,7 @@ int main() {
 			}
 			fprintf(stdout, "Server %s Stopped\n", servername);
 			currently_running--;
-			char *announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has stopped!") + 1)*sizeof(char));
+			announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has stopped!") + 1)*sizeof(char));
 			strcpy(announcement, servername);
 			strcat(announcement, "$[ANNOUNCEMENT] Server has stopped!");
 			send_threaded_chat("bot", announcement);
@@ -512,15 +579,16 @@ int main() {
 			fprintf(stdout, "%s\n", get_server_status(servername));
 		} else {
 			//Chat or in-game command
-			char *message = (char *) malloc((strlen(new_input) + 2)*sizeof(char));
+			message = (char *) malloc((strlen(new_input) + 2)*sizeof(char));
 			strcpy(message, new_input);
 			strcat(message, "\n\0");
 			send_threaded_chat(servername, message);
+			if (strstr(message, "[WEB]") != NULL) log_chat(servername, strstr(message, "[WEB]"));
 		}
 		free(new_input);
 	}
 	//Shut down the bot, giving it time to finish whatever action it is doing
-	sleep(1);
+	sleep(5);
 	struct ServerData *bot = server_list[0];
 	kill(bot->pid, SIGINT);
 	waitpid(bot->pid, NULL, 0);
