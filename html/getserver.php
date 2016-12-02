@@ -26,8 +26,8 @@ foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 			var opt = document.createElement("option");
 			opt.value = "'.$server_select.'";
 			opt.innerHTML = "'.$server_select.'";
-			toSelect.add(opt);
-			toSelect.options[toSelect.options.selectedIndex].selected = true;';
+			opt.selected = true;
+			toSelect.add(opt);';
 		} else {
 			$server_select_dropdown = $server_select_dropdown . '
 			var opt = document.createElement("option");
