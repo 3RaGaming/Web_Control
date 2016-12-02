@@ -31,7 +31,7 @@
 					flush();
 				}
 				echo "Done\r\n</pre>\r\n\r\n";
-				echo "<script>document.getElementById(\"result\").innerHTML = \"Done! <a onclick=\\\"window.history.back();\\\" href=\\\"#goback\\\">Go Back</a>\";</script>";
+				echo "<script>document.getElementById(\"result\").innerHTML = \"Done! <a href=\\\"javascript:window.location = document.referrer;\\\">Go Back</a>\";</script>";
 				ob_flush();
 				flush();
 			}
