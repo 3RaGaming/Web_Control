@@ -4,27 +4,35 @@ args=("$@");
 if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 	    'count')
-			echo "4"
+			echo "5"
             exit 1
             ;;
 
         '1')
-            printf "Step ${args[0]} \r\n";
+            printf "Step ${args[0]} - Downloading latest updates \r\n";
             wget -q https://github.com/3RaGaming/Web_Control/archive/dev-bot-manage.zip -O /tmp/dev-bot-manage.zip
             ;;
 
         '2')
-            printf "Step ${args[0]} \r\n";
+            printf "Step ${args[0]} - Unzipping updates \r\n";
             unzip -u /tmp/dev-bot-manage.zip -d /tmp/
             ;;
 
         '3')
-            printf "Step ${args[0]} \r\n";
+            printf "Step ${args[0]} - Updating files \r\n";
             rsync -a -v /tmp/Web_Control-dev-bot-manage/html/* ./
+	    rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/manage.c ../factorio/
+	    rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/manage.new.sh ../factorio/
+	    rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/3RaFactorioBot.js ../factorio/
             ;;
+	    
+	'4')
+	    printf "Step ${args[0]} - Compiling updated manage.c \r\n";
+	    gcc -o ../factorio/managepgm -pthread ../factorio/manage.c
+	    ;;
 
-        '4')
-            printf "Step ${args[0]} \r\n";
+        '5')
+            printf "Step ${args[0]} - Deleting temporary files \r\n";
             rm -Rf /tmp/dev-bot-manage.zip /tmp/Web_Control-dev-bot-manage/
             ;;
 
