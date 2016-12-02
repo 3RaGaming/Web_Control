@@ -17,7 +17,7 @@
 	if($user_level=="admin") {
 		if(isset($_POST['update'])) {
 			if($_POST['update']=="yes") {
-				echo "Updating... <br />":
+				echo "Updating... <br />";
 				flush();
 				ob_flush();
 				sleep(5);
