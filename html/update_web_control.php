@@ -14,9 +14,17 @@
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "guest"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 	
-	if(isset($_POST)) {
-		echo "<pre>";
-		print_r($_POST);
-		echo "</pre>";
+	if($user_level=="admin") {
+		if(isset($_POST['update'])) {
+			if($_POST['update']=="yes") {
+				echo "Updating... <br />":
+				flush();
+				ob_flush();
+				sleep(5);
+				echo "Done <br />";
+			}
+		}
+	} else {
+		header("Location: ./login.php");
 	}
 ?>
