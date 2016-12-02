@@ -22,9 +22,10 @@
 				ob_flush();
 				flush();
 				$count = system('bash update.sh count');
+				$i = $count;
 				ob_flush();
 				flush();
-				for($n=1; $n<=$count; $n++) {
+				for($n=1; $n<=$i; $n++) {
 					system('bash update.sh '.$n.'');
 					ob_flush();
 					flush();
