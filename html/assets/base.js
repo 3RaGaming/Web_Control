@@ -1206,7 +1206,7 @@ function command_history(args) {
 	}
 }
 
-update_web_control() {
+function update_web_control() {
     var r = confirm("Update webgui and server control files?");
     if (r == true) {
         window.location = "./update_web_control.php"; // or $(this).val()
