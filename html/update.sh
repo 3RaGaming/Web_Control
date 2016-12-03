@@ -23,15 +23,15 @@ if [ "${args[0]}" ]; then
         '3')
             printf "Step ${args[0]} - Updating files \r\n";
             rsync -a -v /tmp/Web_Control-dev-bot-manage/html/* ./
-            rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/manage.c ../factorio/
-            rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/manage.new.sh ../factorio/
-            rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/3RaFactorioBot.js ../factorio/
+            rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/manage.c /var/www/factorio/
+            rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/manage.new.sh /var/www/factorio/
+            rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/3RaFactorioBot.js /var/www/factorio/
             printf "\r\n-----------\r\n\r\n";
             ;;
 	    
         '4')
             printf "Step ${args[0]} - Compiling updated manage.c \r\n";
-            gcc -o ../factorio/managepgm -pthread ../factorio/manage.c
+            gcc -o /var/www/factorio/managepgm -pthread /var/www/factorio/manage.c
             printf "\r\n-----------\r\n\r\n";
             ;;
 
