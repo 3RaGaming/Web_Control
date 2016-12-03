@@ -26,7 +26,7 @@ if(isset($_POST['passw'])) {
 	$passW = addslashes(md5(trim($_POST['passw'])));
 }
 if(!empty($userN) && !empty($passW)) {
-	$userlist = file ( __DIR__ . '/../users.txt');
+	$userlist = file ('../users.txt');
 	$success = false;
 	foreach ($userlist as $user) {
 		$user_details = explode('|', $user);

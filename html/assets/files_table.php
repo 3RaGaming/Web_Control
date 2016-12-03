@@ -14,8 +14,8 @@ if(!isset($_SESSION['login']['level'])) {
 	die('error with user permissions');
 }
 //Set the base directory the factorio servers will be stored
-$base_dir= __DIR__ . "/../../factorio/";
-include( __DIR__ . '/../getserver.php');
+$base_dir="../../factorio/";
+include('../getserver.php');
 if(!isset($server_select)) {
 	die('Error in server selection files.php');
 }
