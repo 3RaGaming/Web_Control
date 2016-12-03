@@ -76,8 +76,12 @@ char * log_chat(char * name, char * message) {
 
 	//Set up timestamped message, also prefixes chats coming in from servers with [CHAT]
 	char *output_message = (char *) malloc((strlen(timestamp) + strlen(message) + 13)*sizeof(char));
-	if (strstr(output_message, "[DISCORD]") != NULL || strstr(output_message, "[WEB]") != NULL) sprintf(output_message, "%s %s\r\n", timestamp, message);
-	else sprintf(output_message, "%s [CHAT] %s\r\n", timestamp, message);
+	int chat = 1;
+	if (strstr(message, "[DISCORD]") != NULL) chat = 0;
+	if (strstr(message, "[WEB]") != NULL) chat = 0;
+	if (strstr(message, "[PUPDATE]") != NULL) chat = 0;
+	if (chat == 1) sprintf(output_message, "%s [CHAT] %s\r\n", timestamp, message);
+	else sprintf(output_message, "%s %s\r\n", timestamp, message);
 
 	//Attempt to lock the mutex - If another thread is currently writing to this place, the code will wait here
 	pthread_mutex_lock(&sendto->chat_mutex);
@@ -141,10 +145,13 @@ void * input_monitoring(void * server_ptr) {
 	char *output;
 	char *token;
 	char *delim = ",\n\t";
+	int i;
 	char **chat_args;
+	char **player_args;
 	char *command;
 	char *force_name;
 	char *message_to_send;
+	char *player_announcement;
 
 	//Declare server variables
 	struct ServerData *server = (struct ServerData *) server_ptr;
@@ -186,7 +193,7 @@ void * input_monitoring(void * server_ptr) {
 			} else if (strcmp(servername, "chat") == 0) {
 				//Handle Articulating's Chat Program
 				chat_args = (char **) malloc(4*sizeof(char *));
-				int i = 0;
+				i = 0;
 
 				token = strtok(new_data, delim);
 				chat_args[i++] = token;
@@ -206,6 +213,31 @@ void * input_monitoring(void * server_ptr) {
 				//This is a player update, used for the bot to keep track of PvP Player Teams
 				message = (char *) malloc((strlen("PLAYER$") + strlen(server->name) + strlen("$") + strlen(new_data) + 3)*sizeof(char));
 				sprintf(message, "PLAYER$%s$%s\n", server->name, new_data);
+
+				i = 0;
+				player_args = (char **) malloc(5*sizeof(char *));
+				player_announcement = (char *) malloc((strlen(new_data) + 50)*sizeof(char));
+
+				token = strtok(new_data, delim);
+				player_args[i++] = token;
+				while (token != NULL) {
+					token = strtok(NULL, delim);
+					player_args[i++] = token;
+				}
+
+				if (strcmp(player_args[0], "join") == 0) {
+					sprintf(player_announcement, "[PUPDATE] %s has joined the server [%s]", player_args[2], player_args[3]);
+				} else if (strcmp(player_args[0], "leave") == 0) {
+					sprintf(player_announcement, "[PUPDATE] %s has left the server [%s]", player_args[2], player_args[3]);
+				} else {
+					sprintf(player_announcement, "[PUPDATE] %s has changed forces to %s", player_args[2], player_args[3]);
+				}
+
+				log_chat(server->name, player_announcement);
+
+				free(player_args);
+				free(player_announcement);
+
 				send_threaded_chat("bot", message);
 				free(message);
 			} else if (strcmp(servername, "admin") == 0) {
