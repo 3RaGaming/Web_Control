@@ -99,7 +99,7 @@ if(isset($_REQUEST['start'])) {
 				$command = "/silent-command game.print(\"[WEB]".$current_user.": \"..\"".$command."\")";
 			}
 			$command = str_replace(array("'", "^"), array("'\"'\"'", "\^"), $command);
-			system("sudo -u www-data /usr/bin/screen -S ".$server_select." -X at 0 stuff '".$command."\n'");
+			system("sudo -u www-data /usr/bin/screen -S manage -X at 0 stuff '".$server_select."\\\$".$command."\n'");
 
 			//used for up arrow history
 			$cmd_history = $command_decode;
