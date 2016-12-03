@@ -51,56 +51,6 @@ struct ServerData * find_server(char * name) {
 	return (struct ServerData *) NULL;
 }
 
-//Function to log chat using thread safe methods
-char * log_chat(char * name, char * message) {
-	//Get the server that data is being sent to
-	struct ServerData * sendto;
-	if (strcmp(name, "bot") == 0) {
-		sendto = server_list[0];
-	} else {
-		sendto = find_server(name);
-		if (sendto == NULL) return "Server Not Running";
-		if (strcmp(sendto->status, "Stopped") == 0) return "Server Not Running";
-	}
-
-	//Strip trailing characters if present
-	if (message[strlen(message) - 1] == '\n') message[strlen(message) - 1] = '\0';
-	if (message[strlen(message) - 1] == ')') message[strlen(message) - 1] = '\0';
-
-	//Set up the timestamp
-	//YYYY-MM-DD HH:MM:SS
-	time_t current_time = time(NULL);
-	struct tm *time_data = localtime(&current_time);
-	char *timestamp = (char *) malloc((strlen("YYYY-MM-DD HH:MM:SS") + 3) * sizeof(char));
-	sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
-
-	//Set up timestamped message, also prefixes chats coming in from servers with [CHAT]
-	char *output_message = (char *) malloc((strlen(timestamp) + strlen(message) + 13)*sizeof(char));
-	int chat = 1;
-	if (strstr(message, "[DISCORD]") != NULL) chat = 0;
-	if (strstr(message, "[WEB]") != NULL) chat = 0;
-	if (strstr(message, "[PUPDATE]") != NULL) chat = 0;
-	if (chat == 1) sprintf(output_message, "%s [CHAT] %s\r\n", timestamp, message);
-	else sprintf(output_message, "%s %s\r\n", timestamp, message);
-
-	//Attempt to lock the mutex - If another thread is currently writing to this place, the code will wait here
-	pthread_mutex_lock(&sendto->chat_mutex);
-
-	//Write data
-	FILE *output = fopen(sendto->chatlog, "a");
-	fputs(output_message, output);
-	fclose(output);
-
-	//Unlock the mutex so that another thread can send data to this server
-	pthread_mutex_unlock(&sendto->chat_mutex);
-
-	//Free memory
-	free(timestamp);
-	free(output_message);
-
-	return "Successful";
-}
-
 //Function to write data using thread safe methods
 char * send_threaded_chat(char * name, char * message) {
 	//Get the server that data is being sent to
@@ -123,6 +73,63 @@ char * send_threaded_chat(char * name, char * message) {
 
 	//Unlock the mutex so that another thread can send data to this server
 	pthread_mutex_unlock(&sendto->mutex);
+
+	return "Successful";
+}
+
+//Function to log chat using thread safe methods
+char * log_chat(char * name, char * message) {
+	//Get the server that data is being sent to
+	struct ServerData * sendto;
+	if (strcmp(name, "bot") == 0) {
+		sendto = server_list[0];
+	} else {
+		sendto = find_server(name);
+		if (sendto == NULL) return "Server Not Running";
+		if (strcmp(sendto->status, "Stopped") == 0) return "Server Not Running";
+	}
+
+	//Strip trailing characters if present
+	if (message[strlen(message) - 1] == '\n') message[strlen(message) - 1] = '\0';
+	if (message[strlen(message) - 1] == ')') message[strlen(message) - 1] = '\0';
+	if (message[strlen(message) - 1] == '"') message[strlen(message) - 1] = '\0';
+
+	//Set up the timestamp
+	//YYYY-MM-DD HH:MM:SS
+	time_t current_time = time(NULL);
+	struct tm *time_data = localtime(&current_time);
+	char *timestamp = (char *) malloc((strlen("YYYY-MM-DD HH:MM:SS") + 3) * sizeof(char));
+	sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
+
+	//Set up timestamped message, also prefixes chats coming in from servers with [CHAT]
+	char *output_message = (char *) malloc((strlen(timestamp) + strlen(message) + 13)*sizeof(char));
+	int chat = 1;
+	if (strstr(message, "[DISCORD]") != NULL) chat = 0;
+	if (strstr(message, "[WEB]") != NULL) {
+		//If this message comes from the webserver, send it to the bot
+		char *bot_message = (char *) malloc((strlen(name) + strlen(message) + 5)*sizeof(char));
+		sprintf(bot_message, "%s$%s\n", name, message);
+		send_threaded_chat("bot", bot_message);
+		chat = 0;
+	}
+	if (strstr(message, "[PUPDATE]") != NULL) chat = 0;
+	if (chat == 1) sprintf(output_message, "%s [CHAT] %s\r\n", timestamp, message);
+	else sprintf(output_message, "%s %s\r\n", timestamp, message);
+
+	//Attempt to lock the mutex - If another thread is currently writing to this place, the code will wait here
+	pthread_mutex_lock(&sendto->chat_mutex);
+
+	//Write data
+	FILE *output = fopen(sendto->chatlog, "a");
+	fputs(output_message, output);
+	fclose(output);
+
+	//Unlock the mutex so that another thread can send data to this server
+	pthread_mutex_unlock(&sendto->chat_mutex);
+
+	//Free memory
+	free(timestamp);
+	free(output_message);
 
 	return "Successful";
 }
@@ -352,8 +359,8 @@ char * launch_server(char * name, char ** args, char * logpath) {
 	//Create chatlog filepath, if this is not the bot
 	char *chatlog;
 	if (strcmp(name_copy,"bot") != 0) {
-		// "/var/www/factorio/name/screenlog.0"
-		chatlog = (char *) malloc((strlen(logpath) + strlen("/screenlog.0") + 2)*sizeof(char));
+		// "/var/www/factorio/name/chatlog.0"
+		chatlog = (char *) malloc((strlen(logpath) + strlen("/chatlog.0") + 2)*sizeof(char));
 		strcpy(chatlog, logpath);
 		strcat(chatlog, "/chatlog.0\0");
 	} else {
@@ -606,7 +613,7 @@ int main() {
 			fprintf(stdout, "%s\n", get_server_status(servername));
 		} else {
 			//Chat or in-game command
-			message = (char *) malloc((strlen(new_input) + 2)*sizeof(char));
+			message = (char *) malloc((strlen(new_input) + 4)*sizeof(char));
 			strcpy(message, new_input);
 			strcat(message, "\n\0");
 			send_threaded_chat(servername, message);
