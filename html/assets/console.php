@@ -23,10 +23,9 @@ if(isset($_REQUEST['d'])&&isset($_REQUEST['s'])) {
 			$repl=array("&lt;", "&gt;", "");
 			if($screen=="chat") {
 				$output = shell_exec('cat '.$chatlog.' | tail -n 75');
-				$output = str_replace($find, $repl, $output);
 				echo str_replace(PHP_EOL, '', $output);         //add newlines
 			} elseif($screen=="console") {
-				$output = str_replace($find, $repl, shell_exec('cat '.$screenlog.' | tail -n 75'));
+				$output = shell_exec('cat '.$screenlog.' | tail -n 75');
 				echo str_replace(PHP_EOL, '', $output);         //add newlines
 			}
 		}
