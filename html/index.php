@@ -15,7 +15,7 @@
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 	
 	//Set the base directory the factorio servers will be stored
-	$base_dir="../factorio/";
+	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
 	if(!isset($server_select)) {
 		die('Error in server selection index.php');
