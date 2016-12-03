@@ -18,14 +18,16 @@ if(isset($_REQUEST['d'])&&isset($_REQUEST['s'])) {
 		if($_REQUEST['s']) {
 			$screen = $_REQUEST['s'];
 			$screenlog = '/var/www/factorio/'.$server_select.'/screenlog.0';
-			$chatlog = 'var/www/factorio/'.$server_select.'/chatlog.0';
+			$chatlog = '/var/www/factorio/'.$server_select.'/chatlog.0';
 			$find=array("<", ">", "\\");
 			$repl=array("&lt;", "&gt;", "");
 			if($screen=="chat") {
 				$output = shell_exec('cat '.$chatlog.' | tail -n 75');
+				$output = str_replace($find, $repl, $output);
 				echo str_replace(PHP_EOL, '', $output);         //add newlines
 			} elseif($screen=="console") {
 				$output = shell_exec('cat '.$screenlog.' | tail -n 75');
+				$output = str_replace($find, $repl, $output);
 				echo str_replace(PHP_EOL, '', $output);         //add newlines
 			}
 		}
