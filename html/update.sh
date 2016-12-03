@@ -31,6 +31,7 @@ if [ "${args[0]}" ]; then
 	    
         '4')
             printf "Step ${args[0]} - Compiling updated manage.c \r\n";
+            rm ../factorio/managepgm
             gcc -o ../factorio/managepgm -pthread ../factorio/manage.c
             printf "\r\n-----------\r\n\r\n";
             ;;
