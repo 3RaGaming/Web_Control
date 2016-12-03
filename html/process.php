@@ -26,7 +26,7 @@ if(isset($_REQUEST['start'])) {
 			$server_password="";
 			$new_server_settings = false;
 			//echo "Sending Start Server Command:\n\n";
-			$output = shell_exec('/var/www/factorio/manage.new.sh "'.$server_select.'" "prestart" "'.$_SESSION['login']['user'].'"');
+			$output = shell_exec('bash /var/www/factorio/manage.new.sh "'.$server_select.'" "prestart" "'.$_SESSION['login']['user'].'"');
 			if (strpos($output, 'false') !== false) {
 				$jsonString = file_get_contents($server_settings_path);
 				$data = json_decode($jsonString, true);
@@ -61,7 +61,7 @@ if(isset($_REQUEST['start'])) {
 					file_put_contents($server_settings_path, $newJsonString);
 				}
 			}
-			$output = shell_exec('/var/www/factorio/manage.new.sh "'.$server_select.'" "start" "'.$_SESSION['login']['user'].'"');
+			$output = shell_exec('bash /var/www/factorio/manage.new.sh "'.$server_select.'" "start" "'.$_SESSION['login']['user'].'"');
 			echo $output;
 		} else {
 			die('Missing server-settings.json');
@@ -69,14 +69,14 @@ if(isset($_REQUEST['start'])) {
 	}
 } elseif(isset($_REQUEST['status'])) {
 	echo "Requesting Status of Servers:\n\n";
-	$output = shell_exec('/var/www/factorio/manage.new.sh "'.$server_select.'" "status" "'.$_SESSION['login']['user'].'"');
+	$output = shell_exec('bash /var/www/factorio/manage.new.sh "'.$server_select.'" "status" "'.$_SESSION['login']['user'].'"');
 	echo $output;
 } elseif(isset($_REQUEST['stop'])) {
 	if($_SESSION['login']['user']=="guest") {
 		echo "Guests may not Start/Stop server";
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
-		$output = shell_exec('/var/www/factorio/manage.new.sh "'.$server_select.'" "stop" "'.$_SESSION['login']['user'].'"');
+		$output = shell_exec('bash /var/www/factorio/manage.new.sh "'.$server_select.'" "stop" "'.$_SESSION['login']['user'].'"');
 		echo $output;
 	}
 } elseif(isset($_REQUEST['command'])) {
