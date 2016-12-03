@@ -18,7 +18,7 @@ if(isset($_REQUEST['d'])) {
 
 $server_select_dropdown = "toSelect = document.getElementById(\"server_select\");";
 foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
-	$dir = str_replace(dirname($dir), '', $dir);
+	$dir = str_replace($base_dir, '', $dir);
 	if($dir!="node_modules") {
 		if($temp_select=="$dir") {
 			$server_select = $dir;
