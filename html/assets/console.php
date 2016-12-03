@@ -11,14 +11,14 @@ if(!isset($_SESSION['login'])) {
 
 		//var_dump($_REQUEST);
 if(isset($_REQUEST['d'])&&isset($_REQUEST['s'])) {
-	$base_dir="/var/www/factorio/";
-	$html_dir="/var/www/html";
+	$base_dir="../../factorio/";
+	$html_dir="../";
 	include($html_dir.'/getserver.php');
 	if(isset($server_select)) {
 		if($_REQUEST['s']) {
 			$screen = $_REQUEST['s'];
-			$screenlog = '/var/www/factorio/'.$server_select.'/screenlog.0';
-			$chatlog = 'var/www/factorio/'.$server_select.'/chatlog.0';
+			$screenlog = '../../factorio/'.$server_select.'/screenlog.0';
+			$chatlog = '../../factorio/'.$server_select.'/chatlog.0';
 			$find=array("<", ">", "\\");
 			$repl=array("&lt;", "&gt;", "");
 			if($screen=="chat") {
