@@ -400,6 +400,8 @@ process.stdin.on('readable', () => {
 bot.on('message', (message) => {
     //Ignore own messages
     if (message.author == bot.user) return;
+    //Ignore DMs
+    if (!message.member) return;
     //Set the prefix
     let prefix = "::";
 

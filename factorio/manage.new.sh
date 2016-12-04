@@ -88,6 +88,12 @@ else
 			if [ "$check" == "Server Running" ]; then 
 				echo -e "Attempted Start by $cur_user: Server is already running\r\n" >> $dir_server/screenlog.0 ;
 			elif [ "$check" == "Manage Stopped" ]; then
+                #Work in a screenlog archive here
+                if [ -s "screenlog.0" ]; then
+                    mkdir -p log
+                    datetime=$(date +%F-%T)
+                    mv screenlog.0 log/screenlog.0-${datetime}
+                fi
 				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
 				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M"
@@ -95,11 +101,20 @@ else
 				sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M"
-
-				echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
-				
-				sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
-				
+                if [ "${args[3]}" ]; then
+                    sanitize "${args[3]}";
+                    #only set $server_file if the file appears to be valid.
+                    #$server_file="$clean";
+                fi
+                
+                #Load server_file if it's set. Or else just load latest
+                if [ "$server_file" ]; then
+                    echo -e "Starting Server. ${server_file}. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
+                    #sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
+                else
+                    echo -e "Starting Server. Load Latest. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
+                    sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
+                fi
 			else
 				if [ "$var_cont" == false ] ; then
 					echo "Cannot start server";
