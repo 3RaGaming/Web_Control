@@ -331,7 +331,7 @@ process.stdin.on('readable', () => {
                         message = "[PLAYER FORCE] Player " + player_name + " has joined force " + force_name + "!";
                         break;
                 }
-                bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + message);
+                bot.channels.get(channels[channelid].id).sendMessage(message);
             }
         } else if (channels[channelid]) {
             if (channels[channelid].type == "registered") {
@@ -346,7 +346,7 @@ process.stdin.on('readable', () => {
                         channelid = forces[i];
                         let open_server = bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
                         open_server.then(() => {
-                            bot.channels.get(channels[channelid].id).sendMessage("[" + channels[mainserver].name + "] " + message);
+                            bot.channels.get(channels[channelid].id).sendMessage(message);
                         });
                     }
                 } else if (message == "[ANNOUNCEMENT] Server has stopped!") {
@@ -355,7 +355,7 @@ process.stdin.on('readable', () => {
                     let forces = channels[channelid].forces;
                     for (let i = 0; i < forces.length; i++) {
                         channelid = forces[i];
-                        let message_sent = bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + input.substring(separator + 1));
+                        let message_sent = bot.channels.get(channels[channelid].id).sendMessage(input.substring(separator + 1));
                         message_sent.then((message) => {
                             bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
                         });
@@ -368,25 +368,28 @@ process.stdin.on('readable', () => {
                     let force_name = pvplists[channelid][username];
                     let pvp_channelid = channelid + "-" + force_name;
                     if (channels[pvp_channelid]) {
-                        bot.channels.get(channels[pvp_channelid].id).sendMessage("[" + channels[pvp_channelid].name + "] " + message);
+                        if (message.charAt(0) == '[') bot.channels.get(channels[pvp_channelid].id).sendMessage(message);
+                        else bot.channels.get(channels[pvp_channelid].id).sendMessage("[" + channels[pvp_channelid].name + "] " + message);
                     }
                 }
             } else {
                 //Server is not PvP, send message normally
-                if (input.substring(separator + 1) == "[ANNOUNCEMENT] Server has started!") {
+                let message = input.substring(separator + 1);
+                if (message == "[ANNOUNCEMENT] Server has started!") {
                     //Open the channel for chat if the server is running
                     let open_server = bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
                     open_server.then(() => {
-                        bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + input.substring(separator + 1));
+                        bot.channels.get(channels[channelid].id).sendMessage(message);
                     });
-                } else if (input.substring(separator + 1) == "[ANNOUNCEMENT] Server has stopped!") {
+                } else if (message == "[ANNOUNCEMENT] Server has stopped!") {
                     //Close the channel for chat if the server is stopped
-                    let message_sent = bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + input.substring(separator + 1));
+                    let message_sent = bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + message);
                     message_sent.then((message) => {
                         bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
                     });
                 } else {
-                    bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + input.substring(separator + 1));
+                    if (message.charAt(0) == '[') bot.channels.get(channels[channelid].id).sendMessage(message);
+                    else bot.channels.get(channels[channelid].id).sendMessage(message);
                 }
             }
         } else return;
