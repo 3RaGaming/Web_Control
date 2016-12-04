@@ -233,7 +233,7 @@ var commandlist = {
             "**::setpvp** *serverid forcename servername* - Only the messages from a specific force (forcename) of a PvP server will be sent to this channel (other arguments same as above)\n\n" +
             "**::unset** - Unsets a channel that was previously registered using ::setserver, ::setchannel, or ::setpvp\n\n" +
             "**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to. " +
-            "All commands following this command are admin commads and must be run in the admin channel that this command registers.\n\n" + 
+            "All commands following this command are admin commands and must be run in the admin channel that this command registers.\n\n" + 
             "**::sendadmin** *[serverid/all] command* - Sends 'command' to 'serverid' as if you were typing directly into the console (/silent-command will automatically be attached to the beginning). " +
             "Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
             "**::adminannounce** *[serverid/all] announcement* - Sends an announcement to 'serverid'. Replace serverid with \"all\" to send to all running servers. Serverid must be registered\n\n" +
