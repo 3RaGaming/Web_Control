@@ -86,7 +86,7 @@ else
         'start')
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
-				echo -e "Attempted Start by $cur_user: Server is already running\n\n" >> $dir_server/screenlog.0 ;
+				echo -e "Attempted Start by $cur_user: Server is already running\r\n" >> $dir_server/screenlog.0 ;
 			elif [ "$check" == "Manage Stopped" ]; then
 				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
 				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M"
@@ -96,7 +96,7 @@ else
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M"
 
-				echo -e "Starting Server. Initiated by $cur_user\n\n" >> $dir_server/screenlog.0 ;
+				echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 				
 				sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
 				
@@ -104,7 +104,7 @@ else
 				if [ "$var_cont" == false ] ; then
 					echo "Cannot start server";
 				else
-					echo -e "Starting Server. Initiated by $cur_user\n\n" >> $dir_server/screenlog.0 ;
+					echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 					if [ -e "$dir_server/screenlog.0" ]; then
 						LASTDATA=$(tail -n 50 $dir_server/screenlog.0)
 						echo "${LASTDATA}" > $dir_server/screenlog.0 ;
@@ -123,7 +123,7 @@ else
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
 				#echo "Server Shutting Down" ;
-				echo -e "Server Shutting Down. Initiated by $cur_user\n\n" >> screenlog.0 ;
+				echo -e "Server Shutting Down. Initiated by $cur_user\r\n" >> screenlog.0 ;
 				sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$stop\n"
 			else
 				echo "Server is already Stopped.";
