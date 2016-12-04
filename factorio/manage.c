@@ -91,8 +91,6 @@ char * log_chat(char * name, char * message) {
 
 	//Strip trailing characters if present
 	if (message[strlen(message) - 1] == '\n') message[strlen(message) - 1] = '\0';
-	if (message[strlen(message) - 1] == ')') message[strlen(message) - 1] = '\0';
-	if (message[strlen(message) - 1] == '"') message[strlen(message) - 1] = '\0';
 
 	//Set up the timestamp
 	//YYYY-MM-DD HH:MM:SS
@@ -107,6 +105,10 @@ char * log_chat(char * name, char * message) {
 	if (strstr(message, "[DISCORD]") != NULL) chat = 0;
 	if (strstr(message, "[WEB]") != NULL) {
 		//If this message comes from the webserver, send it to the bot
+		if (message[strlen(message) - 1] == ')' && message[strlen(message) - 2] == '"') {
+			message[strlen(message) - 1] = '\0';
+			message[strlen(message) - 1] = '\0';
+		}
 		char *bot_message = (char *) malloc((strlen(name) + strlen(message) + 5)*sizeof(char));
 		sprintf(bot_message, "%s$%s\n", name, message);
 		send_threaded_chat("bot", bot_message);
@@ -309,10 +311,10 @@ void * input_monitoring(void * server_ptr) {
 		} else if (strstr(data, " [CHAT] ") != NULL && strstr(data, "[DISCORD]") == NULL) {
 			//Server is sending chat through default chat, relay it to bot
 			//Also includes check to prevent echoing
-			new_data = (char *) malloc(strlen(strstr(data, " [CHAT] ") + strlen(" [CHAT] "))*sizeof(char));
+			new_data = (char *) malloc((strlen(strstr(data, " [CHAT] ") + strlen(" [CHAT] ")) + 4)*sizeof(char));
 			strcpy(new_data, strstr(data, " [CHAT] ") + strlen(" [CHAT] "));
 			log_chat(server->name, new_data);
-			message = (char *) malloc((strlen(server->name) + strlen(data) + 4)*sizeof(char));
+			message = (char *) malloc((strlen(server->name) + strlen(new_data) + 6)*sizeof(char));
 			sprintf(message, "%s$%s\n", server->name, new_data);
 			send_threaded_chat("bot", message);
 			free(message);
@@ -587,7 +589,7 @@ int main() {
 				continue;
 			}
 			fprintf(stdout, "Server %s Started\n", servername);
-			announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has started!") + 1)*sizeof(char));
+			announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has started!") + 3)*sizeof(char));
 			strcpy(announcement, servername);
 			strcat(announcement, "$[ANNOUNCEMENT] Server has started!");
 			send_threaded_chat("bot", announcement);
