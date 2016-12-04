@@ -611,6 +611,25 @@ int main() {
 		} else if (strcmp(new_input, "status") == 0) {
 			//Status command
 			fprintf(stdout, "%s\n", get_server_status(servername));
+		} else if (strcmp(new_input, "force_close") == 0) {
+			//Force close a server
+			//If server is not running
+			if (strcmp(get_server_status(servername), "Server Stopped") == 0) continue;
+			if (strcmp(get_server_status(servername), "Server Does Not Exist") == 0) continue;
+
+			//Get the server to shut down
+			struct ServerData *server = find_server(servername);
+
+			kill(server->pid, SIGKILL); //Send SIGKILL to the server, forcing an immediate shutdown
+
+			fprintf(stdout, "Server %s Stopped\n", servername);
+			currently_running--;
+			announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has stopped!") + 1)*sizeof(char));
+			strcpy(announcement, servername);
+			strcat(announcement, "$[ANNOUNCEMENT] Server has stopped!");
+			send_threaded_chat("bot", announcement);
+			free(announcement);
+			if (currently_running == 0) break;
 		} else {
 			//Chat or in-game command
 			message = (char *) malloc((strlen(new_input) + 4)*sizeof(char));
