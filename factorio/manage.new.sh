@@ -22,7 +22,8 @@ function get_status() {
 	if [ "$firstcheck" ]; then
 		sudo -u www-data screen -S manage -X at 0 stuff "${work}\\\$status\n"
 		secondcheck=$(tail -1 screenlog.0);
-		if [ "$secondcheck"="Server Running\n" ]; then
+        sanitize "$secondcheck"
+		if [ "$clean" == "server_running" ]; then
 			check="Server Running"
 		else
 			check="Server Stopped"

@@ -119,7 +119,7 @@ var commandlist = {
     },
     "setadmin": function (message, command) {
         //Set the admin warning messages to be delivered to this current channel
-        let current = getChannelKey(channels, message.channel.id)
+        let current = getChannelKey(channels, message.channel.id);
         if (current !== null) message.channel.sendMessage("The admin channel is currently already set. This command will overwrite the previous admin channel.\n");
         channels["admin"] = { id: message.channel.id, name: "Admin", type: "admin" };
         fs.unlinkSync("channel_list.json");
@@ -131,7 +131,7 @@ var commandlist = {
             if (channels["admin"].id == message.channel.id) {
                 if (command.length < 3) {
                     message.channel.sendMessage("Correct usage: ::sendadmin [serverid/all] command");
-                    return
+                    return;
                 } 
                 let server = command[1];
                 if (channels[server] || server == "all") {
@@ -151,7 +151,7 @@ var commandlist = {
             if (channels["admin"].id == message.channel.id) {
                 if (command.length < 3) {
                     message.channel.sendMessage("Correct usage: ::adminannounce [serverid/all] announcement");
-                    return
+                    return;
                 }
                 let server = command[1];
                 if (channels[server] || server == "all") {
@@ -171,7 +171,7 @@ var commandlist = {
             if (channels["admin"].id == message.channel.id) {
                 if (command.length != 2) {
                     message.channel.sendMessage("Correct usage: ::registerserver serverid");
-                    return
+                    return;
                 }
                 let serverid = command[1];
                 if (channels[serverid]) {
@@ -192,7 +192,7 @@ var commandlist = {
             if (channels["admin"].id == message.channel.id) {
                 if (command.length != 2) {
                     message.channel.sendMessage("Correct usage: ::unregister serverid");
-                    return
+                    return;
                 }
                 if (!channels[serverid]) {
                     message.channel.sendMessage("This server is not registered!");
@@ -216,7 +216,7 @@ var commandlist = {
             if (channels["admin"].id == message.channel.id) {
                 if (command.length != 2) {
                     message.channel.sendMessage("Correct usage: ::banhammer Factorio_username");
-                    return
+                    return;
                 }
                 let username = command[1];
                 let sendstring = "admin$all$/ban " + username + " 'Speak to us at www.3ragaming.com/Discord to request an appeal'\n";
@@ -439,7 +439,8 @@ bot.on('message', (message) => {
 //Leaves any server that isn't 3Ra
 bot.on('ready', () => {
     bot.user.setGame("3Ra - Factorio");
-    bot.guilds.forEach((guildobj, guildid, collection) => {
+    //bot.guilds.forEach((guildobj, guildid, collection) => {
+    bot.guilds.forEach((guildobj, guildid) => {
         if (guildid != "143772809418637313") guildobj.leave();
     });
     //Set any currently existing PvP servers back up for fresh player lists
@@ -454,6 +455,6 @@ bot.on('guildCreate', (guild) => {
 });
 
 //WARNING: THIS TOKEN IS NOT TO BE SHARED TO THE PUBLIC
-var token = JSON.parse(fs.readFileSync("./token.json", "utf8"))
+var token = JSON.parse(fs.readFileSync("./token.json", "utf8"));
 bot.login(token);
 
