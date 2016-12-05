@@ -91,7 +91,7 @@ var commandlist = {
         let servername = command.slice(3).join(" ");
         channels[pvpid] = { id: message.channel.id, name: servername + "-" + forcename, type: "pvp" };
         message.channel.sendMessage("Messages from force " + forcename + " on server " + serverid + " will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
-        if (!channels[serverid]) channels[serverid] = { id: null, name: servername, type: "pvp-main", forces: [pvpid] };
+        if (!channels[serverid]) { channels[serverid] = { id: null, name: servername, type: "pvp-main", forces: [pvpid] }; }
         else if (channels[serverid].type == "registered") channels[serverid] = { id: null, name: servername, type: "pvp-main", forces: [pvpid] };
         else channels[serverid].forces.push(pvpid);
         if (!pvplists[serverid]) pvplists[serverid] = {};
@@ -121,14 +121,14 @@ var commandlist = {
         //Set the admin warning messages to be delivered to this current channel
         let current = getChannelKey(channels, message.channel.id);
         if (current !== null) message.channel.sendMessage("The admin channel is currently already set. This command will overwrite the previous admin channel.\n");
-        channels["admin"] = { id: message.channel.id, name: "Admin", type: "admin" };
+        channels.admin = { id: message.channel.id, name: "Admin", type: "admin" };
         fs.unlinkSync("channel_list.json");
         fs.writeFileSync("channel_list.json", JSON.stringify(channels));
         message.channel.sendMessage("All Admin warnings and messages will now be sent here.\n");
     },
     "sendadmin": function (message, command) {
-        if (channels["admin"]) {
-            if (channels["admin"].id == message.channel.id) {
+        if (channels.admin) {
+            if (channels.admin.id == message.channel.id) {
                 if (command.length < 3) {
                     message.channel.sendMessage("Correct usage: ::sendadmin [serverid/all] command");
                     return;
@@ -147,8 +147,8 @@ var commandlist = {
         message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
     },
     "adminannounce": function (message, command) {
-        if (channels["admin"]) {
-            if (channels["admin"].id == message.channel.id) {
+        if (channels.admin) {
+            if (channels.admin.id == message.channel.id) {
                 if (command.length < 3) {
                     message.channel.sendMessage("Correct usage: ::adminannounce [serverid/all] announcement");
                     return;
@@ -167,8 +167,8 @@ var commandlist = {
         message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
     },
     "registerserver": function (message, command) {
-        if (channels["admin"]) {
-            if (channels["admin"].id == message.channel.id) {
+        if (channels.admin) {
+            if (channels.admin.id == message.channel.id) {
                 if (command.length != 2) {
                     message.channel.sendMessage("Correct usage: ::registerserver serverid");
                     return;
@@ -188,8 +188,8 @@ var commandlist = {
         message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
     },
     "unregister": function (message, command) {
-        if (channels["admin"]) {
-            if (channels["admin"].id == message.channel.id) {
+        if (channels.admin) {
+            if (channels.admin.id == message.channel.id) {
                 if (command.length != 2) {
                     message.channel.sendMessage("Correct usage: ::unregister serverid");
                     return;
@@ -212,8 +212,8 @@ var commandlist = {
         message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
     },
     "banhammer": function (message, command) {
-        if (channels["admin"]) {
-            if (channels["admin"].id == message.channel.id) {
+        if (channels.admin) {
+            if (channels.admin.id == message.channel.id) {
                 if (command.length != 2) {
                     message.channel.sendMessage("Correct usage: ::banhammer Factorio_username");
                     return;
@@ -296,7 +296,7 @@ process.stdin.on('readable', () => {
             channelid = new_input.substring(0, separator);
             let channelname = channels[channelid].name;
             let message = new_input.substring(separator + 1);
-            bot.channels.get(channels["admin"].id).sendMessage(
+            bot.channels.get(channels.admin.id).sendMessage(
                 tag + "\n" +
                 "**Admin Warning System was set off!**\n" +
                 "Server ID: " + channelid + "\n" +
