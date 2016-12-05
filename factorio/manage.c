@@ -255,7 +255,7 @@ void * input_monitoring(void * server_ptr) {
 					//Bot is sending a command or announcement to a server
 					separator_index = strchr(new_data, '$') - new_data;
 					new_data[separator_index] = '\0';
-					actual_server_name = (char *) malloc(strlen(new_data));
+					actual_server_name = (char *) malloc(strlen(new_data)+2);
 					strcpy(actual_server_name, new_data);
 					command = (char *) malloc((strlen(new_data + separator_index + 1) + 4)*sizeof(char));
 					strcpy(command, new_data + separator_index + 1);
@@ -281,7 +281,7 @@ void * input_monitoring(void * server_ptr) {
 					//Bot is sending chat to a PvP server through default chat
 					separator_index = strchr(new_data, '$') - new_data;
 					new_data[separator_index] = '\0';
-					actual_server_name = (char *) malloc(strlen(new_data));
+					actual_server_name = (char *) malloc((strlen(new_data) + 2)*sizeof(char));
 					strcpy(actual_server_name, new_data);
 					force_name = (char *) malloc((strlen(new_data + separator_index + 1) + 3)*sizeof(char));
 					strcpy(force_name, new_data + separator_index + 1);
@@ -296,6 +296,7 @@ void * input_monitoring(void * server_ptr) {
 					message = (char *) malloc((strlen("/silent-command game.forces[''].print('')") + strlen(force_name) + strlen(message_to_send) + 4)*sizeof(char));
 					sprintf(message, "/silent-command game.forces['%s'].print('%s')\n", force_name, message_to_send);
 					send_threaded_chat(actual_server_name, message);
+					free(actual_server_name);
 					free(message);
 					free(message_to_send);
 					free(force_name);
@@ -354,7 +355,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		// "/var/www/factorio/name/screenlog.0"
 		logfile = (char *) malloc((strlen(logpath) + strlen("/screenlog.0") + 2)*sizeof(char));
 		strcpy(logfile, logpath);
-		strcat(logfile, "/screenlog.0\0");
+		strcat(logfile, "/screenlog.0");
 	} else {
 		logfile = "bot";
 	}
@@ -365,7 +366,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		// "/var/www/factorio/name/chatlog.0"
 		chatlog = (char *) malloc((strlen(logpath) + strlen("/chatlog.0") + 2)*sizeof(char));
 		strcpy(chatlog, logpath);
-		strcat(chatlog, "/chatlog.0\0");
+		strcat(chatlog, "/chatlog.0");
 	} else {
 		chatlog = "bot";
 	}
@@ -467,7 +468,7 @@ char * start_server(char * name, char * input) {
 	launchargs[i++] = "-c";
 	launchargs[i] = (char *) malloc((strlen(args[j]) + strlen("/config/config.ini") + 1)*sizeof(char));
 	strcpy(launchargs[i], args[j]);
-	strcat(launchargs[i], "/config/config.ini\0");
+	strcat(launchargs[i], "/config/config.ini");
 	i++;
 	launchargs[i++] = "--server-setting";
 	launchargs[i] = (char *) malloc((strlen(args[j]) + strlen("/server-settings.json") + 1)*sizeof(char));
@@ -501,6 +502,7 @@ char * stop_server(char * name) {
 	close(server->input); //Close input pipe
 	close(server->output); //Close output pipe
 	if (strcmp(server->name, "bot") != 0) free(server->logfile); //Free memory allocated for logfile
+	if (strcmp(server->name, "bot") != 0) free(server->chatlog); //Free memory allocated for chatlog
 	server->status = "Stopped";
 
 	return "Server Stopped";
@@ -572,7 +574,7 @@ int main() {
 		input[separator_index] = '\0';
 		servername = (char *) realloc(servername, (separator_index + 2)*sizeof(char));
 		strcpy(servername, input);
-		new_input = (char *) malloc(strlen(input + separator_index + 1)*sizeof(char));
+		new_input = (char *) malloc((strlen(input + separator_index + 1) + 2)*sizeof(char));
 		strcpy(new_input, input + separator_index + 1);
 		if (strchr(new_input,'\n') != NULL) new_input[strchr(new_input,'\n') - new_input] = '\0';
 
@@ -581,7 +583,7 @@ int main() {
 			//Start command
 			separator_index = strchr(new_input,'$') - new_input;
 			new_input[separator_index] = '\0';
-			server_args = (char *) malloc(strlen(new_input + separator_index + 1)*sizeof(char));
+			server_args = (char *) malloc((strlen(new_input + separator_index + 1) + 2)*sizeof(char));
 			strcpy(server_args, new_input + separator_index + 1);
 			if (strcmp(start_server(servername, server_args), "Server Running") == 0) {
 				fprintf(stdout, "Server %s Already Running\n", servername);
@@ -637,9 +639,10 @@ int main() {
 			//Chat or in-game command
 			message = (char *) malloc((strlen(new_input) + 4)*sizeof(char));
 			strcpy(message, new_input);
-			strcat(message, "\n\0");
+			strcat(message, "\n");
 			send_threaded_chat(servername, message);
 			if (strstr(message, "[WEB]") != NULL) log_chat(servername, strstr(message, "[WEB]"));
+			free(message);
 		}
 		free(new_input);
 	}
