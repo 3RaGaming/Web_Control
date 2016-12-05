@@ -112,6 +112,7 @@ char * log_chat(char * name, char * message) {
 		char *bot_message = (char *) malloc((strlen(name) + strlen(message) + 5)*sizeof(char));
 		sprintf(bot_message, "%s$%s\n", name, message);
 		send_threaded_chat("bot", bot_message);
+        free(bot_message);
 		chat = 0;
 	}
 	if (strstr(message, "[PUPDATE]") != NULL) chat = 0;
