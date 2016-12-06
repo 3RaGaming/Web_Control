@@ -289,16 +289,16 @@ process.stdin.on('readable', () => {
         let channelid = input.substring(0, separator);
         if (channelid == "admin") {
             //Admin Warning System
-            let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
-            let tag = "<@&" + roleid + ">";
+            //let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
+            //let tag = "<@&" + roleid + ">";
             let new_input = input.substring(separator + 1);
             separator = new_input.indexOf("$");
             channelid = new_input.substring(0, separator);
             let channelname = channels[channelid].name;
             let message = new_input.substring(separator + 1);
             bot.channels.get(channels.admin.id).sendMessage(
-                tag + "\n" +
-                "**Admin Warning System was set off!**\n" +
+                //tag + "\n" +
+                //"**Admin Warning System was set off!**\n" +
                 "Server ID: " + channelid + "\n" +
                 "Server Name: " + channelname + "\n" +
                 "Message: " + message
