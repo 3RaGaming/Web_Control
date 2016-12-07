@@ -486,23 +486,23 @@ process.stdin.on('readable', () => {
                 var message;
                 switch (action) {
                     case "join":
-                        message = "[PLAYER JOIN] Player " + player_name + " has joined the server!";
+                        message = "**Player " + player_name + " has joined the server!**";
                         playerlists[channelid][player_name] = { "force": force_name, "status": "alive" };
                         break;
                     case "leave":
-                        message = "[PLAYER LEAVE] Player " + player_name + " has left the server!";
+                        message = "**Player " + player_name + " has left the server!**";
                         delete playerlists[channelid][player_name];
                         break;
                     case "force":
-                        message = "[PLAYER FORCE] Player " + player_name + " has joined force " + force_name + "!";
+                        message = "***Player " + player_name + " has joined force " + force_name + "!***";
                         playerlists[channelid][player_name].force = force_name;
                         break;
                     case "die":
-                        message = "[PLAYER DIED] Player " + player_name + " was killed!";
+                        message = "**Player " + player_name + " was killed!**";
                         playerlists[channelid][player_name].status = "dead";
                         break;
                     case "respawn":
-                        message = "[PLAYER RESPAWN] Player " + player_name + " just respawned!";
+                        message = "**Player " + player_name + " just respawned!**";
                         playerlists[channelid][player_name].status = "alive";
                         break;
                 }
@@ -519,7 +519,7 @@ process.stdin.on('readable', () => {
                 return;
             } else if (channels[channelid].type == "pvp-main") {
                 let message = input.substring(separator + 1);
-                if (message == "[ANNOUNCEMENT] Server has started!") {
+                if (message == "**[ANNOUNCEMENT]** Server has started!") {
                     //Open the channel for chat if the server is running
                     let mainserver = channelid;
                     let forces = channels[channelid].forces;
@@ -533,7 +533,7 @@ process.stdin.on('readable', () => {
                         bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
                     }
                     channels[mainserver].status = "started";
-                } else if (message == "[ANNOUNCEMENT] Server has stopped!") {
+                } else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
                     //Close the channel for chat if the server is stopped
                     let mainserver = channelid;
                     let forces = channels[channelid].forces;
@@ -561,7 +561,7 @@ process.stdin.on('readable', () => {
             } else {
                 //Server is not PvP, send message normally
                 let message = input.substring(separator + 1);
-                if (message == "[ANNOUNCEMENT] Server has started!") {
+                if (message == "**[ANNOUNCEMENT]** Server has started!") {
                     //Open the channel for chat if the server is running
                     let open_server = bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
                     open_server.then(() => {
@@ -569,7 +569,7 @@ process.stdin.on('readable', () => {
                     });
                     channels[channelid].status = "started";
                     bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected.");
-                } else if (message == "[ANNOUNCEMENT] Server has stopped!") {
+                } else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
                     //Close the channel for chat if the server is stopped
                     let message_sent = bot.channels.get(channels[channelid].id).sendMessage(message);
                     message_sent.then((message) => {
