@@ -405,13 +405,13 @@ var safe = true;
 
 //Update channel description with current list of players
 function updateDescription(channelid) {
-    let playerliststring = "Server online. Connected players: ";
+    let playerliststring = "Server online. " + Object.keys(playerlists[serverid]).length + " Connected players: ";
     let serverid;
     let force_name;
     if (channels[channelid].type == "pvp") {
         serverid = channelid.substring(0, channelid.indexOf("-"));
         force_name = channelid.substring(channelid.indexOf("-") + 1);
-        playerliststring = "Server online. Connected players (Force " + force_name + "): ";
+        playerliststring = "Server online. " + Object.keys(playerlists[serverid]).length + " Connected players (Force " + force_name + "): ";
     } else {
         serverid = channelid;
         force_name = null;
@@ -427,7 +427,7 @@ function updateDescription(channelid) {
             playerliststring = playerliststring + playername + ", ";
         }
     }
-    if (playerliststring == ("Server online. Connected players (Force " + force_name + "): ")) {
+    if (playerliststring == ("Server online. " + Object.keys(playerlists[serverid]).length + " Connected players (Force " + force_name + "): ")) {
         bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
         return;
     }
