@@ -14,12 +14,90 @@ try {
     }
 }
 
-//Set up a blank list for PvP Player storage, does not need to persist through restarts
-pvplists = {};
+//Set up a blank list for Player storage, does not need to persist through restarts
+//This will be used to build a current player list
+playerlists = {};
 
-//Create the command list
-//Perhaps export this to a JSON file like the channel list is?
-var commandlist = {
+//The list of public commands
+var publiccommands = {
+    "players": function (message, command) {
+        if (command.length > 2) {
+            message.channel.sendMessage("::players can be used either alone or with a single optional argument (::players [force])");
+            return;
+        }
+        let force_name = null;
+        let current = getChannelKey(channels, message.channel.id);
+        if (current === null || channels[current].type == "chat") {
+            message.channel.sendMessage("This channel is not registered to any server!\n");
+            return;
+        }
+        if (command.length == 2) force_name = command[1];
+        let serverid;
+        if (channels[current].type == "pvp") serverid = current.substring(0, current.indexOf("-"));
+        else serverid = current;
+        if (channels[serverid].status != "started") {
+            message.channel.sendMessage("This server is currently offline.");
+            return;
+        }
+        let playerlist = playerlists[serverid];
+        if (Object.keys(playerlist).length === 0) {
+            message.channel.sendMessage("No players are currently online.");
+            return;
+        }
+        let send_message;
+        if (!force_name) send_message = "Players currently online: \n\n";
+        else send_message = "Players currently online on force *" + force_name + "*:\n\n";
+        for (var playername in playerlist) {
+            if (!force_name || playerlist[playername].force == force_name) {
+                send_message = send_message + "**" + playername + "**   Force: " + playerlist[playername].force + "   Status: " + playerlist[playername].status + "\n";
+            }
+        }
+        if (send_message == ("Players currently online on force *" + force_name + "*:\n\n")) {
+            message.channel.sendMessage("No players are currently online for force *" + force_name + "*");
+            return;
+        }
+        message.channel.sendMessage(send_message);
+    },
+    "listservers": function (message, command) {
+        if (Object.keys(channels).length === 0) {
+            message.channel.sendMessage("No servers are currently registered. This may be a bug, please tag Moderators.");
+            return;
+        }
+        let servers = "List of currently running servers:\n\n";
+        for (var serverid in channels) {
+            let current = channels[serverid];
+            if (current.type == "server" && current.status == "started") {
+                servers = servers + "**" + current.name + "** is currently running. Not PvP. Current players: " + Object.keys(playerlists[serverid]).length + "\n";
+            }
+            if (current.type == "pvp-main" && current.status == "started") {
+                servers = servers + "**" + current.name + "** is currently running. PvP. Current players: " + Object.keys(playerlists[serverid]).length + "\n";
+            }
+        }
+        if (servers == "List of currently running servers:\n\n") {
+            message.channel.sendMessage("No servers are currently running.");
+        } else {
+            message.channel.sendMessage(servers);
+        }
+    },
+    "status": function (message, command) {
+        let registered_servers = 0;
+        for (var serverid in channels) {
+            let current = channels[serverid];
+            if (current.type == "server" || current.type == "pvp-main") registered_servers++;
+        }
+        message.channel.sendMessage("3Ra Factorio Bot is running. There are currently " + registered_servers + " servers registered.");
+    },
+    "help": function (message, command) {
+        message.channel.sendMessage("**::players** *[force]* - Get a list of all currently connected players, must be run in a registered channel. If the optional argument force is provided, it will print players only on that force.\n\n" +
+            "**::listservers** - Get a list of all currently running servers, as well as the amount of players currently connected to each.\n\n" +
+            "**::status** - Have the bot print a message saying that it is running correctly\n\n" + 
+            "**::adminhelp** - Must have the Moderator role, shows commands that require Moderator role to run."
+        );
+    }
+};
+
+//The list of Moderator only commands
+var admincommands = {
     "setserver": function (message, command) {
         if (command.length < 3) {
             message.channel.sendMessage("The setserver command requires 2 arguments. ::setserver serverid servername");
@@ -39,9 +117,14 @@ var commandlist = {
         }
         //Get the name to tag the server as
         let servername = command.slice(2).join(" ");
-        channels[serverid] = { id: message.channel.id, name: servername, type: "server" };
+        channels[serverid] = { id: message.channel.id, name: servername, type: "server", status: "unknown" };
+        let name_changed = message.channel.setName("factorio-" + servername);
+        name_changed.then(() => {
+            message.channel.setTopic("Server registered");
+        });
         fs.unlinkSync("channel_list.json");
         fs.writeFileSync("channel_list.json", JSON.stringify(channels));
+        playerlists[serverid] = {};
         message.channel.sendMessage("Messages from server " + serverid + " will now be sent to this channel with the prefix [" + servername + "].\n");
     },
     "setchannel": function (message, command) {
@@ -89,12 +172,51 @@ var commandlist = {
         }
         //Get the name to tag the server as
         let servername = command.slice(3).join(" ");
-        channels[pvpid] = { id: message.channel.id, name: servername + "-" + forcename, type: "pvp" };
-        message.channel.sendMessage("Messages from force " + forcename + " on server " + serverid + " will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
-        if (!channels[serverid]) { channels[serverid] = { id: null, name: servername, type: "pvp-main", forces: [pvpid] }; }
-        else if (channels[serverid].type == "registered") channels[serverid] = { id: null, name: servername, type: "pvp-main", forces: [pvpid] };
-        else channels[serverid].forces.push(pvpid);
-        if (!pvplists[serverid]) pvplists[serverid] = {};
+        channels[pvpid] = { id: message.channel.id, name: servername + "-" + forcename, type: "pvp", main: serverid };
+        message.channel.sendMessage("Messages from force *" + forcename + "* on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
+        if (!channels[serverid]) { channels[serverid] = { id: null, name: servername, type: "pvp-main", forces: [pvpid], status: "unknown" }; }
+        else if (channels[serverid].type == "registered") channels[serverid] = { id: null, name: servername, type: "pvp-main", forces: [pvpid], status: "unknown" };
+        else {
+            channels[serverid].forces.push(pvpid);
+            if (channels[serverid].name != servername) {
+                message.channel.sendMessage("This server was already registered as a PvP server under a different name. Using the original name. If you wish to change this, use ::changename newname");
+                channels[pvpid].name = channels[serverid].name + "-" + forcename;
+            }
+        }
+        if (!playerlists[serverid]) playerlists[serverid] = {};
+        let name_changed = message.channel.setName("factorio-" + servername + "-" + forcename);
+        name_changed.then(() => {
+            message.channel.setTopic("Server registered");
+        });
+        fs.unlinkSync("channel_list.json");
+        fs.writeFileSync("channel_list.json", JSON.stringify(channels));
+        playerlists[serverid] = {};
+    },
+    "changename": function (message, command) {
+        //Change the name of a server
+        if (command.length != 2) {
+            message.channel.sendMessage("The changename command requires one argument. ::changename newname\n");
+            return;
+        }
+        let newname = command[1];
+        let current = getChannelKey(channels, message.channel.id);
+        if (current === null) {
+            message.channel.sendMessage("This channel is not registered to any server!\n");
+            return;
+        }
+        if (channels[current].type == "pvp") {
+            let oldname = channels[channels[current].main].name;
+            channels[channels[current].main].name = newname;
+            for (let i = 0; i < channels[channels[current].main].forces.length; i++) {
+                let currentserver = channels[channels[current].main].forces[i];
+                channels[currentserver].name = channels[currentserver].name.replace(oldname, newname);
+                bot.channels.get(channels[currentserver].id).setName("factorio-" + channels[currentserver].name);
+            }
+        } else {
+            let oldname = channels[current].name;
+            channels[current].name = channels[current].name.replace(oldname, newname);
+            bot.channels.get(channels[current].id).setName("factorio-" + newname);
+        }
         fs.unlinkSync("channel_list.json");
         fs.writeFileSync("channel_list.json", JSON.stringify(channels));
     },
@@ -106,16 +228,24 @@ var commandlist = {
             return;
         }
         if (channels[remove].type == "pvp") {
-            let main_name = sendto.substring(0, sendto.indexOf("-"));
+            let main_name = remove.substring(0, remove.indexOf("-"));
             let main_channel = channels[main_name];
             main_channel.forces.splice(main_channel.forces.indexOf(remove), 1);
-            if (main_channel.forces.length === 0) delete channels[main_name];
+            if (main_channel.forces.length === 0) {
+                delete channels[main_name];
+                delete playerlists[main_name];
+            }
         }
         //Delete the server registration and update the channel_list.json
         delete channels[remove];
+        if (playerlists[remove]) delete playerlists[remove];
         fs.unlinkSync("channel_list.json");
         fs.writeFileSync("channel_list.json", JSON.stringify(channels));
         message.channel.sendMessage("Successfully unregistered.\n");
+        let name_changed = message.channel.setName("factorio-unset");
+        name_changed.then(() => {
+            message.channel.setTopic("::unset was used here");
+        });
     },
     "setadmin": function (message, command) {
         //Set the admin warning messages to be delivered to this current channel
@@ -227,10 +357,11 @@ var commandlist = {
         }
         message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
     },
-    "help": function (message, command) {
+    "adminhelp": function (message, command) {
         message.channel.sendMessage("**::setserver** *serverid servername* - Any messages internally tagged with serverid will be sent to the channel this command is run in, prefixed with '[servername]'\n\n" +
             "**::setchannel** *channelid channelname* - Same as above, but using chat channels (coded by Articulating) rather than servers\n\n" +
             "**::setpvp** *serverid forcename servername* - Only the messages from a specific force (forcename) of a PvP server will be sent to this channel (other arguments same as above)\n\n" +
+            "**::changename** *newname* - Change the registered name of a server, must be done in the channel you wish to change. If done to a PvP channel, it will change the name of all PvP channels connected to the same server\n\n" +
             "**::unset** - Unsets a channel that was previously registered using ::setserver, ::setchannel, or ::setpvp\n\n" +
             "**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to. " +
             "All commands following this command are admin commands and must be run in the admin channel that this command registers.\n\n" + 
@@ -239,7 +370,8 @@ var commandlist = {
             "**::adminannounce** *[serverid/all] announcement* - Sends an announcement to 'serverid'. Replace serverid with \"all\" to send to all running servers. Serverid must be registered\n\n" +
             "**::registerserver** *serverid* - Register a server for use, but do not attach a Discord channel to it. (Allows ::sendadmin and ::adminanounce to work)\n\n" +
             "**::unregister** *serverid* - Unregister a server registered with ::registerserver.\n\n" +
-            "**::banhammer** *Factorio_username* - Bans a player from all running servers at once");
+            "**::banhammer** *Factorio_username* - Bans a player from all running servers at once"
+        );
     }
 };
 
@@ -271,6 +403,37 @@ function safeWrite(sendstring) {
 }
 var safe = true;
 
+//Update channel description with current list of players
+function updateDescription(channelid) {
+    let playerliststring = "Server online. Connected players: ";
+    let serverid;
+    let force_name;
+    if (channels[channelid].type == "pvp") {
+        serverid = channelid.substring(0, channelid.indexOf("-"));
+        force_name = channelid.substring(channelid.indexOf("-") + 1);
+        playerliststring = "Server online. Connected players (Force " + force_name + "): ";
+    } else {
+        serverid = channelid;
+        force_name = null;
+    }
+    let playerlist = playerlists[serverid];
+    if (Object.keys(playerlist).length === 0) {
+        if (!force_name) bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected");
+        else bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
+        return;
+    }
+    for (var playername in playerlist) {
+        if (!force_name || playerlist[playername].force == force_name) {
+            playerliststring = playerliststring + playername + ", ";
+        }
+    }
+    if (playerliststring == ("Server online. Connected players (Force " + force_name + "): ")) {
+        bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
+        return;
+    }
+    bot.channels.get(channels[channelid].id).setTopic(playerliststring.substring(0, playerliststring.length - 2));
+}
+
 //Set utf8 encoding for both stdin and stdout
 process.stdin.setEncoding('utf8');
 process.stdout.setDefaultEncoding('utf8');
@@ -289,20 +452,26 @@ process.stdin.on('readable', () => {
         let channelid = input.substring(0, separator);
         if (channelid == "admin") {
             //Admin Warning System
-            //let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
-            //let tag = "<@&" + roleid + ">";
+            if (!channels.admin) return;
+            let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
+            let tag = "<@&" + roleid + ">";
             let new_input = input.substring(separator + 1);
             separator = new_input.indexOf("$");
             channelid = new_input.substring(0, separator);
             let channelname = channels[channelid].name;
             let message = new_input.substring(separator + 1);
             bot.channels.get(channels.admin.id).sendMessage(
-                //tag + "\n" +
-                //"**Admin Warning System was set off!**\n" +
+                tag + "\n" +
+                "**Admin Warning System was set off!**\n" +
                 "Server ID: " + channelid + "\n" +
                 "Server Name: " + channelname + "\n" +
                 "Message: " + message
             );
+        } else if (channelid == "output") {
+            //Requested output from server being returned
+            if (!channels.admin) return;
+            let message = input.substring(separator + 1);
+            bot.channels.get(channels.admin.id).sendMessage("Response: " + message + "\n");
         } else if (channelid == "PLAYER") {
             //Player Update
             let new_input = input.substring(separator + 1);
@@ -310,27 +479,39 @@ process.stdin.on('readable', () => {
             channelid = new_input.substring(0, separator);
             if (channels[channelid]) {
                 let data = new_input.substring(separator + 1).split(","); //Replaces the newline at the end while also splitting the arguments apart
-                let action = data[0]; //Join,Leave,Force (Changed Force)
-                let player_id = data[1]; //Not really relevant, but included in case it may be needed
+                let action = data[0]; //Join,Leave,Force,Die,Respawn
+                let player_id = data[1]; //Not really relevant, but included in case it may be needed sometime in the future
                 let player_name = data[2]; //Player's username
                 let force_name = data[3]; //Name of player's force
-                if (channels[channelid].type == "pvp-main") {
-                    pvplists[channelid][player_name] = force_name; //A simple player_name: force_name dictionary
-                    channelid = channelid + "-" + force_name;
-                    if (!channels[channelid]) return;
-                }
                 var message;
                 switch (action) {
                     case "join":
                         message = "[PLAYER JOIN] Player " + player_name + " has joined the server!";
+                        playerlists[channelid][player_name] = { "force": force_name, "status": "alive" };
                         break;
                     case "leave":
                         message = "[PLAYER LEAVE] Player " + player_name + " has left the server!";
+                        delete playerlists[channelid][player_name];
                         break;
                     case "force":
                         message = "[PLAYER FORCE] Player " + player_name + " has joined force " + force_name + "!";
+                        playerlists[channelid][player_name].force = force_name;
+                        break;
+                    case "die":
+                        message = "[PLAYER DIED] Player " + player_name + " was killed!";
+                        playerlists[channelid][player_name].status = "dead";
+                        break;
+                    case "respawn":
+                        message = "[PLAYER RESPAWN] Player " + player_name + " just respawned!";
+                        playerlists[channelid][player_name].status = "alive";
                         break;
                 }
+                if (channels[channelid].type == "pvp-main") {
+                    if (action != "leave") playerlists[channelid][player_name].force = force_name; //Redundancy, as what force the player is on is only important in PvP
+                    channelid = channelid + "-" + force_name;
+                    if (!channels[channelid]) return;
+                }
+                updateDescription(channelid);
                 bot.channels.get(channels[channelid].id).sendMessage(message);
             }
         } else if (channels[channelid]) {
@@ -348,7 +529,10 @@ process.stdin.on('readable', () => {
                         open_server.then(() => {
                             bot.channels.get(channels[channelid].id).sendMessage(message);
                         });
+                        let force_name = channelid.substring(channelid.indexOf("-") + 1);
+                        bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
                     }
+                    channels[mainserver].status = "started";
                 } else if (message == "[ANNOUNCEMENT] Server has stopped!") {
                     //Close the channel for chat if the server is stopped
                     let mainserver = channelid;
@@ -359,13 +543,15 @@ process.stdin.on('readable', () => {
                         message_sent.then((message) => {
                             bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
                         });
+                        bot.channels.get(channels[channelid].id).setTopic("Server offline");
                     }
+                    channels[mainserver].status = "stopped";
                 } else {
                     //Server is a PvP server, send to correct channel
                     separator = message.indexOf(":");
                     let username = message.substring(0, separator);
                     if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
-                    let force_name = pvplists[channelid][username];
+                    let force_name = playerlists[channelid][username].force;
                     let pvp_channelid = channelid + "-" + force_name;
                     if (channels[pvp_channelid]) {
                         if (message.charAt(0) == '[') bot.channels.get(channels[pvp_channelid].id).sendMessage(message);
@@ -381,15 +567,19 @@ process.stdin.on('readable', () => {
                     open_server.then(() => {
                         bot.channels.get(channels[channelid].id).sendMessage(message);
                     });
+                    channels[channelid].status = "started";
+                    bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected.");
                 } else if (message == "[ANNOUNCEMENT] Server has stopped!") {
                     //Close the channel for chat if the server is stopped
-                    let message_sent = bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + message);
+                    let message_sent = bot.channels.get(channels[channelid].id).sendMessage(message);
                     message_sent.then((message) => {
                         bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
                     });
+                    channels[channelid].status = "stopped";
+                    bot.channels.get(channels[channelid].id).setTopic("Server offline");
                 } else {
                     if (message.charAt(0) == '[') bot.channels.get(channels[channelid].id).sendMessage(message);
-                    else bot.channels.get(channels[channelid].id).sendMessage(message);
+                    else bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + message);
                 }
             }
         } else return;
@@ -407,9 +597,13 @@ bot.on('message', (message) => {
 
     //If message is a command, run the correct command. Else, forward to the proper server (if channel is registered)
     if (message.content.startsWith(prefix)) {
-        if (!message.member.roles.has(message.guild.roles.find("name", "Moderators").id)) return;
         let command = message.cleanContent.substring(2).split(" ");
-        if (commandlist[command[0]]) commandlist[command[0]](message, command);
+        if (publiccommands[command[0]]) {
+            publiccommands[command[0]](message, command);
+            return;
+        }
+        if (!message.member.roles.has(message.guild.roles.find("name", "Moderators").id)) return;
+        if (admincommands[command[0]]) admincommands[command[0]](message, command);
         else return;
     } else {
         //Get an array of servers that match this channel id. End function if array length is 0 (unreigstered channel)
@@ -445,7 +639,7 @@ bot.on('ready', () => {
     });
     //Set any currently existing PvP servers back up for fresh player lists
     for (var key in channels) {
-        if (channels[key].type == "pvp-main") pvplists[key] = {};
+        if (channels[key].type == "pvp-main" || channels[key].type == "server") playerlists[key] = {};
     }
 });
 
@@ -457,4 +651,3 @@ bot.on('guildCreate', (guild) => {
 //WARNING: THIS TOKEN IS NOT TO BE SHARED TO THE PUBLIC
 var token = JSON.parse(fs.readFileSync("./token.json", "utf8"));
 bot.login(token);
-

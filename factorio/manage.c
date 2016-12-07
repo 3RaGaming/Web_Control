@@ -112,7 +112,7 @@ char * log_chat(char * name, char * message) {
 		char *bot_message = (char *) malloc((strlen(name) + strlen(message) + 5)*sizeof(char));
 		sprintf(bot_message, "%s$%s\n", name, message);
 		send_threaded_chat("bot", bot_message);
-        free(bot_message);
+		free(bot_message);
 		chat = 0;
 	}
 	if (strstr(message, "[PUPDATE]") != NULL) chat = 0;
@@ -167,7 +167,7 @@ void * input_monitoring(void * server_ptr) {
 	struct ServerData *server = (struct ServerData *) server_ptr;
 	int separator_index;
 	char *servername = (char *) malloc(sizeof(char));
-	char *data = (char *) malloc(1000*sizeof(char));
+	char *data = (char *) malloc(2001*sizeof(char));
 	FILE *input = fdopen(server->output, "r"); //Begin monitoring the pipe
 	FILE *logfile;
 	if (strcmp(server->name, "bot") != 0) {
@@ -175,7 +175,7 @@ void * input_monitoring(void * server_ptr) {
 		logfile = fopen(server->logfile, "a");
 	}
 	while (1) {
-		if (fgets(data, 1000, input) == NULL || data[0] == '\n') {
+		if (fgets(data, 2001, input) == NULL || data[0] == '\n') {
 			//This should only get called when the server shuts down
 			break;
 		}
@@ -226,7 +226,7 @@ void * input_monitoring(void * server_ptr) {
 
 				i = 0;
 				player_args = (char **) malloc(5*sizeof(char *));
-				player_announcement = (char *) malloc((strlen(new_data) + 50)*sizeof(char));
+				player_announcement = (char *) malloc((strlen(new_data) + 75)*sizeof(char));
 
 				token = strtok(new_data, delim);
 				player_args[i++] = token;
@@ -239,8 +239,17 @@ void * input_monitoring(void * server_ptr) {
 					sprintf(player_announcement, "[PUPDATE] %s has joined the server [%s]", player_args[2], player_args[3]);
 				} else if (strcmp(player_args[0], "leave") == 0) {
 					sprintf(player_announcement, "[PUPDATE] %s has left the server [%s]", player_args[2], player_args[3]);
-				} else {
+				} else if (strcmp(player_args[0], "force") == 0) {
 					sprintf(player_announcement, "[PUPDATE] %s has changed forces to %s", player_args[2], player_args[3]);
+				} else if (strcmp(player_args[0], "die") == 0) {
+					sprintf(player_announcement, "[PUPDATE] %s was killed [%s]", player_args[2], player_args[3]);
+				} else if (strcmp(player_args[0], "respawn") == 0) {
+					sprintf(player_announcement, "[PUPDATE] %s has respawned [%s]", player_args[2], player_args[3]);
+				} else {
+					free(player_args);
+					free(player_announcement);
+					free(message);
+					continue;
 				}
 
 				log_chat(server->name, player_announcement);
@@ -255,7 +264,7 @@ void * input_monitoring(void * server_ptr) {
 					//Bot is sending a command or announcement to a server
 					separator_index = strchr(new_data, '$') - new_data;
 					new_data[separator_index] = '\0';
-					actual_server_name = (char *) malloc(strlen(new_data)+2);
+					actual_server_name = (char *) malloc((strlen(new_data)+3)*sizeof(char));
 					strcpy(actual_server_name, new_data);
 					command = (char *) malloc((strlen(new_data + separator_index + 1) + 4)*sizeof(char));
 					strcpy(command, new_data + separator_index + 1);
@@ -271,12 +280,17 @@ void * input_monitoring(void * server_ptr) {
 					free(command);
 				} else {
 					//Admin Warning System is being sent back to the bot
-					message = (char *) malloc((strlen("admin$") + strlen(server->name) + strlen("$") + strlen(new_data) + 5)*sizeof(char));
+					message = (char *) malloc((strlen("admin$") + strlen(server->name) + strlen(new_data) + 6)*sizeof(char));
 					sprintf(message, "admin$%s$%s\n", server->name, new_data);
 					send_threaded_chat("bot", message);
 					free(message);
 				}
-			} else if (strcmp(server->name, "bot") == 0){
+			} else if (strcmp(servername, "output") == 0) {
+				message = (char *) malloc((strlen("output$") + strlen(new_data) + 5)*sizeof(char));
+				sprintf(message, "output$%s\n" new_data);
+				send_threaded_chat("bot", message);
+				free(message);
+			} else if (strcmp(server->name, bot") == 0){
 				if (strcmp(servername, "PVP") == 0) {
 					//Bot is sending chat to a PvP server through default chat
 					separator_index = strchr(new_data, '$') - new_data;
