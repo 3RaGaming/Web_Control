@@ -65,15 +65,13 @@ var publiccommands = {
         }
         let servers = "List of currently running servers:\n\n";
         for (var serverid in channels) {
-			if(channels.hasOwnProperty(serverid)) {
-				let current = channels[serverid];
-				if (current.type == "server" && current.status == "started") {
-					servers = servers + "**" + current.name + "** is currently running. Not PvP. " + Object.keys(playerlists[serverid]).length + " Players online\n";
-				}
-				if (current.type == "pvp-main" && current.status == "started") {
-					servers = servers + "**" + current.name + "** is currently running. PvP. Current players: " + Object.keys(playerlists[serverid]).length + " Players online\n";
-				}
-			}
+            let current = channels[serverid];
+            if (current.type == "server" && current.status == "started") {
+                servers = servers + "**" + current.name + "** is currently running. Not PvP. Current players: " + Object.keys(playerlists[serverid]).length + "\n";
+            }
+            if (current.type == "pvp-main" && current.status == "started") {
+                servers = servers + "**" + current.name + "** is currently running. PvP. Current players: " + Object.keys(playerlists[serverid]).length + "\n";
+            }
         }
         if (servers == "List of currently running servers:\n\n") {
             message.channel.sendMessage("No servers are currently running.");
@@ -84,10 +82,8 @@ var publiccommands = {
     "status": function (message, command) {
         let registered_servers = 0;
         for (var serverid in channels) {
-			if(channels.hasOwnProperty(serverid)) {
-				let current = channels[serverid];
-				if (current.type == "server" || current.type == "pvp-main") registered_servers++;
-			}
+            let current = channels[serverid];
+            if (current.type == "server" || current.type == "pvp-main") registered_servers++;
         }
         message.channel.sendMessage("3Ra Factorio Bot is running. There are currently " + registered_servers + " servers registered.");
     },
@@ -409,17 +405,16 @@ var safe = true;
 
 //Update channel description with current list of players
 function updateDescription(channelid) {
-    var playerliststring;
-	playerlistcount=0;
+    let playerliststring = "Server online. " + Object.keys(playerlists[serverid]).length + " Connected players: ";
     let serverid;
     let force_name;
     if (channels[channelid].type == "pvp") {
         serverid = channelid.substring(0, channelid.indexOf("-"));
         force_name = channelid.substring(channelid.indexOf("-") + 1);
+        playerliststring = "Server online. " + Object.keys(playerlists[serverid]).length + " Connected players (Force " + force_name + "): ";
     } else {
         serverid = channelid;
         force_name = null;
-		playerliststring = "Server online. " + Object.keys(playerlists[serverid]).length + " Connected players: ";
     }
     let playerlist = playerlists[serverid];
     if (Object.keys(playerlist).length === 0) {
@@ -427,18 +422,13 @@ function updateDescription(channelid) {
         else bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
         return;
     }
-	for (var playername in playerlist) {
-		if(playerlist.hasOwnProperty(playername)) {
-			playerliststring = playerliststring + playername + ", ";
-			if (playerlist[playername].force == force_name) {
-				playerlistcount++;
-			}
-		}
-	}
-	if ( playerlistcount > 0 ) {
-		playerliststring = "Server online. " + playerlistcount + " Connected players (Force " + force_name + "): ";
-	} else if(channels[channelid].type == "pvp") {
-        bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + "): ");
+    for (var playername in playerlist) {
+        if (!force_name || playerlist[playername].force == force_name) {
+            playerliststring = playerliststring + playername + ", ";
+        }
+    }
+    if (playerliststring == ("Server online. " + Object.keys(playerlists[serverid]).length + " Connected players (Force " + force_name + "): ")) {
+        bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
         return;
     }
     bot.channels.get(channels[channelid].id).setTopic(playerliststring.substring(0, playerliststring.length - 2));
