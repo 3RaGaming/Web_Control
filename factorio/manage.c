@@ -287,10 +287,10 @@ void * input_monitoring(void * server_ptr) {
 				}
 			} else if (strcmp(servername, "output") == 0) {
 				message = (char *) malloc((strlen("output$") + strlen(new_data) + 5)*sizeof(char));
-				sprintf(message, "output$%s\n" new_data);
+				sprintf(message, "output$%s\n", new_data);
 				send_threaded_chat("bot", message);
 				free(message);
-			} else if (strcmp(server->name, bot") == 0){
+			} else if (strcmp(server->name, "bot") == 0){
 				if (strcmp(servername, "PVP") == 0) {
 					//Bot is sending chat to a PvP server through default chat
 					separator_index = strchr(new_data, '$') - new_data;
