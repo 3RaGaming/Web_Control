@@ -410,7 +410,7 @@ var safe = true;
 //Update channel description with current list of players
 function updateDescription(channelid) {
     var playerliststring;
-	var playerlistcount = 0;
+	playerlistcount=0;
     let serverid;
     let force_name;
     if (channels[channelid].type == "pvp") {
