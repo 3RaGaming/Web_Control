@@ -443,7 +443,6 @@ process.stdin.on('readable', () => {
     let input = process.stdin.read();
 
     if (input !== null) {
-        bot.channels.get(channels.admin.id).sendMessage("DEBUG: " + input + "\n");
         //Removes various invisible characters that would mess with the program
         if (input.indexOf("\r\n") != -1) input = input.substring(0, input.length - 2); //For testing on Windows, removes the \r\n that Windows adds with the Enter key
         if (input.indexOf("\n") != -1) input = input.substring(0, input.length - 1); //For testing on Linux, removes the \n that Linux adds with the Enter key
