@@ -527,9 +527,9 @@ void stop_all_servers() {
 	for (int i = 1; i < servers; i++) {
 		stop_server(server_list[i]->name);
 		fprintf(stdout, "Server %s Shutdown\n", server_list[i]->name);
-		char *announcement = malloc((strlen(server_list[i]->name) + strlen("$[ANNOUNCEMENT] Server has stopped!") + 1)*sizeof(char));
+		char *announcement = malloc((strlen(server_list[i]->name) + strlen("$**[ANNOUNCEMENT]** Server has stopped!") + 4)*sizeof(char));
 		strcpy(announcement, server_list[i]->name);
-		strcat(announcement, "$[ANNOUNCEMENT] Server has stopped!");
+		strcat(announcement, "$**[ANNOUNCEMENT]** Server has stopped!");
 		send_threaded_chat("bot", announcement);
 		free(announcement);
 	}
@@ -606,9 +606,9 @@ int main() {
 				continue;
 			}
 			fprintf(stdout, "Server %s Started\n", servername);
-			announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has started!") + 3)*sizeof(char));
+			announcement = malloc((strlen(servername) + strlen("$**[ANNOUNCEMENT]** Server has started!") + 3)*sizeof(char));
 			strcpy(announcement, servername);
-			strcat(announcement, "$[ANNOUNCEMENT] Server has started!");
+			strcat(announcement, "$**[ANNOUNCEMENT]** Server has started!");
 			send_threaded_chat("bot", announcement);
 			free(announcement);
 			free(server_args);
@@ -621,9 +621,9 @@ int main() {
 			}
 			fprintf(stdout, "Server %s Stopped\n", servername);
 			currently_running--;
-			announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has stopped!") + 1)*sizeof(char));
+			announcement = malloc((strlen(servername) + strlen("$**[ANNOUNCEMENT]** Server has stopped!") + 1)*sizeof(char));
 			strcpy(announcement, servername);
-			strcat(announcement, "$[ANNOUNCEMENT] Server has stopped!");
+			strcat(announcement, "$**[ANNOUNCEMENT]** Server has stopped!");
 			send_threaded_chat("bot", announcement);
 			free(announcement);
 			if (currently_running == 0) break;
@@ -643,9 +643,9 @@ int main() {
 
 			fprintf(stdout, "Server %s Stopped\n", servername);
 			currently_running--;
-			announcement = malloc((strlen(servername) + strlen("$[ANNOUNCEMENT] Server has stopped!") + 1)*sizeof(char));
+			announcement = malloc((strlen(servername) + strlen("$**[ANNOUNCEMENT]** Server has stopped!") + 1)*sizeof(char));
 			strcpy(announcement, servername);
-			strcat(announcement, "$[ANNOUNCEMENT] Server has stopped!");
+			strcat(announcement, "$**[ANNOUNCEMENT]** Server has stopped!");
 			send_threaded_chat("bot", announcement);
 			free(announcement);
 			if (currently_running == 0) break;

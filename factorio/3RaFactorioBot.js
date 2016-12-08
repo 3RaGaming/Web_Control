@@ -405,18 +405,20 @@ var safe = true;
 
 //Update channel description with current list of players
 function updateDescription(channelid) {
-    let playerliststring = "Server online. " + Object.keys(playerlists[serverid]).length + " Connected players: ";
+    var playerliststring;
     let serverid;
     let force_name;
     if (channels[channelid].type == "pvp") {
         serverid = channelid.substring(0, channelid.indexOf("-"));
         force_name = channelid.substring(channelid.indexOf("-") + 1);
-        playerliststring = "Server online. " + Object.keys(playerlists[serverid]).length + " Connected players (Force " + force_name + "): ";
+        playerliststring = "Server online. ## Connected players (Force " + force_name + "): ";
     } else {
         serverid = channelid;
         force_name = null;
+        playerliststring = "Server online. ## Connected players: ";
     }
     let playerlist = playerlists[serverid];
+    var playerlistcount = 0;
     if (Object.keys(playerlist).length === 0) {
         if (!force_name) bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected");
         else bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
@@ -425,13 +427,16 @@ function updateDescription(channelid) {
     for (var playername in playerlist) {
         if (!force_name || playerlist[playername].force == force_name) {
             playerliststring = playerliststring + playername + ", ";
+            playerlistcount++;
         }
     }
-    if (playerliststring == ("Server online. " + Object.keys(playerlists[serverid]).length + " Connected players (Force " + force_name + "): ")) {
+    if (playerlistcount === 0) {
         bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
         return;
     }
-    bot.channels.get(channels[channelid].id).setTopic(playerliststring.substring(0, playerliststring.length - 2));
+    let preparestring = playerliststring.substring(0, playerliststring.length - 2)
+    let finalstring = preparestring.replace("##", playerlistcount);
+    bot.channels.get(channels[channelid].id).setTopic(finalstring);
 }
 
 //Set utf8 encoding for both stdin and stdout
@@ -524,13 +529,14 @@ process.stdin.on('readable', () => {
                     let mainserver = channelid;
                     let forces = channels[channelid].forces;
                     for (let i = 0; i < forces.length; i++) {
-                        channelid = forces[i];
-                        let open_server = bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
+                        let insideid = forces[i];
+                        let open_server = bot.channels.get(channels[insideid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
                         open_server.then(() => {
-                            bot.channels.get(channels[channelid].id).sendMessage(message);
+                            console.log(i + insideid);
+                            bot.channels.get(channels[insideid].id).sendMessage(message);
                         });
-                        let force_name = channelid.substring(channelid.indexOf("-") + 1);
-                        bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
+                        let force_name = insideid.substring(insideid.indexOf("-") + 1);
+                        bot.channels.get(channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
                     }
                     channels[mainserver].status = "started";
                 } else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
@@ -538,12 +544,12 @@ process.stdin.on('readable', () => {
                     let mainserver = channelid;
                     let forces = channels[channelid].forces;
                     for (let i = 0; i < forces.length; i++) {
-                        channelid = forces[i];
-                        let message_sent = bot.channels.get(channels[channelid].id).sendMessage(input.substring(separator + 1));
+                        let insideid = forces[i];
+                        let message_sent = bot.channels.get(channels[insideid].id).sendMessage(input.substring(separator + 1));
                         message_sent.then((message) => {
-                            bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
+                            message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
                         });
-                        bot.channels.get(channels[channelid].id).setTopic("Server offline");
+                        bot.channels.get(channels[insideid].id).setTopic("Server offline");
                     }
                     channels[mainserver].status = "stopped";
                 } else {
@@ -632,7 +638,7 @@ bot.on('message', (message) => {
 
 //Leaves any server that isn't 3Ra
 bot.on('ready', () => {
-    bot.user.setGame("3Ra - Factorio");
+    bot.user.setGame("3Ra - Factorio | ::help");
     //bot.guilds.forEach((guildobj, guildid, collection) => {
     bot.guilds.forEach((guildobj, guildid) => {
         if (guildid != "143772809418637313") guildobj.leave();
