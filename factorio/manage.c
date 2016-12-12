@@ -38,6 +38,20 @@ pthread_t *thread_list;
 pthread_attr_t thread_attr;
 int servers;
 int currently_running;
+int bot_ready;
+
+//Function declarations
+struct ServerData *find_server(char *);
+char * send_threaded_chat(char *, char *);
+char * log_chat(char *, char *);
+char * get_server_status(char *);
+void * input_monitoring(void *);
+char * launch_server(char *, char **, char *);
+char * start_server(char *, char *);
+char * stop_server(char *);
+void stop_all_servers();
+void launch_bot();
+void server_crashed(struct ServerData *);
 
 //Find server with given name
 struct ServerData * find_server(char * name) {
@@ -66,10 +80,16 @@ char * send_threaded_chat(char * name, char * message) {
 	//Attempt to lock the mutex - If another thread is currently writing to this place, the code will wait here
 	pthread_mutex_lock(&sendto->mutex);
 
-	//Write data
+	//In case of crashes
+	if (strcmp(sendto->status, "Stopped") == 0) return "Server Crashed";
+
+	//Write data, with added error checking for crash detection
 	FILE *output = fdopen(dup(sendto->input), "a");
 	fputs(message, output);
-	fclose(output);
+	if (fclose(output) == EOF && errno == EPIPE) {
+		server_crashed(sendto);
+		return "Failed";
+	}
 
 	//Unlock the mutex so that another thread can send data to this server
 	pthread_mutex_unlock(&sendto->mutex);
@@ -118,6 +138,7 @@ char * log_chat(char * name, char * message) {
 	if (strstr(message, "[PUPDATE]") != NULL) chat = 0;
 	if (chat == 1) sprintf(output_message, "%s [CHAT] %s\r\n", timestamp, message);
 	else sprintf(output_message, "%s %s\r\n", timestamp, message);
+	free(timestamp);
 
 	//Attempt to lock the mutex - If another thread is currently writing to this place, the code will wait here
 	pthread_mutex_lock(&sendto->chat_mutex);
@@ -131,7 +152,6 @@ char * log_chat(char * name, char * message) {
 	pthread_mutex_unlock(&sendto->chat_mutex);
 
 	//Free memory
-	free(timestamp);
 	free(output_message);
 
 	return "Successful";
@@ -180,7 +200,7 @@ void * input_monitoring(void * server_ptr) {
 			break;
 		}
 
-		if (strcmp(server->name, "bot") != 0 && strstr(data, " [CHAT] ") == NULL) {
+		if (strcmp(server->name, "bot") != 0 && strstr(data, " [CHAT] ") == NULL && strstr(data, " (shout):") == NULL) {
 			output = (char *) malloc((strlen(data) + 5)*sizeof(char));
 			sprintf(output, "%s\r\n", data);
 			fputs(output, logfile);
@@ -188,7 +208,7 @@ void * input_monitoring(void * server_ptr) {
 			free(output);
 		}
 
-		if (strchr(data,'$') != NULL && strstr(data, " [CHAT] ") == NULL) {
+		if (strchr(data,'$') != NULL && strstr(data, " [CHAT] ") == NULL && strstr(data, " (shout):") == NULL) {
 			//Handles the rare occasion a chat message will have a '$' inside it
 			separator_index = strchr(data,'$') - data;
 			data[separator_index] = '\0';
@@ -197,7 +217,19 @@ void * input_monitoring(void * server_ptr) {
 			new_data = (char *) malloc((strlen(data + separator_index + 1) + 3)*sizeof(char));
 			strcpy(new_data, data + separator_index + 1);
 			if (strchr(new_data,'\n') != NULL) new_data[strchr(new_data,'\n') - new_data] = '\0';
-			if (strcmp(servername, "DEBUG") == 0) {
+			if (strcmp(servername, "restart") == 0 && strcmp(server->name, "bot") == 0) {
+				//Bot wants to restart
+				pthread_mutex_lock(&server->mutex); //Lock the mutex to prevent the bot from being used before it's ready
+				bot_ready = 0;
+				fclose(input);
+				close(server->input);
+				launch_bot();
+				input = fdopen(server->output, "a");
+				pthread_mutex_lock(&server->mutex);
+			} else if (strcmp(servername, "ready") == 0 && strcmp(server->name, "bot") == 0) {
+				//Bot startup is complete, it is ready to continue
+				bot_ready = 1;
+			}  else if (strcmp(servername, "DEBUG") == 0) {
 				//Handle debug messages
 				fprintf(stderr, "%s\n", new_data);
 			} else if (strcmp(servername, "chat") == 0) {
@@ -335,6 +367,12 @@ void * input_monitoring(void * server_ptr) {
 			send_threaded_chat("bot", message);
 			free(message);
 			free(new_data);
+		} else if (strstr(data, " (shout):") != NULL && strstr(data, "[DISCORD]") == NULL) {
+			log_chat(server->name, data);
+			message = (char *) malloc((strlen(server->name) + strlen(data) + 6)*sizeof(char));
+			sprintf(message, "%s$%s\n", server->name, data);
+			send_threaded_chat("bot", message);
+			free(message);
 		}
 	}
 	//After server is closed, free memory and close file streams
@@ -445,6 +483,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		server->output = out_pipe[0];
 		server->status = "Started";
 		server->logfile = logfile;
+		server->chatlog = chatlog;
 		pthread_create(&thread_list[server->serverid], &thread_attr, input_monitoring, (void *) server_list[server->serverid]);
 
 		return "Old Server Restarted";
@@ -527,7 +566,7 @@ void stop_all_servers() {
 	for (int i = 1; i < servers; i++) {
 		stop_server(server_list[i]->name);
 		fprintf(stdout, "Server %s Shutdown\n", server_list[i]->name);
-		char *announcement = malloc((strlen(server_list[i]->name) + strlen("$**[ANNOUNCEMENT]** Server has stopped!") + 4)*sizeof(char));
+		char *announcement = malloc((strlen(server_list[i]->name) + strlen("$**[ANNOUNCEMENT]** Server has stopped!") + 1)*sizeof(char));
 		strcpy(announcement, server_list[i]->name);
 		strcat(announcement, "$**[ANNOUNCEMENT]** Server has stopped!");
 		send_threaded_chat("bot", announcement);
@@ -545,6 +584,74 @@ void stop_all_servers() {
 	exit(0);
 }
 
+void launch_bot() {
+	char **botargs = (char **) malloc(3*sizeof(char *));
+	botargs[0] = "nodejs\0";
+	botargs[1] = "./3RaFactorioBot.js\0";
+	botargs[2] = (char *) NULL;
+	launch_server("bot", botargs, "bot");
+	free(botargs);
+
+	while (bot_ready == 0) {
+		//Wait for the bot to reply that it's ready.
+		sleep(1);
+	}
+}
+
+void server_crashed(struct ServerData * server) {
+	//The server has crashed
+	close(server->input); //Close input pipe
+	close(server->output); //Close output pipe
+	if (strcmp(server->name, "bot") != 0) free(server->logfile); //Free memory allocated for logfile
+	if (strcmp(server->name, "bot") != 0) free(server->chatlog); //Free memory allocated for chatlog
+	server->status = "Stopped";
+
+	if (strcmp(server->name, "bot") == 0) {
+		bot_ready = 0;
+		launch_bot();
+		//Set up the timestamp
+		//YYYY-MM-DD HH:MM:SS
+		time_t current_time = time(NULL);
+		struct tm *time_data = localtime(&current_time);
+		char *timestamp = (char *) malloc((strlen("YYYY-MM-DD HH:MM:SS") + 3) * sizeof(char));
+		sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
+		char *output_message = (char *) malloc((strlen(timestamp) + strlen("emergency$") + 4)*sizeof(char));
+		sprintf(output_message, "emergency$%s\n", timestamp);
+		free(timestamp);
+		FILE *output = fdopen(dup(server->input), "a");
+		fputs(output_message, output);
+		if (fclose(output) == EOF && errno == EPIPE) {
+			fprintf(stderr, "The bot crashed and was unable to be restarted.");
+			exit(1);
+			return;
+		}
+		free(output_message);
+	} else {
+		char *output_message = malloc((strlen("crashreport$") + strlen(server->name) + 5)*sizeof(char));
+		sprintf(output_message, "crashreport$%s\n", server->name);
+		send_threaded_chat("bot", output_message);
+		free(output_message);
+		currently_running--;
+		if (currently_running == 0) {
+			//Shut down the bot, giving it time to finish whatever action it is doing
+			sleep(5);
+			struct ServerData *bot = server_list[0];
+			kill(bot->pid, SIGINT);
+			waitpid(bot->pid, NULL, 0);
+			pthread_join(thread_list[0], NULL);
+			close(bot->input); //Close input pipe
+			close(bot->output); //Close output pipe
+			//Free allocated memory
+			free(server_list);
+			free(thread_list);
+			//Exit with error
+			exit(1);
+		}
+	}
+
+	pthread_mutex_unlock(&server->mutex);
+}
+
 int main() {
 	//Initial setup of variables
 	servers = 0;
@@ -554,21 +661,14 @@ int main() {
 	thread_list = (pthread_t *) malloc(sizeof(pthread_t));
 	int separator_index;
 	currently_running = 0;
+	bot_ready = 0;
 	pthread_attr_init(&thread_attr);
 	pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_JOINABLE);
 
 	if (signal(SIGINT, stop_all_servers) == SIG_ERR) fprintf(stderr, "Failure to ignore interrupt signal.\n");
+	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) fprintf(stderr, "Failure to ignore broken pipe signal.\n");
 
-
-	//Set up the bot
-	char **botargs = (char **) malloc(3*sizeof(char *));
-	botargs[0] = "nodejs\0";
-	botargs[1] = "./3RaFactorioBot.js\0";
-	botargs[2] = (char *) NULL;
-	launch_server("bot", botargs, "bot");
-	fprintf(stdout, "Bot is starting up, please wait\n");
-	sleep(5); //Wait for bot to launch fully before continuing
-	free(botargs);
+	launch_bot();
 
 	//Declare variables used in input parsing
 	char *new_input;

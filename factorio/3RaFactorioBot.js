@@ -520,7 +520,7 @@ process.stdin.on('readable', () => {
 			let tag = "<@&" + roleid + ">";
 			let servername = input.substring(separator + 1);
 			if (!channels[servername]) return;
-			bot.channels.get(channels.admin.id).sendMessage(tag + "Server" + servername + " (" + channels[servername].name + ") has crashed!\n");
+			bot.channels.get(channels.admin.id).sendMessage(tag + " Server " + servername + " (" + channels[servername].name + ") has crashed!\n");
 		} else if (channelid == "admin") {
 			//Admin Warning System
 			if (!channels.admin) return;
