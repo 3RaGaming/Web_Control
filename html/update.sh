@@ -4,7 +4,7 @@ args=("$@");
 if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 	    'count')
-			echo "6"
+			echo "5"
             exit 1
             ;;
 
@@ -40,12 +40,6 @@ if [ "${args[0]}" ]; then
             rm -Rf /tmp/dev-bot-manage.zip /tmp/Web_Control-dev-bot-manage/
             printf "\r\n-----------\r\n\r\n";
             ;;
-	    
-	'6')
-	    printf "Did it work?\r\n"
-	    #kill -SIGKILL 14714 19056 19458 29257 19012 13710 14619 19014
-	    ps -u www-data -o comm,pid,args
-	    ;;
 
         *)
             printf "Error in input provided\r\n"
