@@ -259,9 +259,18 @@ var admincommands = {
 			let main_name = remove.substring(0, remove.indexOf("-"));
 			let main_channel = channels[main_name];
 			main_channel.forces.splice(main_channel.forces.indexOf(remove), 1);
-			if (main_channel.forces.length === 0) {
-				delete channels[main_name];
-				delete playerlists[main_name];
+		} else if (channels[remove].type == "pvp-main") {
+			let forces = channels[remove].forces;
+			for (let i = 0; i < forces.length; i++) {
+				let current = forces[i];
+				let message_sent = bot.channels.get(channels[current].id).sendMessage("Main channel was unregistered.");
+				message_sent.then((sent_message) => {
+					let name_changed = sent_message.channel.setName("factorio-unset");
+					name_changed.then(() => {
+						sent_message.channel.setTopic("::unset was used here");
+					});
+				});
+				delete channels[current];
 			}
 		}
 		//Delete the server registration and update the channel_list.json
@@ -352,6 +361,7 @@ var admincommands = {
 					message.channel.sendMessage("Correct usage: ::unregister serverid");
 					return;
 				}
+				let serverid = command[1];
 				if (!channels[serverid]) {
 					message.channel.sendMessage("This server is not registered!");
 				} else {
@@ -411,9 +421,9 @@ var admincommands = {
 			"**::setpvpmain** *serverid* *servername* - Set the main channel for a PvP server. This command must be run before force specific forces can be registered." +
 			"**::setpvpforce** *serverid forcename* - Only the messages from a specific force (forcename) of a PvP server will be sent to this channel (other arguments same as above). Cannot be used unless ::setpvpmain has been run.\n\n" +
 			"**::changename** *newname* - Change the registered name of a server, must be done in the channel you wish to change. If done to a PvP channel, it will change the name of all PvP channels connected to the same server.\n\n" +
-			"**::unset** - Unsets a channel that was previously registered using ::setserver, ::setchannel, or ::setpvp. Unsetting a single force PvP channel will only unset that channel, but unsetting the main PvP channel will unset all force specific channels.\n\n" +
-			"**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to. " +
-			"All commands following this command are admin commands and must be run in the admin channel that this command registers.\n\n" +
+			"**::unset** - Unsets a channel that was previously registered using ::setserver, ::setchannel, or ::setpvp. Unsetting a single force PvP channel will only unset that channel, but unsetting the main PvP channel will unset all force specific channels.\n\n"
+		);
+		message.channel.sendMessage("**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to.\n\n" +
 			"**::sendadmin** *[serverid/all] command* - Sends 'command' to 'serverid' as if you were typing directly into the console (/silent-command will automatically be attached to the beginning). " +
 			"Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
 			"**::adminannounce** *[serverid/all] announcement* - Sends an announcement to 'serverid'. Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
@@ -520,7 +530,11 @@ process.stdin.on('readable', () => {
 			let tag = "<@&" + roleid + ">";
 			let servername = input.substring(separator + 1);
 			if (!channels[servername]) return;
-			bot.channels.get(channels.admin.id).sendMessage(tag + " Server " + servername + " (" + channels[servername].name + ") has crashed!\n");
+			bot.channels.get(channels.admin.id).sendMessage(tag + " Server *" + servername + "* (" + channels[servername].name + ") has crashed!\n");
+			let message_sent = bot.channels.get(channels[servername].id).sendMessage("**Server crash was detected. Moderators have been notified. Please wait for restart.**");
+			message_sent.then((message) => {
+				message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
+			});
 		} else if (channelid == "admin") {
 			//Admin Warning System
 			if (!channels.admin) return;
