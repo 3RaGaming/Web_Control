@@ -76,12 +76,11 @@ else
 	case "$clean" in
 	    'prestart')
 			get_status "$server"
-			if [ "$check" ]; then 
-				#server is running
-				echo "true" ;
+			if [ "$check" == "Server Running" ]; then 
+				#echo -e "${check}"
+				echo "running" ;
 			else
-				#server is stopped
-				echo "false";
+				echo "stopped";
 			fi
             ;;
         'start')

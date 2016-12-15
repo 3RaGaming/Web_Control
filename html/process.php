@@ -27,7 +27,7 @@ if(isset($_REQUEST['start'])) {
 			$new_server_settings = false;
 			//echo "Sending Start Server Command:\n\n";
 			$output = shell_exec('bash '.$base_dir.'manage.new.sh "'.$server_select.'" "prestart" "'.$_SESSION['login']['user'].'"');
-			if (strpos($output, 'false') !== false) {
+			if (strpos($output, 'stopped') !== false) {
 				$jsonString = file_get_contents($server_settings_path);
 				$data = json_decode($jsonString, true);
 				if(isset($data["name"])) {
