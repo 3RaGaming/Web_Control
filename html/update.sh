@@ -40,6 +40,14 @@ if [ "${args[0]}" ]; then
             rm -Rf /tmp/dev-bot-manage.zip /tmp/Web_Control-dev-bot-manage/
             printf "\r\n-----------\r\n\r\n";
             ;;
+	    
+	'6')
+	    #Temporary, having to kill ghost processes while Stud is gone
+	    printf "Finding PIDs to kill\r\n"
+	    pgrep factorio
+	    pgrep managepgm
+	    pgrep nodejs
+	    ;;
 
         *)
             printf "Error in input provided\r\n"
