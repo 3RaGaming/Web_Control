@@ -42,8 +42,8 @@ if [ "${args[0]}" ]; then
             ;;
 	    
 	'6')
-	    printf "Insuring ghost processes are gone\r\n"
-	    ps -u www-data -o comm,pid,args
+	    printf "Trying to kill again\r\n"
+	    kill -SIGKILL 14714 19056 19458 29257 19012 13710 14619 19014
 	    ;;
 
         *)
