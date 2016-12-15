@@ -4,7 +4,7 @@ args=("$@");
 if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 	    'count')
-			echo "5"
+			echo "6"
             exit 1
             ;;
 
