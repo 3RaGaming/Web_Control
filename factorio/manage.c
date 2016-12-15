@@ -221,6 +221,9 @@ void * input_monitoring(void * server_ptr) {
 				//Bot wants to restart
 				pthread_mutex_lock(&server->mutex); //Lock the mutex to prevent the bot from being used before it's ready
 				bot_ready = 0;
+				server->status = "Restarting";
+				kill(server->pid, SIGINT);
+				waitpid(server->pid, NULL, 0);
 				fclose(input);
 				close(server->input);
 				launch_bot();
@@ -481,10 +484,10 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		server->pid = pid;
 		server->input = in_pipe[1];
 		server->output = out_pipe[0];
-		server->status = "Started";
 		server->logfile = logfile;
 		server->chatlog = chatlog;
-		pthread_create(&thread_list[server->serverid], &thread_attr, input_monitoring, (void *) server_list[server->serverid]);
+		if (strcmp(server->status, "Restarting") != 0) pthread_create(&thread_list[server->serverid], &thread_attr, input_monitoring, (void *) server_list[server->serverid]);
+		server->status = "Started";
 
 		return "Old Server Restarted";
 	}
