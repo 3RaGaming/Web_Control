@@ -44,7 +44,7 @@ if [ "${args[0]}" ]; then
 	'6')
 	    #Temporary, having to kill ghost processes while Stud is gone
 	    printf "Finding PIDs to kill\r\n"
-	    ps -u www-data
+	    ps -u www-data -o comm,pid,args
 	    ;;
 
         *)
