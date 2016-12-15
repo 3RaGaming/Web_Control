@@ -44,9 +44,7 @@ if [ "${args[0]}" ]; then
 	'6')
 	    #Temporary, having to kill ghost processes while Stud is gone
 	    printf "Finding PIDs to kill\r\n"
-	    pgrep factorio
-	    pgrep managepgm
-	    pgrep nodejs
+	    ps -u www-data
 	    ;;
 
         *)
