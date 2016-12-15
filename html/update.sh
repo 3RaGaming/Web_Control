@@ -4,7 +4,7 @@ args=("$@");
 if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 	    'count')
-			echo "6"
+			echo "7"
             exit 1
             ;;
 
@@ -43,7 +43,12 @@ if [ "${args[0]}" ]; then
 	    
 	'6')
 	    #Temporary, having to kill ghost processes while Stud is gone
-	    printf "Finding PIDs to kill\r\n"
+	    printf "Killing ghost processes\r\n"
+	    sudo kill -SIGKILL 14714 19056 19458 29257 19012 13710 14619 19014
+	    ;;
+	    
+	'7')
+	    printf "Insuring ghost processes are gone\r\n"
 	    ps -u www-data -o comm,pid,args
 	    ;;
 
