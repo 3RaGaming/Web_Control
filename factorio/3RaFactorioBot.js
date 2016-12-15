@@ -569,6 +569,7 @@ process.stdin.on('readable', () => {
 				let player_name = data[2]; //Player's username
 				let force_name = data[3]; //Name of player's force
 				var message;
+			
 				switch (action) {
 					case "join":
 						message = "**Player " + player_name + " has joined the server!**";
@@ -580,14 +581,17 @@ process.stdin.on('readable', () => {
 						break;
 					case "force":
 						message = "***Player " + player_name + " has joined force " + force_name + "!***";
+						if (!playerlists[channelid][player_name]) return;
 						playerlists[channelid][player_name].force = force_name;
 						break;
 					case "die":
 						message = "**Player " + player_name + " was killed!**";
+						if (!playerlists[channelid][player_name]) return;
 						playerlists[channelid][player_name].status = "dead";
 						break;
 					case "respawn":
 						message = "**Player " + player_name + " just respawned!**";
+						if (!playerlists[channelid][player_name]) return;
 						playerlists[channelid][player_name].status = "alive";
 						break;
 				}
