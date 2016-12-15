@@ -42,8 +42,9 @@ if [ "${args[0]}" ]; then
             ;;
 	    
 	'6')
-	    printf "Trying to kill again\r\n"
-	    kill -SIGKILL 14714 19056 19458 29257 19012 13710 14619 19014
+	    printf "Did it work?\r\n"
+	    #kill -SIGKILL 14714 19056 19458 29257 19012 13710 14619 19014
+	    ps -u www-data -o comm,pid,args
 	    ;;
 
         *)
