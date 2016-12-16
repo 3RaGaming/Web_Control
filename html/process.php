@@ -5,7 +5,7 @@ if(!isset($_SESSION['login'])) {
 	die();
 } else {
 	$current_user = $_SESSION['login']['user'];
-	if($_SERVER["HTTPS"] != "on")
+	if(isset($_SERVER["HTTPS"]) == false)
 	{
 		die('Must use HTTPS');
 	}

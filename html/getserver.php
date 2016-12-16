@@ -3,7 +3,7 @@ if(!isset($_SESSION)) { session_start(); }
 if(!isset($_SESSION['login'])) {
 	die('Please sign in');
 } else {
-	if($_SERVER["HTTPS"] != "on")
+	if(isset($_SERVER["HTTPS"]) == false)
 	{
 		die('Must use HTTPS');
 	}
