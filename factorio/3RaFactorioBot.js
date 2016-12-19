@@ -657,6 +657,7 @@ process.stdin.on('readable', () => {
 						separator = message.indexOf(":");
 						let username = message.substring(0, separator);
 						if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
+						if (!playerlists[channelid][username]) return;
 						let force_name = playerlists[channelid][username].force;
 						let pvp_channelid = channelid + "-" + force_name;
 						if (channels[pvp_channelid]) {
