@@ -504,194 +504,199 @@ function updateDescription(channelid) {
 process.stdin.setEncoding('utf8');
 process.stdout.setDefaultEncoding('utf8');
 
+function handleInput(input) {
+	//Get the channelid
+	let separator = input.indexOf("$");
+	let channelid = input.substring(0, separator);
+	if (channelid == "emergency") {
+		//Bot crashed, must restart
+		if (!channels.admin) return;
+		let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
+		let tag = "<@&" + roleid + ">";
+		let new_input = input.substring(separator + 1);
+		bot.channels.get(channels.admin.id).sendMessage(tag + " The bot has crashed! The crash was detected and the bot restarted at " + new_input + "\n");
+	} else if (channelid == "crashreport") {
+		//Bot crashed, must restart
+		if (!channels.admin) return;
+		let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
+		let tag = "<@&" + roleid + ">";
+		let servername = input.substring(separator + 1);
+		if (!channels[servername]) return;
+		bot.channels.get(channels.admin.id).sendMessage(tag + " Server *" + servername + "* (" + channels[servername].name + ") has crashed!\n");
+		let message_sent = bot.channels.get(channels[servername].id).sendMessage("**Server crash was detected. Moderators have been notified. Please wait for restart.**");
+		message_sent.then((message) => {
+			message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
+		});
+	} else if (channelid == "admin") {
+		//Admin Warning System
+		if (!channels.admin) return;
+		let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
+		let tag = "<@&" + roleid + ">";
+		let new_input = input.substring(separator + 1);
+		separator = new_input.indexOf("$");
+		channelid = new_input.substring(0, separator);
+		let channelname = channels[channelid].name;
+		let message = new_input.substring(separator + 1);
+		bot.channels.get(channels.admin.id).sendMessage(
+			tag + "\n" +
+			"**Admin Warning System was set off!**\n" +
+			"Server ID: " + channelid + "\n" +
+			"Server Name: " + channelname + "\n" +
+			"Message: " + message
+		);
+	} else if (channelid == "output") {
+		//Requested output from server being returned
+		if (!channels.admin) return;
+		let message = input.substring(separator + 1);
+		bot.channels.get(channels.admin.id).sendMessage("Response: " + message + "\n");
+	} else if (channelid == "PLAYER") {
+		//Player Update
+		let new_input = input.substring(separator + 1);
+		separator = new_input.indexOf("$");
+		channelid = new_input.substring(0, separator);
+		if (channels[channelid]) {
+			let data = new_input.substring(separator + 1).split(","); //Replaces the newline at the end while also splitting the arguments apart
+			let action = data[0]; //Join,Leave,Force,Die,Respawn
+			let player_id = data[1]; //Not really relevant, but included in case it may be needed sometime in the future
+			let player_name = data[2]; //Player's username
+			let force_name = data[3]; //Name of player's force
+			var message;
+
+			switch (action) {
+				case "join":
+					message = "**Player " + player_name + " has joined the server!**";
+					playerlists[channelid][player_name] = { "force": force_name, "status": "alive" };
+					break;
+				case "leave":
+					message = "**Player " + player_name + " has left the server!**";
+					delete playerlists[channelid][player_name];
+					break;
+				case "force":
+					message = "***Player " + player_name + " has joined force " + force_name + "!***";
+					if (!playerlists[channelid][player_name]) return;
+					playerlists[channelid][player_name].force = force_name;
+					break;
+				case "die":
+					message = "**Player " + player_name + " was killed!**";
+					if (!playerlists[channelid][player_name]) return;
+					playerlists[channelid][player_name].status = "dead";
+					break;
+				case "respawn":
+					message = "**Player " + player_name + " just respawned!**";
+					if (!playerlists[channelid][player_name]) return;
+					playerlists[channelid][player_name].status = "alive";
+					break;
+			}
+			if (channels[channelid].type == "pvp-main") {
+				updateDescription(channelid);
+				bot.channels.get(channels[channelid].id).sendMessage(message);
+				if (action != "leave") playerlists[channelid][player_name].force = force_name; //Redundancy, as what force the player is on is only important in PvP
+				channelid = channelid + "-" + force_name;
+				if (!channels[channelid]) return;
+			}
+			updateDescription(channelid);
+			bot.channels.get(channels[channelid].id).sendMessage(message);
+		}
+	} else if (channels[channelid]) {
+		if (channels[channelid].type == "registered") {
+			return;
+		} else if (channels[channelid].type == "pvp-main") {
+			let message = input.substring(separator + 1);
+			if (message == "**[ANNOUNCEMENT]** Server has started!") {
+				//Open the channel for chat if the server is running
+				let mainserver = channelid;
+				let open_server = bot.channels.get(channels[mainserver].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
+				open_server.then(() => {
+					bot.channels.get(channels[mainserver].id).sendMessage(message);
+				});
+				bot.channels.get(channels[mainserver].id).setTopic("Server online. No players connected");
+				let forces = channels[channelid].forces;
+				for (let i = 0; i < forces.length; i++) {
+					let insideid = forces[i];
+					let open_server = bot.channels.get(channels[insideid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
+					open_server.then(() => {
+						bot.channels.get(channels[insideid].id).sendMessage(message);
+					});
+					let force_name = insideid.substring(insideid.indexOf("-") + 1);
+					bot.channels.get(channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
+				}
+				channels[mainserver].status = "started";
+			} else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
+				//Close the channel for chat if the server is stopped
+				let mainserver = channelid;
+				let message_sent = bot.channels.get(channels[mainserver].id).sendMessage(message);
+				message_sent.then((message) => {
+					message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
+				});
+				let forces = channels[channelid].forces;
+				for (let i = 0; i < forces.length; i++) {
+					let insideid = forces[i];
+					let message_sent = bot.channels.get(channels[insideid].id).sendMessage(message);
+					message_sent.then((message) => {
+						message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
+					});
+					bot.channels.get(channels[insideid].id).setTopic("Server offline");
+				}
+				channels[mainserver].status = "stopped";
+			} else {
+				//Server is a PvP server, send to correct channel
+				if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) {
+					//Message is a shout, send it to main channel
+					let shoutless = message.replace(" (shout):", ":");
+					bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + shoutless);
+				} else {
+					//Message is not a shout, send it to force specific channel
+					separator = message.indexOf(":");
+					let username = message.substring(0, separator);
+					if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
+					if (!playerlists[channelid][username]) return;
+					let force_name = playerlists[channelid][username].force;
+					let pvp_channelid = channelid + "-" + force_name;
+					if (channels[pvp_channelid]) {
+						if (message.charAt(0) == '[') bot.channels.get(channels[pvp_channelid].id).sendMessage(message);
+						else bot.channels.get(channels[pvp_channelid].id).sendMessage("[" + channels[pvp_channelid].name + "] " + message);
+					}
+				}
+			}
+		} else {
+			//Server is not PvP, send message normally
+			let message = input.substring(separator + 1);
+			if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) message = message.replace(" (shout):", ":");
+			if (message == "**[ANNOUNCEMENT]** Server has started!") {
+				//Open the channel for chat if the server is running
+				let open_server = bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
+				open_server.then(() => {
+					bot.channels.get(channels[channelid].id).sendMessage(message);
+				});
+				channels[channelid].status = "started";
+				bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected.");
+			} else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
+				//Close the channel for chat if the server is stopped
+				let message_sent = bot.channels.get(channels[channelid].id).sendMessage(message);
+				message_sent.then((message) => {
+					bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
+				});
+				channels[channelid].status = "stopped";
+				bot.channels.get(channels[channelid].id).setTopic("Server offline");
+			} else {
+				if (message.charAt(0) == '[') bot.channels.get(channels[channelid].id).sendMessage(message);
+				else bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + message);
+			}
+		}
+	} else return;
+}
+
 //Receive input from management program
 process.stdin.on('readable', () => {
 	let input = process.stdin.read();
 
 	if (input !== null) {
-		//Removes various invisible characters that would mess with the program
-		if (input.indexOf("\r\n") != -1) input = input.substring(0, input.length - 2); //For testing on Windows, removes the \r\n that Windows adds with the Enter key
-		if (input.indexOf("\n") != -1) input = input.substring(0, input.length - 1); //For testing on Linux, removes the \n that Linux adds with the Enter key
+		let newline_input = input.replace(/\r/g, "\n");
+		let split_input = newline_input.split("\n");
 
-		//Get the channelid
-		let separator = input.indexOf("$");
-		let channelid = input.substring(0, separator);
-		if (channelid == "emergency") {
-			//Bot crashed, must restart
-			if (!channels.admin) return;
-			let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
-			let tag = "<@&" + roleid + ">";
-			let new_input = input.substring(separator + 1);
-			bot.channels.get(channels.admin.id).sendMessage(tag + " The bot has crashed! The crash was detected and the bot restarted at " + new_input + "\n");
-		} else if (channelid == "crashreport") {
-			//Bot crashed, must restart
-			if (!channels.admin) return;
-			let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
-			let tag = "<@&" + roleid + ">";
-			let servername = input.substring(separator + 1);
-			if (!channels[servername]) return;
-			bot.channels.get(channels.admin.id).sendMessage(tag + " Server *" + servername + "* (" + channels[servername].name + ") has crashed!\n");
-			let message_sent = bot.channels.get(channels[servername].id).sendMessage("**Server crash was detected. Moderators have been notified. Please wait for restart.**");
-			message_sent.then((message) => {
-				message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
-			});
-		} else if (channelid == "admin") {
-			//Admin Warning System
-			if (!channels.admin) return;
-			let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
-			let tag = "<@&" + roleid + ">";
-			let new_input = input.substring(separator + 1);
-			separator = new_input.indexOf("$");
-			channelid = new_input.substring(0, separator);
-			let channelname = channels[channelid].name;
-			let message = new_input.substring(separator + 1);
-			bot.channels.get(channels.admin.id).sendMessage(
-				tag + "\n" +
-				"**Admin Warning System was set off!**\n" +
-				"Server ID: " + channelid + "\n" +
-				"Server Name: " + channelname + "\n" +
-				"Message: " + message
-			);
-		} else if (channelid == "output") {
-			//Requested output from server being returned
-			if (!channels.admin) return;
-			let message = input.substring(separator + 1);
-			bot.channels.get(channels.admin.id).sendMessage("Response: " + message + "\n");
-		} else if (channelid == "PLAYER") {
-			//Player Update
-			let new_input = input.substring(separator + 1);
-			separator = new_input.indexOf("$");
-			channelid = new_input.substring(0, separator);
-			if (channels[channelid]) {
-				let data = new_input.substring(separator + 1).split(","); //Replaces the newline at the end while also splitting the arguments apart
-				let action = data[0]; //Join,Leave,Force,Die,Respawn
-				let player_id = data[1]; //Not really relevant, but included in case it may be needed sometime in the future
-				let player_name = data[2]; //Player's username
-				let force_name = data[3]; //Name of player's force
-				var message;
-			
-				switch (action) {
-					case "join":
-						message = "**Player " + player_name + " has joined the server!**";
-						playerlists[channelid][player_name] = { "force": force_name, "status": "alive" };
-						break;
-					case "leave":
-						message = "**Player " + player_name + " has left the server!**";
-						delete playerlists[channelid][player_name];
-						break;
-					case "force":
-						message = "***Player " + player_name + " has joined force " + force_name + "!***";
-						if (!playerlists[channelid][player_name]) return;
-						playerlists[channelid][player_name].force = force_name;
-						break;
-					case "die":
-						message = "**Player " + player_name + " was killed!**";
-						if (!playerlists[channelid][player_name]) return;
-						playerlists[channelid][player_name].status = "dead";
-						break;
-					case "respawn":
-						message = "**Player " + player_name + " just respawned!**";
-						if (!playerlists[channelid][player_name]) return;
-						playerlists[channelid][player_name].status = "alive";
-						break;
-				}
-				if (channels[channelid].type == "pvp-main") {
-					updateDescription(channelid);
-					bot.channels.get(channels[channelid].id).sendMessage(message);
-					if (action != "leave") playerlists[channelid][player_name].force = force_name; //Redundancy, as what force the player is on is only important in PvP
-					channelid = channelid + "-" + force_name;
-					if (!channels[channelid]) return;
-				}
-				updateDescription(channelid);
-				bot.channels.get(channels[channelid].id).sendMessage(message);
-			}
-		} else if (channels[channelid]) {
-			if (channels[channelid].type == "registered") {
-				return;
-			} else if (channels[channelid].type == "pvp-main") {
-				let message = input.substring(separator + 1);
-				if (message == "**[ANNOUNCEMENT]** Server has started!") {
-					//Open the channel for chat if the server is running
-					let mainserver = channelid;
-					let open_server = bot.channels.get(channels[mainserver].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
-					open_server.then(() => {
-						bot.channels.get(channels[mainserver].id).sendMessage(message);
-					});
-					bot.channels.get(channels[mainserver].id).setTopic("Server online. No players connected");
-					let forces = channels[channelid].forces;
-					for (let i = 0; i < forces.length; i++) {
-						let insideid = forces[i];
-						let open_server = bot.channels.get(channels[insideid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
-						open_server.then(() => {
-							bot.channels.get(channels[insideid].id).sendMessage(message);
-						});
-						let force_name = insideid.substring(insideid.indexOf("-") + 1);
-						bot.channels.get(channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
-					}
-					channels[mainserver].status = "started";
-				} else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
-					//Close the channel for chat if the server is stopped
-					let mainserver = channelid;
-					let message_sent = bot.channels.get(channels[mainserver].id).sendMessage(message);
-					message_sent.then((message) => {
-						message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
-					});
-					let forces = channels[channelid].forces;
-					for (let i = 0; i < forces.length; i++) {
-						let insideid = forces[i];
-						let message_sent = bot.channels.get(channels[insideid].id).sendMessage(message);
-						message_sent.then((message) => {
-							message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
-						});
-						bot.channels.get(channels[insideid].id).setTopic("Server offline");
-					}
-					channels[mainserver].status = "stopped";
-				} else {
-					//Server is a PvP server, send to correct channel
-					if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) {
-						//Message is a shout, send it to main channel
-						let shoutless = message.replace(" (shout):", ":");
-						bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + shoutless);
-					} else {
-						//Message is not a shout, send it to force specific channel
-						separator = message.indexOf(":");
-						let username = message.substring(0, separator);
-						if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
-						if (!playerlists[channelid][username]) return;
-						let force_name = playerlists[channelid][username].force;
-						let pvp_channelid = channelid + "-" + force_name;
-						if (channels[pvp_channelid]) {
-							if (message.charAt(0) == '[') bot.channels.get(channels[pvp_channelid].id).sendMessage(message);
-							else bot.channels.get(channels[pvp_channelid].id).sendMessage("[" + channels[pvp_channelid].name + "] " + message);
-						}
-					}
-				}
-			} else {
-				//Server is not PvP, send message normally
-				let message = input.substring(separator + 1);
-				if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) message = message.replace(" (shout):", ":");
-				if (message == "**[ANNOUNCEMENT]** Server has started!") {
-					//Open the channel for chat if the server is running
-					let open_server = bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': true });
-					open_server.then(() => {
-						bot.channels.get(channels[channelid].id).sendMessage(message);
-					});
-					channels[channelid].status = "started";
-					bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected.");
-				} else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
-					//Close the channel for chat if the server is stopped
-					let message_sent = bot.channels.get(channels[channelid].id).sendMessage(message);
-					message_sent.then((message) => {
-						bot.channels.get(channels[channelid].id).overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
-					});
-					channels[channelid].status = "stopped";
-					bot.channels.get(channels[channelid].id).setTopic("Server offline");
-				} else {
-					if (message.charAt(0) == '[') bot.channels.get(channels[channelid].id).sendMessage(message);
-					else bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + message);
-				}
-			}
-		} else return;
+		for (let i = 0; i < split_input.length; i++) {
+			handleInput(split_input[i]);
+		}
 	}
 });
 
@@ -734,7 +739,7 @@ bot.on('message', (message) => {
 			addon = "PVP$" + serverid + "$" + force_name;
 		} else return;
 		var sendstring;
-		if (channels[sendto].type == "pvp-main") sendstring = clean_message(addon + "$[DISCORD] " + name + "(shout): " + message.cleanContent) + "\n";
+		if (channels[sendto].type == "pvp-main") sendstring = clean_message(addon + "$[DISCORD] " + name + " (shout): " + message.cleanContent) + "\n";
 		else sendstring = clean_message(addon + "$[DISCORD] " + name + ": " + message.cleanContent) + "\n";
 		safeWrite(sendstring);
 	}
