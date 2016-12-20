@@ -19,9 +19,16 @@ try {
 	}
 }
 
-//Set up a blank list for Player storage, does not need to persist through restarts
-//This will be used to build a current player list
-playerlists = {};
+//Set up the playerlists to persist through restart
+var playerlists;
+try {
+	playerlists = JSON.parse(fs.readFileSync("./playerlists.json", "utf8"));
+} catch (err) {
+	if (err.code == "ENOENT") {
+		fs.writeFileSync("playerlists.json", JSON.stringify({}));
+		playerlists = {};
+	}
+}
 
 //The list of public commands
 var publiccommands = {
@@ -572,7 +579,7 @@ function handleInput(input) {
 					delete playerlists[channelid][player_name];
 					break;
 				case "force":
-					message = "***Player " + player_name + " has joined force " + force_name + "!***";
+					message = "**Player " + player_name + " has joined force " + force_name + "!**";
 					if (!playerlists[channelid][player_name]) return;
 					playerlists[channelid][player_name].force = force_name;
 					break;
@@ -580,17 +587,20 @@ function handleInput(input) {
 					message = "**Player " + player_name + " was killed!**";
 					if (!playerlists[channelid][player_name]) return;
 					playerlists[channelid][player_name].status = "dead";
+					playerlists[channelid][player_name].force = force_name;
 					break;
 				case "respawn":
 					message = "**Player " + player_name + " just respawned!**";
 					if (!playerlists[channelid][player_name]) return;
 					playerlists[channelid][player_name].status = "alive";
+					playerlists[channelid][player_name].force = force_name;
 					break;
 			}
+			fs.unlinkSync("playerlists.json");
+			fs.writeFileSync("playerlists.json", JSON.stringify(playerlists));
 			if (channels[channelid].type == "pvp-main") {
 				updateDescription(channelid);
 				bot.channels.get(channels[channelid].id).sendMessage(message);
-				if (action != "leave") playerlists[channelid][player_name].force = force_name; //Redundancy, as what force the player is on is only important in PvP
 				channelid = channelid + "-" + force_name;
 				if (!channels[channelid]) return;
 			}
@@ -621,6 +631,10 @@ function handleInput(input) {
 					bot.channels.get(channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
 				}
 				channels[mainserver].status = "started";
+				if (playerlists[mainserver]) delete playerlists[mainserver];
+				playerlists[mainserver] = {};
+				fs.unlinkSync("playerlists.json");
+				fs.writeFileSync("playerlists.json", JSON.stringify(playerlists));
 			} else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
 				//Close the channel for chat if the server is stopped
 				let mainserver = channelid;
@@ -638,24 +652,27 @@ function handleInput(input) {
 					bot.channels.get(channels[insideid].id).setTopic("Server offline");
 				}
 				channels[mainserver].status = "stopped";
+				delete playerlists[mainserver];
+				fs.unlinkSync("playerlists.json");
+				fs.writeFileSync("playerlists.json", JSON.stringify(playerlists));
 			} else {
 				//Server is a PvP server, send to correct channel
-				if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) {
-					//Message is a shout, send it to main channel
+				separator = message.indexOf(":");
+				let username = message.substring(0, separator);
+				if (username.indexOf(" (shout)") > 0) {
+					//If message is a shout, send it to main channel
+					username = username.replace(" (shout)", "");
 					let shoutless = message.replace(" (shout):", ":");
 					bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + shoutless);
-				} else {
-					//Message is not a shout, send it to force specific channel
-					separator = message.indexOf(":");
-					let username = message.substring(0, separator);
-					if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
-					if (!playerlists[channelid][username]) return;
-					let force_name = playerlists[channelid][username].force;
-					let pvp_channelid = channelid + "-" + force_name;
-					if (channels[pvp_channelid]) {
-						if (message.charAt(0) == '[') bot.channels.get(channels[pvp_channelid].id).sendMessage(message);
-						else bot.channels.get(channels[pvp_channelid].id).sendMessage("[" + channels[pvp_channelid].name + "] " + message);
-					}
+				}
+				//Send message to force specific channel, whether shout or not
+				if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
+				if (!playerlists[channelid][username]) return;
+				let force_name = playerlists[channelid][username].force;
+				let pvp_channelid = channelid + "-" + force_name;
+				if (channels[pvp_channelid]) {
+					if (message.charAt(0) == '[') bot.channels.get(channels[pvp_channelid].id).sendMessage(message);
+					else bot.channels.get(channels[pvp_channelid].id).sendMessage("[" + channels[pvp_channelid].name + "] " + message);
 				}
 			}
 		} else {
@@ -670,6 +687,10 @@ function handleInput(input) {
 				});
 				channels[channelid].status = "started";
 				bot.channels.get(channels[channelid].id).setTopic("Server online. No players connected.");
+				if (playerlists[channelid]) delete playerlists[channelid];
+				playerlists[channelid] = {};
+				fs.unlinkSync("playerlists.json");
+				fs.writeFileSync("playerlists.json", JSON.stringify(playerlists));
 			} else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
 				//Close the channel for chat if the server is stopped
 				let message_sent = bot.channels.get(channels[channelid].id).sendMessage(message);
@@ -678,6 +699,9 @@ function handleInput(input) {
 				});
 				channels[channelid].status = "stopped";
 				bot.channels.get(channels[channelid].id).setTopic("Server offline");
+				delete playerlists[channelid];
+				fs.unlinkSync("playerlists.json");
+				fs.writeFileSync("playerlists.json", JSON.stringify(playerlists));
 			} else {
 				if (message.charAt(0) == '[') bot.channels.get(channels[channelid].id).sendMessage(message);
 				else bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + message);
@@ -755,8 +779,10 @@ bot.on('ready', () => {
 	});
 	//Set any currently existing PvP servers back up for fresh player lists
 	for (var key in channels) {
-		if (channels[key].type == "pvp-main" || channels[key].type == "server") playerlists[key] = {};
+		if ((channels[key].type == "pvp-main" || channels[key].type == "server") && !playerlists[key]) playerlists[key] = {};
 	}
+	fs.unlinkSync("playerlists.json");
+	fs.writeFileSync("playerlists.json", JSON.stringify(playerlists));
 });
 
 //If the bot joins a server that isn't 3Ra, immediately leave it
