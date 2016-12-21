@@ -79,6 +79,19 @@ if(isset($_REQUEST['start'])) {
 		$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "stop" "'.$_SESSION['login']['user'].'"');
 		echo $output;
 	}
+} elseif(isset($_REQUEST['forcekill'])) {
+	if($_SESSION['login']['user']=="guest") {
+		echo "You really think we'd allow guests to force kill the server?";
+	} else {
+		//echo "Sending Stop Server Command:\n\n";
+		$output = shell_exec('pkill -9 factorio');
+		echo $output;
+		$output = shell_exec('pkill -9 nodejs');
+		echo $output;
+		$output = shell_exec('pkill -9 managepgm');
+		echo $output;
+		echo "Servers killed. You monster.";
+	}
 } elseif(isset($_REQUEST['command'])) {
 	if($_SESSION['login']['user']=="guest") {
 		echo "Guests can't send commands (yet) :( ";//".$_REQUEST['command'];
