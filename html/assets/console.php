@@ -17,18 +17,17 @@ if(isset($_REQUEST['d'])&&isset($_REQUEST['s'])) {
 	if(isset($server_select)) {
 		if($_REQUEST['s']) {
 			$screen = $_REQUEST['s'];
-			$filename = '/var/www/factorio/'.$server_select.'/screenlog.0';  //about 500MB
+			$screenlog = '/var/www/factorio/'.$server_select.'/screenlog.0';
+			$chatlog = '/var/www/factorio/'.$server_select.'/chatlog.0';
 			$find=array("<", ">", "\\");
 			$repl=array("&lt;", "&gt;", "");
 			if($screen=="chat") {
-				$output = shell_exec('grep -E -i \'CHAT|shout|\\[WEB|\\[PUPDATE|\\[COLOR\' '.$filename.' | tail -n 75');
-				if(preg_match('/\/silent-command\sgame\.print\(.+\"\.\.".+\"\)/i', $output)) {
-					$output = preg_replace(array('/\/silent-command\sgame\.print\(\"\[WEB\]/i', '/\"\.\.\"/', '/\"\)/'), array('[WEB] ', '', ''), $output);
-				}
+				$output = shell_exec('cat '.$chatlog.' | tail -n 75');
 				$output = str_replace($find, $repl, $output);
 				echo str_replace(PHP_EOL, '', $output);         //add newlines
 			} elseif($screen=="console") {
-				$output = str_replace($find, $repl, shell_exec('grep -E -v \'CHAT|shout|\\[WEB|\\[PUPDATE|\\[COLOR\' '.$filename.' | tail -n 75'));
+				$output = shell_exec('cat '.$screenlog.' | tail -n 75');
+				$output = str_replace($find, $repl, $output);
 				echo str_replace(PHP_EOL, '', $output);         //add newlines
 			}
 		}

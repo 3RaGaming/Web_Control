@@ -5,7 +5,7 @@ if(!isset($_SESSION['login'])) {
 	die();
 } else {
 	$current_user = $_SESSION['login']['user'];
-	if($_SERVER["HTTPS"] != "on")
+	if(isset($_SERVER["HTTPS"]) == false)
 	{
 		die('Must use HTTPS');
 	}
@@ -26,8 +26,8 @@ if(isset($_REQUEST['start'])) {
 			$server_password="";
 			$new_server_settings = false;
 			//echo "Sending Start Server Command:\n\n";
-			$output = shell_exec('/var/www/factorio/manage.sh "'.$server_select.'" "prestart" "'.$_SESSION['login']['user'].'"');
-			if (strpos($output, 'false') !== false) {
+			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "prestart" "'.$_SESSION['login']['user'].'"');
+			if (strpos($output, 'stopped') !== false) {
 				$jsonString = file_get_contents($server_settings_path);
 				$data = json_decode($jsonString, true);
 				if(isset($data["name"])) {
@@ -61,7 +61,7 @@ if(isset($_REQUEST['start'])) {
 					file_put_contents($server_settings_path, $newJsonString);
 				}
 			}
-			$output = shell_exec('/var/www/factorio/manage.sh "'.$server_select.'" "start" "'.$_SESSION['login']['user'].'"');
+			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "start" "'.$_SESSION['login']['user'].'"');
 			echo $output;
 		} else {
 			die('Missing server-settings.json');
@@ -69,14 +69,14 @@ if(isset($_REQUEST['start'])) {
 	}
 } elseif(isset($_REQUEST['status'])) {
 	echo "Requesting Status of Servers:\n\n";
-	$output = shell_exec('/var/www/factorio/manage.sh "'.$server_select.'" "status" "'.$_SESSION['login']['user'].'"');
+	$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "status" "'.$_SESSION['login']['user'].'"');
 	echo $output;
 } elseif(isset($_REQUEST['stop'])) {
 	if($_SESSION['login']['user']=="guest") {
 		echo "Guests may not Start/Stop server";
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
-		$output = shell_exec('/var/www/factorio/manage.sh "'.$server_select.'" "stop" "'.$_SESSION['login']['user'].'"');
+		$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "stop" "'.$_SESSION['login']['user'].'"');
 		echo $output;
 	}
 } elseif(isset($_REQUEST['command'])) {
@@ -96,10 +96,10 @@ if(isset($_REQUEST['start'])) {
 			}
 			if(substr($command_decode,0,1) != "/") {
 				$command = str_replace(array("\""), array('\\\"'), $command_decode);
-				$command = "/silent-command game.print(\"[WEB]".$current_user.": \"..\"".$command."\")";
+				$command = "/silent-command game.print(\"[WEB] ".$current_user.": ".$command."\")";
 			}
 			$command = str_replace(array("'", "^"), array("'\"'\"'", "\^"), $command);
-			system("sudo -u www-data /usr/bin/screen -S ".$server_select." -X at 0 stuff '".$command."\n'");
+			system("sudo -u www-data /usr/bin/screen -S manage -X at 0 stuff '".$server_select."\\\$".$command."\n'");
 
 			//used for up arrow history
 			$cmd_history = $command_decode;

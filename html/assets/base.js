@@ -1206,6 +1206,17 @@ function command_history(args) {
 	}
 }
 
+function update_web_control(user_name) {
+    if(user_name=="admin") {
+        var r = confirm("Update webgui and server control files?");
+        if (r == true) {
+            $("#update_web_control").submit();
+        }
+    } else {
+        alert('Must be a web admin to update gui :(');
+    }
+}
+
 //Things to only start doing after the page has finished loading
 $(document).ready(function() {
 	$('#welcome_user').text(user_name);

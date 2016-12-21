@@ -1,6 +1,6 @@
 <?php
 if(!isset($_SESSION)) { session_start(); }
-if($_SERVER["HTTPS"] != "on")
+if(isset($_SERVER["HTTPS"]) == false)
 {
     header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
     exit();
@@ -14,6 +14,8 @@ if(isset($_SESSION['login'])) {
 	} else {
 		//if not requesting to logout... Take back home
 		header("Location: ./?d=server1");
+		exit();
+		die();
 	}
 }
 
