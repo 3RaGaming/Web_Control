@@ -1,4 +1,9 @@
 #!/bin/bash
+result=${PWD##*/}
+if [ "$result" == "html" ]; then
+	result = "master";
+fi
+printf "Detected \"$result\" branch \r\n";
 args=("$@");
 
 if [ "${args[0]}" ]; then
@@ -10,22 +15,22 @@ if [ "${args[0]}" ]; then
 
         '1')
             printf "Step ${args[0]} - Downloading latest updates \r\n";
-            wget -q https://github.com/3RaGaming/Web_Control/archive/master.zip -O /tmp/master.zip
+            wget -q https://github.com/3RaGaming/Web_Control/archive/$result.zip -O /tmp/$result.zip
             printf "\r\n-----------\r\n\r\n";
             ;;
 
         '2')
             printf "Step ${args[0]} - Unzipping updates \r\n";
-            unzip -u /tmp/master.zip -d /tmp/
+            unzip -u /tmp/$result.zip -d /tmp/
             printf "\r\n-----------\r\n\r\n";
             ;;
 
         '3')
             printf "Step ${args[0]} - Updating files \r\n";
-            rsync -a -v /tmp/Web_Control-master/html/* ./
-            rsync -a -v /tmp/Web_Control-master/factorio/manage.c /var/www/factorio/
-            rsync -a -v /tmp/Web_Control-master/factorio/manage.sh /var/www/factorio/
-            rsync -a -v /tmp/Web_Control-master/factorio/3RaFactorioBot.js /var/www/factorio/
+            rsync -a -v /tmp/Web_Control-$result/html/* ./
+            rsync -a -v /tmp/Web_Control-$result/factorio/manage.c /var/www/factorio/
+            rsync -a -v /tmp/Web_Control-$result/factorio/manage.sh /var/www/factorio/
+            rsync -a -v /tmp/Web_Control-$result/factorio/3RaFactorioBot.js /var/www/factorio/
             printf "\r\n-----------\r\n\r\n";
             ;;
 
@@ -37,7 +42,7 @@ if [ "${args[0]}" ]; then
 
         '5')
             printf "Step ${args[0]} - Deleting temporary files \r\n";
-            rm -Rf /tmp/master.zip /tmp/Web_Control-master/
+            rm -Rf /tmp/$result.zip /tmp/Web_Control-$result/
             printf "\r\n-----------\r\n\r\n";
             ;;
 
