@@ -3,7 +3,7 @@ if(!isset($_SESSION)) { session_start(); }
 if(!isset($_SESSION['login'])) {
 	die('Please sign in');
 } else {
-	if($_SERVER["HTTPS"] != "on")
+	if(isset($_SERVER["HTTPS"]) == false)
 	{
 		die('Must use HTTPS');
 	}
@@ -16,14 +16,25 @@ if(isset($_REQUEST['d'])) {
 	$temp_select="servertest";
 }
 
-$server_select_dropdown = "";
+$server_select_dropdown = "toSelect = document.getElementById(\"server_select\");";
 foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 	$dir = str_replace($base_dir, '', $dir);
-	if($temp_select=="$dir") {
-		$server_select = $dir;
-		$server_select_dropdown = $server_select_dropdown . '<option value="' . $server_select . '" selected>' . $server_select . '</option>';
-	} else {
-		$server_select_dropdown = $server_select_dropdown . '<option value="' . $dir . '">' . $dir . '</option>';
+	if($dir!="node_modules"&&$dir!="log") {
+		if($temp_select=="$dir") {
+			$server_select = $dir;
+			$server_select_dropdown = $server_select_dropdown . '
+			var opt = document.createElement("option");
+			opt.value = "'.$server_select.'";
+			opt.innerHTML = "'.$server_select.'";
+			opt.selected = true;
+			toSelect.add(opt);';
+		} else {
+			$server_select_dropdown = $server_select_dropdown . '
+			var opt = document.createElement("option");
+			opt.innerHTML = "'.$dir.'";
+			opt.value = "'.$dir.'";
+			toSelect.appendChild(opt);';
+		}
 	}
 }
 

@@ -4,7 +4,7 @@ if(!isset($_SESSION['login'])) {
 	header("Location: ./login.php");
 	die();
 } else {
-	if($_SERVER["HTTPS"] != "on")
+	if(isset($_SERVER["HTTPS"]) == false)
 	{
 		header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
 		die();
@@ -271,8 +271,7 @@ if(isset($_REQUEST['archive'])) {
 		{
 			die('No files selected for deletion');
 		}
-		
-		
+		die('Deletion almost possible!');
 	}
 	//no reason to carry on
 	die();

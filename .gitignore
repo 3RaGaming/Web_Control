@@ -221,7 +221,21 @@ pip-log.txt
 #############
 
 # Compiled file manage file
-factorio/manage
+factorio/managepgm
 
 # NodeJS/Discord.js
 factorio/node_modules/
+
+# Bot Token File
+factorio/token.json
+
+# Bot Channel List
+factorio/channel_list.json
+
+# Bot Player List
+factorio/playerlists.json
+
+# Log File
+factorio/screenlog.0
+
+
