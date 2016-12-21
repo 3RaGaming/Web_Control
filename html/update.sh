@@ -1,7 +1,7 @@
 #!/bin/bash
 result=("${PWD##*/}");
 if [ "$result" == "html" ]; then
-	result = "master";
+	result="master";
 fi
 args=("$@");
 
