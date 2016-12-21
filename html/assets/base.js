@@ -1040,9 +1040,15 @@ function Download(url) {
 }
 
 function server_sss(cmd) {
-    if(user_level == "guest" && (cmd == "start" || cmd =="stop" )) {
+    if(user_level == "guest" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
         alert("Guest's may not start/stop the server");
         return;
+    }
+	if(cmd == "forcekill") {
+        var r = confirm("WARNING: This will force kill the servers.");
+        if (r != true) {
+            return;
+        }
     }
 	var http = new XMLHttpRequest();
 	http.open("POST", "process.php?d=" + server_select, true);
