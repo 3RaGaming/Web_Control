@@ -42,9 +42,7 @@ if [ "${args[0]}" ]; then
             ;;
 
 		'6')
-	    	pgrep managepgm
-	    	pgrep nodejs
-	    	pgrep factorio
+	    	kill -9 22079 22080 5212 22122 22455
 	    	;;
 
         *)
