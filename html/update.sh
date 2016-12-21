@@ -4,7 +4,7 @@ args=("$@");
 if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 	    'count')
-			echo "5"
+			echo "6"
             exit 1
             ;;
 
@@ -28,7 +28,7 @@ if [ "${args[0]}" ]; then
             rsync -a -v /tmp/Web_Control-dev-bot-manage/factorio/3RaFactorioBot.js /var/www/factorio/
             printf "\r\n-----------\r\n\r\n";
             ;;
-	    
+
         '4')
             printf "Step ${args[0]} - Compiling updated manage.c \r\n";
             gcc -o /var/www/factorio/managepgm -pthread /var/www/factorio/manage.c
@@ -41,6 +41,12 @@ if [ "${args[0]}" ]; then
             printf "\r\n-----------\r\n\r\n";
             ;;
 
+		'6')
+	    	pgrep managepgm
+	    	pgrep nodejs
+	    	pgrep factorio
+	    	break;;
+
         *)
             printf "Error in input provided\r\n"
             exit 1
@@ -48,4 +54,3 @@ if [ "${args[0]}" ]; then
 else
     printf "No input provided\r\n"
 fi
-
