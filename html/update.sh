@@ -45,7 +45,7 @@ if [ "${args[0]}" ]; then
 	    	pgrep managepgm
 	    	pgrep nodejs
 	    	pgrep factorio
-	    	break;;
+	    	;;
 
         *)
             printf "Error in input provided\r\n"
