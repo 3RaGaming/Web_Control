@@ -9,11 +9,11 @@ if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 		'count')
 			echo "5"
-			printf "Detected \"$result\" branch \r\n";
 			exit 1
 			;;
 
 		'1')
+			printf "Detected \"$result\" branch \r\n";
 			printf "Step ${args[0]} - Downloading latest updates \r\n";
 			wget -q https://github.com/3RaGaming/Web_Control/archive/$result.zip -O /tmp/$result.zip
 			printf "\r\n-----------\r\n\r\n";
