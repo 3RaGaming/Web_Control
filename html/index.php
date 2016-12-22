@@ -121,7 +121,7 @@
 			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
 				<input type="hidden" id="update" name="update" value="yes" />
 			</form>
-			<button onclick="server_sss('forcekill')">force kill</button>&nbsp;-&nbsp;
+			<button onclick="force_kill('forcekill')">force kill</button>
 			<div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
