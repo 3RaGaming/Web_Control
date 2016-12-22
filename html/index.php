@@ -20,17 +20,6 @@
 	if(!isset($server_select)) {
 		die('Error in server selection index.php');
 	}
-	
-	if(file_exists("repo_list.txt")) {
-		$server_version_dropdown = "";
-		$handle = fopen("repo_list.txt", "r");
-		if ($handle) {
-			while (($line = fgets($handle)) !== false) {
-				$server_version_dropdown = $server_version_dropdown . '<option id="'.$line.'">'.$line.'</option>';
-			}
-			fclose($handle);
-		}
-	}
 ?>
 </script>
 <html>
@@ -116,7 +105,6 @@
 			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />
-			<select id="server_version"><?php if(isset($server_version_dropdown)) { echo $server_version_dropdown; } ?></select>
 			<button onclick="update_web_control(user_level);">Update Web Control</button>
 			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
 				<input type="hidden" id="update" name="update" value="yes" />

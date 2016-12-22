@@ -208,7 +208,7 @@ void * input_monitoring(void * server_ptr) {
 			free(output);
 		}
 
-		if (strchr(data,'$') != NULL && strstr(data, " [CHAT] ") == NULL && strstr(data, " (shout):") == NULL) {
+		if (strchr(data,'$') != NULL && ((strstr(data, " [CHAT] ") == NULL && strstr(data, " (shout):") == NULL) || strcmp(server->name, "bot") == 0)) {
 			//Handles the rare occasion a chat message will have a '$' inside it
 			separator_index = strchr(data,'$') - data;
 			data[separator_index] = '\0';
