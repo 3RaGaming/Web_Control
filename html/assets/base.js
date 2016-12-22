@@ -1063,6 +1063,29 @@ function server_sss(cmd) {
 		}
 	};
 }
+function force_kill(cmd) {
+	if(user_level == "guest") {
+        alert("Guests may not force kill the server(s)");
+        return;
+    }
+	if(cmd == "forcekill") {
+        var r = confirm("WARNING: This will force kill ALL servers.");
+        if (r == true) {
+            var http = new XMLHttpRequest();
+			http.open("POST", "process.php?d=" + server_select, true);
+			http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+			var server_name = $('#server_name').val();
+			var server_password = $('#server_password').val();
+			var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
+			http.send(params);
+			http.onload = function() {
+				if(http.responseText) {
+					alert(http.responseText);
+				}
+			};
+        }
+    }
+}
 function command() {
     if(user_level == "guest") {
         alert("Guests may not send commands :(");
