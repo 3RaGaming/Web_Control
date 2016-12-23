@@ -663,20 +663,23 @@ function handleInput(input) {
 				} else {
 					separator = message.indexOf(":");
 					let username = message.substring(0, separator);
-					if (username.indexOf(" (shout)") > 0) {
+					if (message.charAt(0) == '[') {
+						//If message is from web, send it to main channel
+						bot.channels.get(channels[channelid].id).sendMessage(message);
+					} else if (username.indexOf(" (shout)") > 0) {
 						//If message is a shout, send it to main channel
 						username = username.replace(" (shout)", "");
 						let shoutless = message.replace(" (shout):", ":");
 						bot.channels.get(channels[channelid].id).sendMessage("[" + channels[channelid].name + "] " + shoutless);
-					}
-					//Send message to force specific channel, whether shout or not
-					if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
-					if (!playerlists[channelid][username]) return;
-					let force_name = playerlists[channelid][username].force;
-					let pvp_channelid = channelid + "-" + force_name;
-					if (channels[pvp_channelid]) {
-						if (message.charAt(0) == '[') bot.channels.get(channels[pvp_channelid].id).sendMessage(message);
-						else bot.channels.get(channels[pvp_channelid].id).sendMessage("[" + channels[pvp_channelid].name + "] " + message);
+					} else {
+						//Send non-shout message to force specific channel
+						if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
+						if (!playerlists[channelid][username]) return;
+						let force_name = playerlists[channelid][username].force;
+						let pvp_channelid = channelid + "-" + force_name;
+						if (channels[pvp_channelid]) {
+							bot.channels.get(channels[pvp_channelid].id).sendMessage("[" + channels[pvp_channelid].name + "] " + message);
+						}
 					}
 				}
 			}
