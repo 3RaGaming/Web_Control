@@ -30,6 +30,87 @@ try {
 	}
 }
 
+//Set up the Factorio username <-> Discord username registration lists
+var registration;
+try {
+	registration = JSON.parse(fs.readFileSync("./registration.json", "utf8"));
+} catch (err) {
+	if (err.code == "ENOENT") {
+		fs.writeFileSync("registration.json", JSON.stringify({}));
+		registration = {};
+	}
+}
+
+//Cleans a message by escaping single quotes, clearing backslashes, and replacing newlines with spaces
+function clean_message(message) {
+	let escape_chars = message.replace(/\\/g, "");
+	let single_quotes = escape_chars.replace(/'/g, "\\'");
+	let new_lines = single_quotes.replace(/\n/g, " ");
+	return new_lines;
+}
+
+//Function to get the key relating to a value
+function getChannelKey(channelid) {
+	for (var internalid in channels) {
+		if (channels[internalid].id == channelid) return internalid;
+	}
+	return null;
+}
+
+//Function to get the Discord Unique ID of a registered username
+function getPlayerID(username) {
+	for (var userid in registration) {
+		if (registration[userid] == username) return userid;
+	}
+	return null;
+}
+
+//Function to safely handle writing to stdout
+function safeWrite(sendstring) {
+	if (!process.stdout.write(sendstring)) {
+		safe = false;
+		process.stdout.once('drain', safeWrite(sendstring));
+	} else {
+		safe = true;
+	}
+}
+var safe = true;
+
+//Find the server a player is in
+function findPlayer(username) {
+	for (var server in playerlists) {
+		for (var player in playerlists[server]) {
+			if (player.toLowerCase() == username.toLowerCase()) return server;
+		}
+	}
+	return null;
+}
+
+//Assign a player to a PvP Role
+function assignRole(server, force, userid) {
+	let user = bot.guilds.get("143772809418637313").members.get(userid);
+	let rolename = server + "-" + force;
+	let role = bot.guilds.get("143772809418637313").roles.find("name", rolename);
+	if (role === null && channels[rolename]) {
+		let created = bot.guilds.get("143772809418637313").createRole(rolename);
+		created.then((role) => {
+			user.addRole(role);
+		});
+	} else if (role !== null && !user.roles.has(role.id)) {
+		user.addRole(role);
+	}
+}
+
+//Remove a player from any Role in a PvP Server, if he has one
+function removeRole(server, userid) {
+	let user = bot.guilds.get("143772809418637313").members.get(userid);
+	for (let i = 0; i < channels[server].forces.length; i++) {
+		let rolename = channels[server].forces[i];
+		let role = bot.guilds.get("143772809418637313").roles.find("name", rolename);
+		if (role !== null && user.roles.has(role.id)) user.removeRole(role);
+	}
+}
+
 //The list of public commands
 var publiccommands = {
 	"players": function (message, command) {
@@ -38,7 +119,7 @@ var publiccommands = {
 			return;
 		}
 		let force_name = null;
-		let current = getChannelKey(channels, message.channel.id);
+		let current = getChannelKey(message.channel.id);
 		if (current === null || channels[current].type == "chat") {
 			message.channel.sendMessage("This channel is not registered to any server!\n");
 			return;
@@ -69,6 +150,28 @@ var publiccommands = {
 			return;
 		}
 		message.channel.sendMessage(send_message);
+	},
+	"register": function (message, command) {
+		if (command.length != 2) {
+			message.channel.sendMessage("Correct usage: ::register *Factorio_username*");
+			return;
+		}
+		let userid = message.author.id;
+		let username = command[1];
+		if (getPlayerID(username) !== null) {
+			message.channel.sendMessage("This Factorio username has already been taken! If you believe this to be an error, please contact @Moderators");
+			return;
+		}
+		registration[userid] = username;
+		if (registration[userid]) message.channel.sendMessage("Your previously set Factorio username will be overwritten.");
+		else message.channel.sendMessage("Factorio username updated.");
+		fs.unlinkSync("registration.json");
+		fs.writeFileSync("registration.json", JSON.stringify(registration));
+		let server = findPlayer(username);
+		if (server !== null && channels[server].type == "pvp-main") {
+			message.channel.sendMessage("This username was detected in a currently running PvP server. Your role has been assigned to you.");
+			assignRole(server, playerlists[server][username].force, userid);
+		}
 	},
 	"listservers": function (message, command) {
 		if (Object.keys(channels).length === 0) {
@@ -101,9 +204,11 @@ var publiccommands = {
 	},
 	"help": function (message, command) {
 		message.channel.sendMessage("**::players** *[force]* - Get a list of all currently connected players, must be run in a registered channel. If the optional argument force is provided, it will print players only on that force.\n\n" +
+			"**::register** *Factorio_username* - Register your Factorio username to your Discord account. This is required for PvP roles to be added to your account.\n\n" +
 			"**::listservers** - Get a list of all currently running servers, as well as the amount of players currently connected to each.\n\n" +
 			"**::status** - Have the bot print a message saying that it is running correctly\n\n" + 
-			"**::adminhelp** - Must have the Moderator role, shows commands that require Moderator role to run."
+			"**::serverhelp** - Must have the Moderators role, shows commands related to server/channel management.\n\n" +
+			"**::adminhelp** - Must have the Moderators role, can only be run in the admin channel, shows admin management commands."
 		);
 	}
 };
@@ -122,7 +227,7 @@ var admincommands = {
 			return;
 		}
 		//Check to see if this channel is already registered
-		let current = getChannelKey(channels, message.channel.id);
+		let current = getChannelKey(message.channel.id);
 		if (current !== null) {
 			message.channel.sendMessage("This channel is already registered! Please use ::unset first if you want to change this.\n");
 			return;
@@ -151,7 +256,7 @@ var admincommands = {
 			return;
 		}
 		//Check to see if this channel is already registered
-		let current = getChannelKey(channels, message.channel.id);
+		let current = getChannelKey(message.channel.id);
 		if (current !== null) {
 			message.channel.sendMessage("This channel is already registered! Please use ::unset first if you want to change this.\n");
 			return;
@@ -175,7 +280,7 @@ var admincommands = {
 			return;
 		}
 		//Check to see if this channel is already registered
-		let current = getChannelKey(channels, message.channel.id);
+		let current = getChannelKey(message.channel.id);
 		if (current !== null) {
 			message.channel.sendMessage("This channel is already registered! Please use ::unset first if you want to change this.\n");
 			return;
@@ -210,7 +315,7 @@ var admincommands = {
 			return;
 		}
 		//Check to see if this channel is already registered
-		let current = getChannelKey(channels, message.channel.id);
+		let current = getChannelKey(message.channel.id);
 		if (current !== null) {
 			message.channel.sendMessage("This channel is already registered! Please use ::unset first if you want to change this.\n");
 			return;
@@ -226,6 +331,17 @@ var admincommands = {
 		});
 		fs.unlinkSync("channel_list.json");
 		fs.writeFileSync("channel_list.json", JSON.stringify(channels));
+		let role = bot.guilds.get("143772809418637313").roles.find("name", pvpid);
+		if (role === null) {
+			let created = bot.guilds.get("143772809418637313").createRole({ name: pvpid });
+			created.then((role) => {
+				let modid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
+				message.channel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }) //Allow bot to read
+				message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get(modid), { 'READ_MESSAGES': true }) //Allow Moderators to read
+				message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get(role.id), { 'READ_MESSAGES': true }) //Allow force to read
+				message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'READ_MESSAGES': false }) //Don't allow anyone else to read
+			});
+		}
 	},
 	"changename": function (message, command) {
 		//Change the name of a server
@@ -234,7 +350,7 @@ var admincommands = {
 			return;
 		}
 		let newname = command[1];
-		let current = getChannelKey(channels, message.channel.id);
+		let current = getChannelKey(message.channel.id);
 		if (current === null) {
 			message.channel.sendMessage("This channel is not registered to any server!\n");
 			return;
@@ -257,7 +373,7 @@ var admincommands = {
 	},
 	"unset": function (message, command) {
 		//Check to see if the server is registered to a channel
-		let remove = getChannelKey(channels, message.channel.id);
+		let remove = getChannelKey(message.channel.id);
 		if (remove === null) {
 			message.channel.sendMessage("There is nothing registered to this channel");
 			return;
@@ -266,6 +382,8 @@ var admincommands = {
 			let main_name = remove.substring(0, remove.indexOf("-"));
 			let main_channel = channels[main_name];
 			main_channel.forces.splice(main_channel.forces.indexOf(remove), 1);
+			let role = bot.guilds.get("143772809418637313").roles.find("name", remove);
+			if (role !== null) role.delete();
 		} else if (channels[remove].type == "pvp-main") {
 			let forces = channels[remove].forces;
 			for (let i = 0; i < forces.length; i++) {
@@ -278,6 +396,8 @@ var admincommands = {
 					});
 				});
 				delete channels[current];
+				let role = bot.guilds.get("143772809418637313").roles.find("name", current);
+				if (role !== null) role.delete();
 			}
 		}
 		//Delete the server registration and update the channel_list.json
@@ -293,7 +413,7 @@ var admincommands = {
 	},
 	"setadmin": function (message, command) {
 		//Set the admin warning messages to be delivered to this current channel
-		let current = getChannelKey(channels, message.channel.id);
+		let current = getChannelKey(message.channel.id);
 		if (current !== null) message.channel.sendMessage("The admin channel is currently already set. This command will overwrite the previous admin channel.\n");
 		channels.admin = { id: message.channel.id, name: "Admin", type: "admin" };
 		fs.unlinkSync("channel_list.json");
@@ -422,15 +542,45 @@ var admincommands = {
 		}
 		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
-	"adminhelp": function (message, command) {
-		message.channel.sendMessage("**::setserver** *serverid servername* - Any messages internally tagged with serverid will be sent to the channel this command is run in, prefixed with '[servername]'.\n\n" +
+	"removeregistration": function (message, command) {
+		if (channels.admin) {
+			if (channels.admin.id == message.channel.id) {
+				if (command.length != 2) {
+					message.channel.sendMessage("Correct usage: ::removeregistration *Factorio_username*");
+					return;
+				}
+				let username = command[1];
+				let userid = getPlayerID(username);
+				if (userid === null) {
+					message.channel.sendMessage("That username is not registered!");
+				} else {
+					delete registration[userid];
+					message.channel.sendMessage("Username is now unregistered.");
+					fs.unlinkSync("registration.json");
+					fs.writeFileSync("registration.json", JSON.stringify(registration));
+				}
+				return;
+			}
+		}
+		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+	},
+	"serverhelp": function (message, command) {
+		message.channel.sendMessage("***SERVER/CHANNEL MANAGEMENT:*** \n\n\n" +
+			"**::setserver** *serverid servername* - Any messages internally tagged with serverid will be sent to the channel this command is run in, prefixed with '[servername]'.\n\n" +
 			"**::setchannel** *channelid channelname* - Same as above, but using chat channels (coded by Articulating) rather than servers.\n\n" +
-			"**::setpvpmain** *serverid* *servername* - Set the main channel for a PvP server. This command must be run before force specific forces can be registered." +
+			"**::setpvpmain** *serverid* *servername* - Set the main channel for a PvP server. This command must be run before force specific forces can be registered.\n\n" +
 			"**::setpvpforce** *serverid forcename* - Only the messages from a specific force (forcename) of a PvP server will be sent to this channel (other arguments same as above). Cannot be used unless ::setpvpmain has been run.\n\n" +
 			"**::changename** *newname* - Change the registered name of a server, must be done in the channel you wish to change. If done to a PvP channel, it will change the name of all PvP channels connected to the same server.\n\n" +
 			"**::unset** - Unsets a channel that was previously registered using ::setserver, ::setchannel, or ::setpvp. Unsetting a single force PvP channel will only unset that channel, but unsetting the main PvP channel will unset all force specific channels.\n\n"
 		);
-		message.channel.sendMessage("**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to.\n\n" +
+	},
+	"adminhelp": function (message, command) {
+		if (channels.admin && channels.admin.id != message.channel.id) {
+			message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+			return;
+		}
+		message.channel.sendMessage("***ADMIN CHANNEL COMMANDS:*** \n (All commands must be run in the registered admin channel) \n\n\n" +
+			"**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to.\n\n" +
 			"**::sendadmin** *[serverid/all] command* - Sends 'command' to 'serverid' as if you were typing directly into the console (/silent-command will automatically be attached to the beginning). " +
 			"Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
 			"**::adminannounce** *[serverid/all] announcement* - Sends an announcement to 'serverid'. Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
@@ -438,38 +588,11 @@ var admincommands = {
 			"**::unregister** *serverid* - Unregister a server registered with ::registerserver.\n\n" +
 			"**::banhammer** *Factorio_username* - Bans a player from all running servers at once.\n\n" +
 			"**::restart** - Have the bot restart, allowing any updates to the source code to occur without requiring shutting down everything else.\n\n" +
-			"**::clearservers** - Delete and recreate a blank channel_list.json. This will unregister every server, including the admin channel. Used in case an update changes the structure of channel_list.json."
+			"**::clearservers** - Delete and recreate a blank channel_list.json. This will unregister every server, including the admin channel. Used in case an update changes the structure of channel_list.json.\n\n" +
+			"**::removeregistration** *Factorio_username* - Remove a username from the registration list."
 		);
 	}
 };
-
-//Cleans a message by escaping single quotes and double quotes, as well as clearing newlines
-//Single quotes are double escaped, as the C program will strip one and the Factorio server will strip the other
-function clean_message(message) {
-	let escape_chars = message.replace(/\\/g, "");
-	let single_quotes = escape_chars.replace(/'/g, "\\'");
-	let new_lines = single_quotes.replace(/\n/g, " ");
-	return new_lines;
-}
-
-//Function to get the key(s) relating to a value
-function getChannelKey(object, value) {
-	for (var key in object) {
-		if (object[key].id == value) return key;
-	}
-	return null;
-}
-
-//Function to safely handle writing to stdout
-function safeWrite(sendstring) {
-	if (!process.stdout.write(sendstring)) {
-		safe = false;
-		process.stdout.once('drain', safeWrite(sendstring));
-	} else {
-		safe = true;
-	}
-}
-var safe = true;
 
 //Update channel description with current list of players
 function updateDescription(channelid) {
@@ -595,10 +718,20 @@ function handleInput(input) {
 					playerlists[channelid][player_name].status = "alive";
 					playerlists[channelid][player_name].force = force_name;
 					break;
+				case "update":
+					playerlists[channelid][player_name] = { "force": force_name, "status": "alive" }
+					return;
 			}
 			fs.unlinkSync("playerlists.json");
 			fs.writeFileSync("playerlists.json", JSON.stringify(playerlists));
 			if (channels[channelid].type == "pvp-main") {
+				if (action == "force") {
+					let userid = getPlayerID(player_name);
+					if (userid !== null) {
+						removeRole(channelid, userid);
+						assignRole(channelid, force_name, userid);
+					}
+				}
 				updateDescription(channelid);
 				bot.channels.get(channels[channelid].id).sendMessage(message);
 				channelid = channelid + "-" + force_name;
@@ -753,7 +886,7 @@ bot.on('message', (message) => {
 		else return;
 	} else {
 		//Get an array of servers that match this channel id. End function if array length is 0 (unreigstered channel)
-		let sendto = getChannelKey(channels, message.channel.id);
+		let sendto = getChannelKey(message.channel.id);
 		var name;
 		if (message.member.nickname === null) name = message.author.username;
 		else name = message.member.nickname;
