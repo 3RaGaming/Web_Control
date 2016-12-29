@@ -235,6 +235,9 @@ factorio/channel_list.json
 # Bot Player List
 factorio/playerlists.json
 
+# Bot Discord <-> Factorio Registration List
+factorio/registration.json
+
 # Log File
 factorio/screenlog.0
 
