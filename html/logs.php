@@ -38,6 +38,7 @@
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
 		
+		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; } 
 		echo "\t\t})\xA";
 ?>
