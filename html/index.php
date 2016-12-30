@@ -88,7 +88,7 @@
 			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
 			echo "\t\t\t$('#server_name').attr('size',40);\xA";
 		}
-		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";"
+		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";";
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
 ?>
