@@ -38,7 +38,7 @@
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
 		
-		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
+		if(isset($server_tab_list)) { echo $server_tab_list; } 
 		echo "\t\t})\xA";
 ?>
 	</script>
@@ -50,34 +50,20 @@
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-
-			<button onclick="update_web_control(user_level);">Update Web Control</button>
-			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
-				<input type="hidden" id="update" name="update" value="yes" />
-			</form>
+			<a href="./index.php">Home</a>
 			<div style="float: right;">
-				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
 			</div>
 		</div>
-		<!-- console and chat windows -->
-		<div style="width: 52%; height: 99%; float: left;">
-			<textarea id="console" style="width: 98%; height: 92%;"></textarea>
-		</div>
 		<!-- server files -->
-		<div style="width: 46%; height: 99%; float: left;">
-			<table id="fileTable" class="tablesorter">
-				<thead>
-					<tr>
-						<th>File</th>
-						<th>Size</th>
-						<th>Creation</th>
-					</tr>
-				</thead>
-				<tbody>
-					
-				</tbody>
-			</table>
+		<div style="width: 92%; height: 99%; float: left;">
+			<div id="server_list">
+				<ul>
+					<li><a href="#tabs-1">Nunc tincidunt</a></li>
+					<li><a href="#tabs-2">Proin dolor</a></li>
+					<li><a href="#tabs-3">Aenean lacinia</a></li>
+				</ul>
+			</div>
 			<iframe id="file_iframe" style="display:none;"></iframe>
 		</div>
 	</div>
