@@ -1,9 +1,11 @@
 #!/bin/bash
 dir_base="$( dirname "${BASH_SOURCE[0]}" )";
+datetime=$(date +%F-%T)
 cd "$dir_base";
 #put all recieved arguments into an $args[index] array
 args=("$@");
 
+#used to clean certain variables
 function sanitize() {
 	# first, strip underscores
 	local work="$1"
@@ -15,6 +17,24 @@ function sanitize() {
 	# finally, lowercase with TR
 	clean=`echo -n $work | tr A-Z a-z`
 }
+
+#used to move server folder log files
+function move_logs() {
+    local work="$1"
+    if [ ! -d "$1/logs" ]; then
+        mkdir -p "$1/logs"
+    fi
+    #Work in a screenlog archive here
+	if [ -s "$1/screenlog.0" ]; then
+		mv "$1/screenlog.0" "$1/logs/screenlog.0-${datetime}"
+	fi
+    #Work in a factorio-current archive here
+	if [ -s "$1/factorio-current.log" ]; then
+		mv "$1/factorio-current.log" "$1/logs/factorio-current.log-${datetime}"
+	fi
+    
+}
+
 #global way to get status of server.
 function get_status() {
 	local work="$1"
@@ -91,7 +111,6 @@ else
 				#Work in a screenlog archive here
 				if [ -s "screenlog.0" ]; then
 					mkdir -p log
-					datetime=$(date +%F-%T)
 					mv screenlog.0 log/screenlog.0-${datetime}
 				fi
 				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
@@ -106,8 +125,9 @@ else
 				    #only set $server_file if the file appears to be valid.
 				    #$server_file="$clean";
 				fi
-				
+
 				#Load server_file if it's set. Or else just load latest
+                move_logs "$server"
 				if [ "$server_file" ]; then
 					echo -e "Starting Server. ${server_file}. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 					#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
@@ -122,14 +142,10 @@ else
 					echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 					if [ -e "$dir_server/screenlog.0" ]; then
 						LASTDATA=$(tail -n 50 $dir_server/screenlog.0)
+                        move_logs "$server"
 						echo "${LASTDATA}" > $dir_server/screenlog.0 ;
 					fi
-
-					#echo "Server under going Updates...";
-					#exit
-
-					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
-					
+					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"	
 				fi
 			fi
             ;;
@@ -144,7 +160,7 @@ else
 				echo "Server is already Stopped.";
 			fi
             ;;
-         
+
         'status')
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
