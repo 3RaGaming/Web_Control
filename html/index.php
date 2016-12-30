@@ -88,6 +88,7 @@
 			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
 			echo "\t\t\t$('#server_name').attr('size',40);\xA";
 		}
+		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";"
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
 ?>
@@ -110,6 +111,7 @@
 				<input type="hidden" id="update" name="update" value="yes" />
 			</form>
 			<button onclick="force_kill('forcekill')">force kill</button>
+			<a href="./logs.php" id="logs_link">Logs</a>
 			<div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
