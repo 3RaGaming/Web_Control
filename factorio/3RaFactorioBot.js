@@ -60,7 +60,7 @@ function getChannelKey(channelid) {
 //Function to get the Discord Unique ID of a registered username
 function getPlayerID(username) {
 	for (var userid in registration) {
-		if (registration[userid] == username) return userid;
+		if (registration[userid].toLowerCase() == username.toLowerCase()) return userid;
 	}
 	return null;
 }
@@ -162,9 +162,9 @@ var publiccommands = {
 			message.channel.sendMessage("This Factorio username has already been taken! If you believe this to be an error, please contact @Moderators");
 			return;
 		}
-		registration[userid] = username;
 		if (registration[userid]) message.channel.sendMessage("Your previously set Factorio username will be overwritten.");
 		else message.channel.sendMessage("Factorio username updated.");
+		registration[userid] = username;
 		fs.unlinkSync("registration.json");
 		fs.writeFileSync("registration.json", JSON.stringify(registration));
 		let server = findPlayer(username);
