@@ -59,9 +59,6 @@
 		<div style="width: 92%; height: 99%; float: left;">
 			<div id="server_list">
 				<ul>
-					<li><a href="#tabs-1">Nunc tincidunt</a></li>
-					<li><a href="#tabs-2">Proin dolor</a></li>
-					<li><a href="#tabs-3">Aenean lacinia</a></li>
 				</ul>
 			</div>
 			<iframe id="file_iframe" style="display:none;"></iframe>
