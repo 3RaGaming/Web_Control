@@ -45,6 +45,7 @@
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
 	<style type="text/css">@import "assets/base.css";</style>
+	<style type="text/css">@import "assets/log-ui.css";</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
