@@ -430,7 +430,7 @@ var admincommands = {
 				let server = command[1];
 				if (channels[server] || server == "all") {
 					let sendcommand = command.slice(2).join(" ");
-					let sendstring = "admin$" + server + "$/silent-command local s,e = pcall(loadstring('" + clean_message(sendcommand) + "')) e = e ~= nil and print('output$'" + server + "..tostring(e))\n" 
+					let sendstring = "admin$" + server + "$/silent-command local s,e = pcall(loadstring('" + clean_message(sendcommand) + "')) e = e ~= nil and print('output$(" + server + ")' ..tostring(e))\n" 
 					safeWrite(sendstring);
 				} else {
 					message.channel.sendMessage("Serverid is not a registered server or 'all'.");
