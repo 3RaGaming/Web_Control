@@ -59,7 +59,9 @@
 		<div style="width: 92%; height: 99%; float: left;">
 			<div id="server_list">
 				<ul>
+					<li><a href="#server_list-Managepgm">Managepgm</a></li>
 				</ul>
+				<div id="server_list-Managepgm">Dynamic tab for Managepgm</div>
 			</div>
 			<iframe id="file_iframe" style="display:none;"></iframe>
 		</div>
