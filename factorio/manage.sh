@@ -110,8 +110,8 @@ else
 			elif [ "$check" == "Manage Stopped" ]; then
 				#Work in a screenlog archive here
 				if [ -s "screenlog.0" ]; then
-					mkdir -p log
-					mv screenlog.0 log/screenlog.0-${datetime}
+					mkdir -p logs
+					mv screenlog.0 logs/screenlog.0-${datetime}
 				fi
 				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
 				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M"
