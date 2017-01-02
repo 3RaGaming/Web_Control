@@ -107,8 +107,18 @@ function removeRole(server, userid) {
 	for (let i = 0; i < channels[server].forces.length; i++) {
 		let rolename = channels[server].forces[i];
 		let role = bot.guilds.get("143772809418637313").roles.find("name", rolename);
-		if (role !== null && user.roles.has(role.id)) user.removeRole(role);
+		if (role !== null && user.roles.has(role.id)) user.removeRole(role.id);
 	}
+}
+
+//Replace any mentions with an actual tag
+function replaceMentions(message) {
+	let roleid = bot.guilds.get("143772809418637313").roles.find("name", "Moderators").id;
+	let tag = "<@&" + roleid + ">";
+	let moderators = message.replace(/@moderators/ig, tag);
+	let zackman = moderators.replace(/@zackman0010/ig, "<@129357924324605952>");
+	let arty = zackman.replace(/@articulating/ig, "<@180898179502309376>");
+	return arty;
 }
 
 //The list of public commands
@@ -322,7 +332,7 @@ var admincommands = {
 		}
 		//Get the name to tag the server as
 		let servername = channels[serverid].name;
-		channels[pvpid] = { id: message.channel.id, name: servername + "-" + forcename, type: "pvp", main: serverid };
+		channels[pvpid] = { id: message.channel.id, name: servername + "-" + forcename, type: "pvp", main: serverid, role: null };
 		message.channel.sendMessage("Messages from force *" + forcename + "* on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
 		channels[serverid].forces.push(pvpid);
 		let name_changed = message.channel.setName("factorio-" + servername + "-" + forcename);
@@ -342,6 +352,7 @@ var admincommands = {
 				message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'READ_MESSAGES': false }) //Don't allow anyone else to read
 			});
 		}
+		channels[pvpid].role = role.id;
 	},
 	"changename": function (message, command) {
 		//Change the name of a server
@@ -430,7 +441,7 @@ var admincommands = {
 				let server = command[1];
 				if (channels[server] || server == "all") {
 					let sendcommand = command.slice(2).join(" ");
-					let sendstring = "admin$" + server + "$/silent-command local s,e = pcall(loadstring('" + clean_message(sendcommand) + "')) e = e ~= nil and print('output$(" + server + ")' ..tostring(e))\n" 
+					let sendstring = "admin$" + server + "$/silent-command local s,e = pcall(loadstring('" + clean_message(sendcommand) + "')) e = e ~= nil and print('output$(" + server + ") ' .. tostring(e))\n";
 					safeWrite(sendstring);
 				} else {
 					message.channel.sendMessage("Serverid is not a registered server or 'all'.");
@@ -564,6 +575,26 @@ var admincommands = {
 		}
 		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
+	"viewregistration": function (message, command) {
+		if (channels.admin) {
+			if (channels.admin.id == message.channel.id) {
+				if (command.length != 2) {
+					message.channel.sendMessage("Correct usage: ::removeregistration *Factorio_username*");
+					return;
+				}
+				let username = command[1];
+				let userid = getPlayerID(username);
+				if (userid === null) {
+					message.channel.sendMessage("That username is not registered!");
+				} else {
+					let tag = "<@" + userid + ">";
+					message.channel.sendMessage("That username is registered to " + tag);
+				}
+				return;
+			}
+		}
+		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+	},
 	"serverhelp": function (message, command) {
 		message.channel.sendMessage("***SERVER/CHANNEL MANAGEMENT:*** \n\n\n" +
 			"**::setserver** *serverid servername* - Any messages internally tagged with serverid will be sent to the channel this command is run in, prefixed with '[servername]'.\n\n" +
@@ -589,7 +620,8 @@ var admincommands = {
 			"**::banhammer** *Factorio_username* - Bans a player from all running servers at once.\n\n" +
 			"**::restart** - Have the bot restart, allowing any updates to the source code to occur without requiring shutting down everything else.\n\n" +
 			"**::clearservers** - Delete and recreate a blank channel_list.json. This will unregister every server, including the admin channel. Used in case an update changes the structure of channel_list.json.\n\n" +
-			"**::removeregistration** *Factorio_username* - Remove a username from the registration list."
+			"**::removeregistration** *Factorio_username* - Remove a username from the registration list.\n\n" +
+			"**::viewregistration** *Factorio_username* - View the user that a certain username is registered to."
 		);
 	}
 };
@@ -657,6 +689,10 @@ function handleInput(input) {
 		message_sent.then((message) => {
 			message.channel.overwritePermissions(bot.guilds.get("143772809418637313").roles.get("143772809418637313"), { 'SEND_MESSAGES': false });
 		});
+		channels[servername].status = "stopped";
+		delete playerlists[servername];
+		fs.unlinkSync("playerlists.json");
+		fs.writeFileSync("playerlists.json", JSON.stringify(playerlists));
 	} else if (channelid == "admin") {
 		//Admin Warning System
 		if (!channels.admin) return;
@@ -794,6 +830,7 @@ function handleInput(input) {
 					//Message is from the web, send it to the main channel.
 					bot.channels.get(channels[channelid].id).sendMessage(message);
 				} else {
+					message = replaceMentions(message);
 					separator = message.indexOf(":");
 					let username = message.substring(0, separator);
 					if (message.charAt(0) == '[') {
@@ -818,7 +855,7 @@ function handleInput(input) {
 			}
 		} else {
 			//Server is not PvP, send message normally
-			let message = input.substring(separator + 1);
+			let message = replaceMentions(input.substring(separator + 1));
 			if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) message = message.replace(" (shout):", ":");
 			if (message == "**[ANNOUNCEMENT]** Server has started!") {
 				//Open the channel for chat if the server is running
