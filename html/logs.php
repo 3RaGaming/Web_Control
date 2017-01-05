@@ -76,6 +76,13 @@
 		if(isset($server_tab_list)) { echo $server_tab_list; } 
 		echo "\t\t})\xA";
 ?>
+		function load_list(server) {
+			$.get("logs.php.php?show=true&d=" + server, function(html) {
+				// replace the "ajax'd" data to the table body
+				$('#server_list-' + server).html(html);
+				return false;
+			});
+		}
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
 	<style type="text/css">@import "assets/log-ui.css";</style>
@@ -93,7 +100,7 @@
 		<div style="width: 92%; height: 99%; float: left;">
 			<div id="server_list">
 				<ul>
-					<li><a href="#server_list-Managepgm">Managepgm</a></li>
+					<li><a href="#server_list-Managepgm" onclick="load_list('Managepgm');">Managepgm</a></li>
 				</ul>
 				<div id="server_list-Managepgm">Dynamic tab for Managepgm</div>
 			</div>
