@@ -14,6 +14,10 @@
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "guest"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 	
+	if($user_level=="guest") {
+		die('Not allowed for guests');
+	}
+	
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
@@ -22,13 +26,25 @@
 		die('Error in server selection index.php');
 	}
 	
+	// function to print files size in human-readable form
+	function human_filesize($file, $decimals = 2) {
+		$bytes = filesize($file);
+		$sz = 'BKMGTP';
+		$factor = floor((strlen($bytes) - 1) / 3);
+		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+	}
+	
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
 				$server_dir = $base_dir . $server_select;
-				$server_dir_logs = $server_dir . "/logs";
-				$dir = dir($server_dir_logs);
-				print_r($dir);
+				$full_dir = $server_dir . "/logs";
+				foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
+					$file_full_path = "$full_dir$file";
+					$size = human_filesize("$file_full_path");
+					$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
+					echo " <a href=\"#\" onClick=\"Download('logs.php?d=".$server_select."&download=".$file."')\">$file</a> - $size - $date <br />";
+				}
 				die();
 			}
 		}
