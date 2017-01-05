@@ -28,7 +28,8 @@
 				$server_dir = $base_dir . $server_select;
 				$server_dir_logs = $server_dir . "/logs";
 				$dir = dir($server_dir_logs);
-				die($dir);
+				echo "$dir";
+				die();
 			}
 		}
 		if(isset($_REQUEST['filename'])) {
