@@ -28,7 +28,7 @@
 				$server_dir = $base_dir . $server_select;
 				$server_dir_logs = $server_dir . "/logs";
 				$dir = dir($server_dir_logs);
-				echo "$dir";
+				print_r($dir);
 				die();
 			}
 		}
