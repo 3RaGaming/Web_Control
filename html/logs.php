@@ -21,6 +21,23 @@
 		header("Location: ./login.php");
 		die('Error in server selection index.php');
 	}
+	
+	if(isset($_REQUEST)) {
+		if(isset($_REQUEST['show'])) {
+			if($_REQUEST['show']=="true") {
+				$server_dir = $base_dir . $server_select;
+				$server_dir_logs = $server_dir . "/logs";
+				$dir = dir($server_dir_logs);
+				die($dir);
+			}
+		}
+		if(isset($_REQUEST['filename'])) {
+			$file_path = $base_dir . $server_select . "/" . $_REQUEST['filename'];
+			if(file_exists($file_path)) {
+				#something
+			}
+		}
+	}
 ?>
 </script>
 <html>
