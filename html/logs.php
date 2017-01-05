@@ -37,8 +37,15 @@
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
-				$server_dir = $base_dir . $server_select;
-				$full_dir = $server_dir . "/logs";
+				$server_dir = $base_dir . $server_select . "/";
+				if(isset($_REQUEST['d'])) {
+					if($_REQUEST['d']=="Managepgm") {
+						$server_dir = $base_dir;
+					} elseif($_REQUEST['d']!=$server_select) {
+						die('Error in check');
+					}
+				}
+				$full_dir = $server_dir . "logs";
 				foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
 					$file_full_path = "$full_dir/$file";
 					$size = human_filesize("$file_full_path");
