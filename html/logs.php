@@ -40,7 +40,7 @@
 				$server_dir = $base_dir . $server_select;
 				$full_dir = $server_dir . "/logs";
 				foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
-					$file_full_path = "$full_dir$file";
+					$file_full_path = "$full_dir/$file";
 					$size = human_filesize("$file_full_path");
 					$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
 					echo " <a href=\"#\" onClick=\"Download('logs.php?d=".$server_select."&download=".$file."')\">$file</a> - $size - $date <br />";
