@@ -21,10 +21,6 @@
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
-	if(!isset($server_select)) {
-		header("Location: ./login.php");
-		die('Error in server selection index.php');
-	}
 	
 	// function to print files size in human-readable form
 	function human_filesize($file, $decimals = 2) {
