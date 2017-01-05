@@ -46,7 +46,7 @@ foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 			$server_select = $dir;
 		}
 		$server_tab_list = $server_tab_list . '
-		$("#server_list ul").append(\'<li><a href="#server_list-'.$dir.'" onClick="load_list(\''.$dir.''\);">'.$dir.'</a></li>\');
+		$("#server_list ul").append(\'<li><a href="#server_list-'.$dir.'" onClick="load_list(\''.$dir.'\');">'.$dir.'</a></li>\');
 		$("#server_list").append(\'<div id="server_list-'.$dir.'">Dynamic tab for '.$dir.'</div>\');';
 	}
 }
