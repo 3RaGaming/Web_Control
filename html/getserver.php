@@ -19,7 +19,7 @@ if(isset($_REQUEST['d'])) {
 $server_select_dropdown = "toSelect = document.getElementById(\"server_select\");";
 foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 	$dir = str_replace($base_dir, '', $dir);
-	if($dir!="node_modules"&&$dir!="log") {
+	if($dir!="node_modules"&&$dir!="logs") {
 		if($temp_select=="$dir") {
 			$server_select = $dir;
 			$server_select_dropdown = $server_select_dropdown . '
@@ -41,7 +41,7 @@ foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 $server_tab_list = "$( function() { $( \"#server_list\" ).tabs(); } );";
 foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 	$dir = str_replace($base_dir, '', $dir);
-	if($dir!="node_modules"&&$dir!="log") {
+	if($dir!="node_modules"&&$dir!="logs") {
 		if($temp_select=="$dir") {
 			$server_select = $dir;
 			$server_tab_list = $server_tab_list . '
