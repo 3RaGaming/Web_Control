@@ -141,9 +141,13 @@ else
 				else
 					echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 					if [ -e "$dir_server/screenlog.0" ]; then
-						LASTDATA=$(tail -n 50 $dir_server/screenlog.0)
+						LASTSCREEN=$(tail -n 50 $dir_server/screenlog.0)
                         move_logs "$server"
-						echo "${LASTDATA}" > $dir_server/screenlog.0 ;
+						echo "${LASTSCREEN}" > $dir_server/screenlog.0 ;
+					fi
+					if [ -e "$dir_server/chatlog.0" ]; then
+						LASTCHAT=$(tail -n 50 $dir_server/chatlog.0)
+						echo "${LASTCHAT}" > $dir_server/chatlog.0 ;
 					fi
 					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"	
 				fi
