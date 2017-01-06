@@ -36,6 +36,7 @@
 				$server_dir = $base_dir . $server_select . "/";
 				if(isset($_REQUEST['d'])) {
 					if($_REQUEST['d']=="Managepgm") {
+						$server_select="Managepgm";
 						$server_dir = $base_dir;
 					} elseif($_REQUEST['d']!=$server_select) {
 						die('Error in check');
@@ -52,9 +53,11 @@
 			}
 		}
 		if(isset($_REQUEST['download'])&&isset($_REQUEST['d'])) {
-			$server_dir = $base_dir . $_REQUEST['d'] . "/logs";
+			$server_dir = $base_dir . $_REQUEST['d'] . "/logs/";
+			$server_name = $_REQUEST['d'];
 			if($_REQUEST['d']=="Managepgm") {
-				$server_dir = $base_dir . "logs";
+				$server_dir = $base_dir . "logs/";
+				$server_name = "managepgm";
 			}
 			if(file_exists($server_dir)) {
 				$file_path = $server_dir . $_REQUEST['download'];
@@ -75,7 +78,7 @@
 					// sanitize the file request, keep just the name and extension
 					// also, replaces the file location with a preset one ('./myfiles/' in this example)
 					$path_parts = pathinfo($file_path);
-					$file_name  = $path_parts['basename'];
+					$file_name  = $path_parts['filename'];
 					$file_ext   = $path_parts['extension'];
 					// allow a file to be streamed instead of sent as an attachment
 					$is_attachment = isset($_REQUEST['stream']) ? false : true;
@@ -90,11 +93,11 @@
 							header("Pragma: public");
 							header("Expires: -1");
 							header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
-							header("Content-Disposition: attachment; filename=\"$file_name\"");
+							header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
 					
 							// set appropriate headers for attachment or streamed file
 							if ($is_attachment)
-									header("Content-Disposition: attachment; filename=\"$file_name\"");
+									header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
 							else
 									header('Content-Disposition: inline;');
 					
@@ -105,8 +108,8 @@
 									"zip" => "application/zip",
 									"tar.gz" => "application/tar+gzip"
 									);
-							$ctype = isset($content_types[$file_ext]) ? $content_types[$file_ext] : $ctype_default;
-							header("Content-Type: " . $ctype);
+							$ctype = isset($content_types["log"]) ? $content_types["log"] : $ctype_default;
+							header("Content-Type: text/plain");
 							//check if http_range is sent by browser (or download manager)
 							if(isset($_SERVER['HTTP_RANGE'])) {
 								list($size_unit, $range_orig) = explode('=', $_SERVER['HTTP_RANGE'], 2);
@@ -165,6 +168,9 @@
 					}
 					/*   END OF FILE DOWNLOAD */
 					//no reason to continue
+					die();
+				} else {
+					echo "NOT exists $file_path $server_name";
 					die();
 				}
 			}
