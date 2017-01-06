@@ -26,7 +26,7 @@ function move_logs() {
     fi
     #Work in a screenlog archive here
 	if [ -s "$1/screenlog.0" ]; then
-		mv "$1/screenlog.0" "$1/logs/screenlog-${datetime}.0"
+		mv "$1/screenlog.0" "$1/logs/screenlog-${datetime}.log"
 	fi
     #Work in a factorio-current archive here
 	if [ -s "$1/factorio-current.log" ]; then
