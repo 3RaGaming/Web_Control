@@ -102,13 +102,7 @@
 									header('Content-Disposition: inline;');
 					
 							// set the mime type based on extension, add yours if needed.
-							$ctype_default = "application/octet-stream";
-							$content_types = array(
-									"exe" => "application/octet-stream",
-									"zip" => "application/zip",
-									"tar.gz" => "application/tar+gzip"
-									);
-							$ctype = isset($content_types["log"]) ? $content_types["log"] : $ctype_default;
+							$ctype = "application/octet-stream";
 							header("Content-Type: text/plain");
 							//check if http_range is sent by browser (or download manager)
 							if(isset($_SERVER['HTTP_RANGE'])) {
