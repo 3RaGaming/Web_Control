@@ -42,6 +42,15 @@
 						die('Error in check');
 					}
 				}
+				$current_array = ("screenlog.0", "factorio_current.log");
+				foreach($current_array as $value) {
+					if(file_exists($server_dir.$value)) {
+						$file_full_path = $server_dir.$value;
+						$size = human_filesize("$file_full_path");
+						$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
+						echo " <a href=\"#\" onClick=\"Download('logs.php?d=".$server_select."&download=$value')\">$value</a> - $size - $date <br />";
+					}
+				}
 				$full_dir = $server_dir . "logs";
 				foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
 					$file_full_path = "$full_dir/$file";
@@ -53,11 +62,16 @@
 			}
 		}
 		if(isset($_REQUEST['download'])&&isset($_REQUEST['d'])) {
-			$server_dir = $base_dir . $_REQUEST['d'] . "/logs/";
 			$server_name = $_REQUEST['d'];
 			if($_REQUEST['d']=="Managepgm") {
 				$server_dir = $base_dir . "logs/";
 				$server_name = "managepgm";
+			}
+			//Current running log file, or archived log file?
+			if($_REQUEST['download']=="screenlog.0"||$_REQUEST['download']=="factorio_current.log")) {
+				$server_dir = $base_dir . $_REQUEST['d'] . "/";
+			} else {
+				$server_dir = $base_dir . $_REQUEST['d'] . "/logs/";
 			}
 			if(file_exists($server_dir)) {
 				$file_path = $server_dir . $_REQUEST['download'];
