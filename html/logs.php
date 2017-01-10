@@ -42,7 +42,7 @@
 						die('Error in check');
 					}
 				}
-				$current_array = ("screenlog.0", "factorio_current.log");
+				$current_array = array("screenlog.0", "factorio-current.log");
 				foreach($current_array as $value) {
 					if(file_exists($server_dir.$value)) {
 						$file_full_path = $server_dir.$value;
@@ -68,7 +68,7 @@
 				$server_name = "managepgm";
 			}
 			//Current running log file, or archived log file?
-			if($_REQUEST['download']=="screenlog.0"||$_REQUEST['download']=="factorio_current.log")) {
+			if($_REQUEST['download']=="screenlog.0"||$_REQUEST['download']=="factorio-current.log") {
 				$server_dir = $base_dir . $_REQUEST['d'] . "/";
 			} else {
 				$server_dir = $base_dir . $_REQUEST['d'] . "/logs/";
