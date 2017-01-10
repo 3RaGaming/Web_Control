@@ -13,12 +13,12 @@ if(!isset($_SESSION['login'])) {
 $base_dir="/var/www/factorio/";
 include(getcwd().'/getserver.php');
 if(!isset($server_select)) {
-	die('Error in server selection process.php');
+	die('Error s'.__LINE__.': In server selection files.php');
 }
 
 if(isset($_REQUEST['start'])) {
-	if($_SESSION['login']['user']=="guest") {
-		echo "Guests may not Start/Stop server";
+	if($_SESSION['login']['level']=="viewonly") {
+		echo "You have read only access.";
 	} else {
 		if(file_exists("$base_dir$server_select/server-settings.json")) {
 			$server_settings_path = "$base_dir$server_select/server-settings.json";
@@ -72,16 +72,16 @@ if(isset($_REQUEST['start'])) {
 	$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "status" "'.$_SESSION['login']['user'].'"');
 	echo $output;
 } elseif(isset($_REQUEST['stop'])) {
-	if($_SESSION['login']['user']=="guest") {
-		echo "Guests may not Start/Stop server";
+	if($_SESSION['login']['level']=="viewonly") {
+		echo "You have view only access.";
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
 		$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "stop" "'.$_SESSION['login']['user'].'"');
 		echo $output;
 	}
 } elseif(isset($_REQUEST['forcekill'])) {
-	if($_SESSION['login']['user']=="guest") {
-		echo "You really think we'd allow guests to force kill the server?";
+	if($_SESSION['login']['level']=="viewonly") {
+		echo "You have view only access.";
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
 		$output = shell_exec('pkill -9 factorio');
@@ -93,8 +93,8 @@ if(isset($_REQUEST['start'])) {
 		echo "Servers killed. You monster.";
 	}
 } elseif(isset($_REQUEST['command'])) {
-	if($_SESSION['login']['user']=="guest") {
-		echo "Guests can't send commands (yet) :( ";//".$_REQUEST['command'];
+	if($_SESSION['login']['level']=="viewonly") {
+		echo "You have view only access.";//".$_REQUEST['command'];
 	} else {
 		//screen -S factorio1 -X at 0 stuff 'hello\n'
 		$command_decode = trim ( $_REQUEST['command'] , " \t\n\r\0\x0B" );

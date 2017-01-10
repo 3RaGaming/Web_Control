@@ -11,11 +11,11 @@
 		}
 	}
 	
-	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "guest"; }
+	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 	
-	if($user_level=="guest") {
-		die('Not allowed for guests');
+	if($user_level=="viewonly") {
+		die('Not allowed for view only');
 	}
 	
 	//Set the base directory the factorio servers will be stored
@@ -62,8 +62,8 @@
 			if(file_exists($server_dir)) {
 				$file_path = $server_dir . $_REQUEST['download'];
 				if(file_exists($file_path)) {
-					if($_SESSION['login']['level']=="guest") {
-						die('Guests may not download files\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
+					if($_SESSION['login']['level']=="viewonly") {
+						die('You have read only access.\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
 					}
 					// file download found on http://www.media-division.com/php-download-script-with-resume-option/
 					// get the file request, throw error if nothing supplied
@@ -186,7 +186,7 @@
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		<?php if(isset($server_select)) { echo "\t\t$(\"logs\").attr(\"href\", \"./logs.php?$server_select\");\xA"; } ?>
 		//you can try to change this if you really want. Validations are also done server side.
-		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
+		//This is just for a better graphical experience, ie: if you have view only access, why upload a file, just to be told you can't do that?
 <?php
 		echo "\t\tvar user_level = \"$user_level\";\xA";
 		echo "\t\tvar user_name = \"$user_name\";\xA";
@@ -206,7 +206,7 @@
 			});
 		}
 		function Download(url) {
-			if (user_level == "guest") { return; }
+			if (user_level == "viewonly") { return; }
 			document.getElementById('file_iframe').src = url;
 		}
 	</script>

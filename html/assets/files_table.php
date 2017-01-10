@@ -17,13 +17,11 @@ if(!isset($_SESSION['login']['level'])) {
 $base_dir="/var/www/factorio/";
 include('../getserver.php');
 if(!isset($server_select)) {
-	die('Error in server selection files.php');
+	die('Error s'.__LINE__.': In server selection files.php');
 }
 
-/* THIS IS FOR FILE LIST AND SUCH */
-//This part is included from index.php
-if(!isset($base_dir)) { exit(); die(); }
-if(!isset($server_select)) { exit(); die(); }
+if(!isset($base_dir)) { die(); }
+if(!isset($server_select)) { die(); }
 
 // function to print files size in human-readable form
 function human_filesize($file, $decimals = 2) {
@@ -40,28 +38,23 @@ $tdc='</td><td>';
 $tde='</td>';
 
 if(isset($server_select)) {
-	$full_dir="$base_dir$server_select/saves/";
-	$file_users_path = "$base_dir$server_select/saves.txt";
+	$file_dir="$base_dir$server_select/saves/";
+	$file_users_path = "$base_dir$server_select/saves.json";
 	if(file_exists($file_users_path)) {
-		$filelist = file($file_users_path);
-		foreach ($filelist as $fileuser) {
-			$user_details = explode('|', $fileuser);
-			if(isset($user_details[0])&&isset($user_details[1])) {
-				$file_list[$user_details[0]]=$user_details[1];
-			}
-		}
+		$jsonString = file_get_contents($file_users_path);
+		$file_list = json_decode($jsonString, true);
 	}
 	
-	foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
+	foreach(array_diff(scandir("$file_dir"), array('..', '.')) as $file) {
 		$file_full_path = "$full_dir$file";
 		$size = human_filesize("$file_full_path");
 		$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
-		if($_SESSION['login']['user']=="guest") {
+		if($_SESSION['login']['level']=="viewonly") {
 			echo "$trs$tds <input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc $file $tdc $size $tdc $date $tdc ";
 		} else {
 			echo "$trs$tds <input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc <a href=\"#\" onClick=\"Download('files.php?d=".$server_select."&download=".$file."')\">$file</a> $tdc $size $tdc $date $tdc ";
 		}
-		if(isset($file_list[$file])) { echo $file_list[$file]; } else { echo "server"; }
+		echo $file_list[$file] ?? "server";
 		echo " $tde $tre
 		";
 	}
