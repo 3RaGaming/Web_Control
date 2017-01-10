@@ -111,7 +111,7 @@ else
 				#Work in a screenlog archive here
 				if [ -s "screenlog.0" ]; then
 					mkdir -p logs
-					mv screenlog.0 logs/screenlog.0-${datetime}
+					mv screenlog.0 logs/screenlog-${datetime}.log
 				fi
 				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
 				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M"

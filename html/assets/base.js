@@ -1035,13 +1035,13 @@
 
 
 function Download(url) {
-    if (user_level == "guest") { return; }
+    if (user_level == "viewonly") { return; }
 	document.getElementById('file_iframe').src = url;
 }
 
 function server_sss(cmd) {
-    if(user_level == "guest" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
-        alert("Guest's may not start/stop the server");
+    if(user_level == "viewonly" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
+        alert("You have view only access.");
         return;
     }
 	if(cmd == "forcekill") {
@@ -1064,8 +1064,8 @@ function server_sss(cmd) {
 	};
 }
 function force_kill(cmd) {
-	if(user_level == "guest") {
-        alert("Guests may not force kill the server(s)");
+	if(user_level == "viewonly") {
+        alert("You have view only access");
         return;
     }
 	if(cmd == "forcekill") {
@@ -1087,8 +1087,8 @@ function force_kill(cmd) {
     }
 }
 function command() {
-    if(user_level == "guest") {
-        alert("Guests may not send commands :(");
+    if(user_level == "viewonly") {
+        alert("You have view only access");
         return;
     }
     var http = new XMLHttpRequest();
@@ -1160,7 +1160,7 @@ function uploadCanceled() {
 }
 
 function upload() {
-	if ($('#upload_file').val == "" || user_level == "guest") {
+	if ($('#upload_file').val == "" || user_level == "viewonly") {
 		return;
 	}
 	var the_file;
@@ -1274,15 +1274,15 @@ $(document).ready(function() {
 	});
 	//Upload button click event
 	$('#upload_button').on('click', function() {
-        if(user_level == "guest") {
-        	alert("guests may not upload files");
+        if(user_level == "viewonly") {
+        	alert("You have view only access.");
         	return;
         }
 		$('#upload_file').click();
 	});
 	$('#command').keydown(function(event) {
 		if (event.keyCode == 13) command();
-        if (user_level == "guest") { return; }
+        if (user_level == "viewonly") { return; }
 		if (event.keyCode == 38) command_history('up');
 		if (event.keyCode == 40) command_history('down');
 	});

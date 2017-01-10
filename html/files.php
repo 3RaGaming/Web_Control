@@ -11,13 +11,13 @@ if(!isset($_SESSION['login'])) {
 	}
 }
 if(!isset($_SESSION['login']['level'])) {
-	die('error with user permissions');
+	die('Error with user permissions');
 }
 //Set the base directory the factorio servers will be stored
 $base_dir="/var/www/factorio/";
 include('./getserver.php');
 if(!isset($server_select)) {
-	die('Error in server selection files.php');
+	die('Error s'.__LINE__.': In server selection files.php');
 }
 
 if(isset($_REQUEST['archive'])) {
@@ -42,13 +42,13 @@ if(isset($_REQUEST['archive'])) {
 	}
 	die();
 } elseif(isset($_REQUEST['download'])) {
-	if($_SESSION['login']['level']=="guest") {
-		die('Guests may not download files\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
+	if($_SESSION['login']['level']=="viewonly") {
+		die('You have view only access.\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
 	} 
 	if(empty($_REQUEST['download']))
 	{
 		header("HTTP/1.0 400 Bad Request");
-		exit;
+		die();
 	}
 	//file download requested.
 
@@ -109,7 +109,7 @@ if(isset($_REQUEST['archive'])) {
 				} else {
 					$range = '';
 					header('HTTP/1.1 416 Requested Range Not Satisfiable');
-					exit;
+					die();
 				}
 			} else {
 				$range = '';
@@ -138,36 +138,35 @@ if(isset($_REQUEST['archive'])) {
 				flush();
 				if (connection_status()!=0) {
 					@fclose($file);
-					exit;
+					die();
 				}			
 			}
 			// file save was a success
 			@fclose($file);
-			exit;
+			die();
 		} else {
 			// file couldn't be opened
 			header("HTTP/1.0 500 Internal Server Error");
-			exit;
+			die();
 		}
 	} else {
 		// file does not exist
 		header("HTTP/1.0 404 Not Found");
-		die('dead');
-		exit;
+		die();
 	}
 	/*   END OF FILE DOWNLOAD */
 	//no reason to continue
 	die();
 	
 } elseif(isset($_REQUEST['upload'])) {
-	if($_SESSION['login']['level']=="guest") {
-		die('Guests may not upload files');
+	if($_SESSION['login']['level']=="viewonly") {
+		die('You have read only access.');
 	} else {
 		//Valdidate name
 		if(isset($_FILES['file']['name'])) {
 			$filename = strtolower($_FILES['file']['name']);
 		} else { 
-			die('Error n: Invalid File'); 
+			die('Error n'.__LINE__.': Invalid File'); 
 		}
 		
 		//Validate size
@@ -178,7 +177,7 @@ if(isset($_REQUEST['archive'])) {
 				die('File must be less than 30M'); 
 			}
 		} else { 
-			die('Error s: Invalid File'); 
+			die('Error s'.__LINE__.': Invalid File'); 
 		}
 		
 		if(isset($_FILES['file']['type'])) {
@@ -189,7 +188,7 @@ if(isset($_REQUEST['archive'])) {
 				die($fileType.'Invalid File Type');
 			}
 		} else {
-			die('Error t: Invalid File');
+			die('Error t'.__LINE__.': Invalid File');
 		}
 		
 		if(isset($_FILES['file']['tmp_name'])) {
@@ -200,20 +199,20 @@ if(isset($_REQUEST['archive'])) {
 				switch($res) {
 					case ZipArchive::ER_NOZIP:
 						unlink($fileTmp);
-						die('Not a zip archive');
+						die('Error z'.__LINE__.': Not a zip archive');
 					case ZipArchive::ER_INCONS :
 						unlink($fileTmp);
-						die('zip consistency check failed');
+						die('Error z'.__LINE__.': Zip consistency check failed');
 					case ZipArchive::ER_CRC :
 						unlink($fileTmp);
-						die('zip checksum failed');
+						die('Error z'.__LINE__.': Zip checksum failed');
 					default:
 						unlink($fileTmp);
-						die('zip error ' . $res);
+						die('Error z'.__LINE__.': Zip error ' . $res);
 				}
 			}
 		} else {
-			die('Error t: Invalid File');
+			die('Error t'.__LINE__.': Invalid File');
 		}
 
 		$filename = preg_replace('/\s+/', '_', $filename);
@@ -227,34 +226,45 @@ if(isset($_REQUEST['archive'])) {
 			//fclose($fh);
 			//die( "invalid zip file" );
 		//}
-		$file_replaced = false;
-		$file_users_path = "$base_dir$server_select/saves.txt";
-		$rows_array = array();
+		$file_users_path = "$base_dir$server_select/saves.json";
 		if(file_exists($file_users_path)) {
-			$file_editors = file($file_users_path);
-			foreach ($file_editors as $line) {
-				$values = explode('|', $line);
-				if($values[0]==$filename) {
-					//if the file is listed, omit it from the array and report it
-					$file_replaced = true;
-					$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
-				} else {
-					$rows_array[] = $line;
-				}
+			$jsonString = file_get_contents($file_users_path);
+			$file_list = json_decode($jsonString, true);
+			$file_list_prehash = md5(serialize($file_list));
+			if(isset($file_list[$filename])) {
+				$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
 			}
 		}
-			
-		
-		$rows_array[] = $filename . "|" . $_SESSION['login']['user'];
-		$lines_to_write = implode("\n", $rows_array);
-		$file_users = fopen($file_users_path, 'w');
-		fwrite($file_users, $lines_to_write);
-		fclose($file_users);
+		$file_list[$filename] = $_SESSION['login']['user'];
+
 		if ($_FILES["file"]["error"] == UPLOAD_ERR_OK) {
-			move_uploaded_file($fileTmp, $full_file_path);
-			echo "complete";
+			$move_uploaded_file = move_uploaded_file($fileTmp, $full_file_path);
+			$file_list_prehash = null;
+			if($move_uploaded_file == true) {
+				$file_users_path = "$base_dir$server_select/saves.json";
+				if(file_exists($file_users_path)) {
+					//Grab file list json and put into array
+					$jsonString = file_get_contents($file_users_path);
+					$file_list = json_decode($jsonString, true);
+					//md5 hash to check if it changes
+					$file_list_prehash = md5(serialize($file_list));
+					if(isset($file_list[$filename])) {
+						$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
+					}
+				}
+				$file_list[$filename] = $_SESSION['login']['user'];
+				//if hash changes, a user over writ someones previous file, or a file has been aded
+				if($file_list_prehash !== md5(serialize($file_list))) {
+					$newJsonString = json_encode($file_list, JSON_PRETTY_PRINT);
+					file_put_contents($file_users_path, $newJsonString);
+				}
+				//does echo do anything here?
+				echo "complete";
+			} else {
+				$_SESSION['login']['reload_report']='Error u251: File failed to upload.';
+			}
 		} else {
-			die($_FILES["file"]["error"]);
+			$_SESSION['login']['reload_report']='Error u254: '.$_FILES["file"]["error"];
 		}
 		//$pre = file_put_contents($full_file_path, $fh);
 		//fwrite($fh, $pre);
@@ -264,8 +274,8 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 }  elseif(isset($_REQUEST['delete'])) {
-	if($_SESSION['login']['level']=="guest") {
-		die('Guests may not delete files');
+	if($_SESSION['login']['level']=="viewonly") {
+		die('You have view only access.');
 	} else {
 		if(empty($_REQUEST['delete']))
 		{
@@ -277,7 +287,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 } else {
-	die('No action requested');
+	die('Error u'.__LINE__.': No action requested');
 }
 
 ?>
