@@ -10,18 +10,18 @@
 			die();
 		}
 	}
-	
+
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
-	
+
 	if($user_level=="viewonly") {
 		die('Not allowed for view only');
 	}
-	
+
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
-	
+
 	// function to print files size in human-readable form
 	function human_filesize($file, $decimals = 2) {
 		$bytes = filesize($file);
@@ -29,7 +29,7 @@
 		$factor = floor((strlen($bytes) - 1) / 3);
 		return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
 	}
-	
+
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
@@ -40,6 +40,15 @@
 						$server_dir = $base_dir;
 					} elseif($_REQUEST['d']!=$server_select) {
 						die('Error in check');
+					}
+				}
+				$current_array = array("screenlog.0", "factorio-current.log");
+				foreach($current_array as $value) {
+					if(file_exists($server_dir.$value)) {
+						$file_full_path = $server_dir.$value;
+						$size = human_filesize("$file_full_path");
+						$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
+						echo " <a href=\"#\" onClick=\"Download('logs.php?d=".$server_select."&download=$value')\">$value</a> - $size - $date <br />";
 					}
 				}
 				$full_dir = $server_dir . "logs";
@@ -53,11 +62,16 @@
 			}
 		}
 		if(isset($_REQUEST['download'])&&isset($_REQUEST['d'])) {
-			$server_dir = $base_dir . $_REQUEST['d'] . "/logs/";
 			$server_name = $_REQUEST['d'];
 			if($_REQUEST['d']=="Managepgm") {
 				$server_dir = $base_dir . "logs/";
 				$server_name = "managepgm";
+			}
+			//Current running log file, or archived log file?
+			if($_REQUEST['download']=="screenlog.0"||$_REQUEST['download']=="factorio-current.log") {
+				$server_dir = $base_dir . $_REQUEST['d'] . "/";
+			} else {
+				$server_dir = $base_dir . $_REQUEST['d'] . "/logs/";
 			}
 			if(file_exists($server_dir)) {
 				$file_path = $server_dir . $_REQUEST['download'];
@@ -67,14 +81,14 @@
 					}
 					// file download found on http://www.media-division.com/php-download-script-with-resume-option/
 					// get the file request, throw error if nothing supplied
-					
+
 					// hide notices
 					@ini_set('error_reporting', E_ALL & ~ E_NOTICE);
-					
+
 					//- turn off compression on the server
 					@apache_setenv('no-gzip', 1);
 					@ini_set('zlib.output_compression', 'Off');
-					
+
 					// sanitize the file request, keep just the name and extension
 					// also, replaces the file location with a preset one ('./myfiles/' in this example)
 					$path_parts = pathinfo($file_path);
@@ -94,21 +108,14 @@
 							header("Expires: -1");
 							header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
 							header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
-					
+
 							// set appropriate headers for attachment or streamed file
-							if ($is_attachment)
-									header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
-							else
-									header('Content-Disposition: inline;');
-					
-							// set the mime type based on extension, add yours if needed.
-							$ctype_default = "application/octet-stream";
-							$content_types = array(
-									"exe" => "application/octet-stream",
-									"zip" => "application/zip",
-									"tar.gz" => "application/tar+gzip"
-									);
-							$ctype = isset($content_types["log"]) ? $content_types["log"] : $ctype_default;
+							if ($is_attachment) {
+								header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
+							} else {
+								header('Content-Disposition: inline;');
+							}
+
 							header("Content-Type: text/plain");
 							//check if http_range is sent by browser (or download manager)
 							if(isset($_SERVER['HTTP_RANGE'])) {
@@ -127,12 +134,12 @@
 							}
 							//figure out download piece from range (if set)
 							list($seek_start, $seek_end) = explode('-', $range, 2);
-					
+
 							//set start and end based on range (if set), else set defaults
 							//also check for invalid ranges.
 							$seek_end   = (empty($seek_end)) ? ($file_size - 1) : min(abs(intval($seek_end)),($file_size - 1));
 							$seek_start = (empty($seek_start) || $seek_end < abs(intval($seek_start))) ? 0 : max(abs(intval($seek_start)),0);
-					
+
 							//Only send partial content header if downloading a piece of the file (IE workaround)
 							if ($seek_start > 0 || $seek_end < ($file_size - 1)) {
 								header('HTTP/1.1 206 Partial Content');
@@ -150,7 +157,7 @@
 								if (connection_status()!=0) {
 									@fclose($file);
 									exit;
-								}			
+								}
 							}
 							// file save was a success
 							@fclose($file);
@@ -193,9 +200,9 @@
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
-		
+
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
-		if(isset($server_tab_list)) { echo $server_tab_list; } 
+		if(isset($server_tab_list)) { echo $server_tab_list; }
 		echo "\t\t})\xA";
 ?>
 		function load_list(server) {

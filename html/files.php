@@ -97,7 +97,7 @@ if(isset($_REQUEST['archive'])) {
 					"zip" => "application/zip",
 					"tar.gz" => "application/tar+gzip"
 					);
-			$ctype = isset($content_types[$file_ext]) ? $content_types[$file_ext] : $ctype_default;
+			$ctype = $content_types[$file_ext] ?? $ctype_default;
 			header("Content-Type: " . $ctype);
 			//check if http_range is sent by browser (or download manager)
 			if(isset($_SERVER['HTTP_RANGE'])) {
