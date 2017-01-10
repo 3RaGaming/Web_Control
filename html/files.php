@@ -234,11 +234,12 @@ if(isset($_REQUEST['archive'])) {
 			if(isset($file_list[$filename])) {
 				$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
 			}
-			$file_list[$filename] = $_SESSION['login']['user'];
 		}
+		$file_list[$filename] = $_SESSION['login']['user'];
 
 		if ($_FILES["file"]["error"] == UPLOAD_ERR_OK) {
 			$move_uploaded_file = move_uploaded_file($fileTmp, $full_file_path);
+			$file_list_prehash = null;
 			if($move_uploaded_file == true) {
 				$file_users_path = "$base_dir$server_select/saves.json";
 				if(file_exists($file_users_path)) {
@@ -250,12 +251,12 @@ if(isset($_REQUEST['archive'])) {
 					if(isset($file_list[$filename])) {
 						$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
 					}
-					$file_list[$filename] = $_SESSION['login']['user'];
-					//if hash changes, a user over writ someones previous file, or a file has been aded
-					if($file_list_prehash != md5(serialize($file_list))) {
-						$newJsonString = json_encode($file_list, JSON_PRETTY_PRINT);
-						file_put_contents($file_users_path, $newJsonString);
-					}
+				}
+				$file_list[$filename] = $_SESSION['login']['user'];
+				//if hash changes, a user over writ someones previous file, or a file has been aded
+				if($file_list_prehash !== md5(serialize($file_list))) {
+					$newJsonString = json_encode($file_list, JSON_PRETTY_PRINT);
+					file_put_contents($file_users_path, $newJsonString);
 				}
 				//does echo do anything here?
 				echo "complete";

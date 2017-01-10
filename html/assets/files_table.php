@@ -38,14 +38,14 @@ $tdc='</td><td>';
 $tde='</td>';
 
 if(isset($server_select)) {
-	$file_dir="$base_dir$server_select/saves/";
+	$full_dir="$base_dir$server_select/saves/";
 	$file_users_path = "$base_dir$server_select/saves.json";
 	if(file_exists($file_users_path)) {
 		$jsonString = file_get_contents($file_users_path);
 		$file_list = json_decode($jsonString, true);
 	}
 	
-	foreach(array_diff(scandir("$file_dir"), array('..', '.')) as $file) {
+	foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
 		$file_full_path = "$full_dir$file";
 		$size = human_filesize("$file_full_path");
 		$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
