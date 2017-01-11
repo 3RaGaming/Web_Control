@@ -226,17 +226,11 @@ factorio/managepgm
 # NodeJS/Discord.js
 factorio/node_modules/
 
-# Bot Token File
-factorio/token.json
+# Bot Config File
+factorio/config.json
 
-# Bot Channel List
-factorio/channel_list.json
-
-# Bot Player List
-factorio/playerlists.json
-
-# Bot Discord <-> Factorio Registration List
-factorio/registration.json
+# Bot Save Data List (Channel List, Player Lists, Registration List)
+factorio/savedata.json
 
 # Log File
 factorio/screenlog.0
