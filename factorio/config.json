@@ -1,0 +1,5 @@
+{
+	"token": "PUT_YOUR_BOT_TOKEN_HERE",
+	"guildid": "This is the ID of your guild",
+	"adminrole": "This is the name of the role you wish to lock admin commands to"
+}
