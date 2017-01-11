@@ -52,7 +52,7 @@ if(isset($server_select)) {
 		if($_SESSION['login']['level']=="viewonly") {
 			echo "$trs$tds <input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc $file $tdc $size $tdc $date $tdc ";
 		} else {
-			echo "$trs$tds <input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc <a href=\"#\" onClick=\"Download('files.php?d=".$server_select."&download=".$file."')\">$file</a> $tdc $size $tdc $date $tdc ";
+			echo "$trs$tds <input type=\"checkbox\" id=\"filesCheck-$server_select---".bin2hex($file)."\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc <a href=\"#\" onClick=\"Download('files.php?d=".$server_select."&download=".$file."')\">$file</a> $tdc $size $tdc $date $tdc ";
 		}
 		echo $file_list[$file] ?? "server";
 		echo " $tde $tre
