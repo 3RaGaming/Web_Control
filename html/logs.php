@@ -75,7 +75,7 @@
 			}
 			//Current running log file, or archived log file?
 			if($_REQUEST['download']!="screenlog.0"||$_REQUEST['download']!="factorio-current.log") {
-				$server_dir = $server_dir "logs/";
+				$server_dir = $server_dir . "logs/";
 			}
 			if(file_exists($server_dir)) {
 				$file_path = $server_dir . $_REQUEST['download'];
