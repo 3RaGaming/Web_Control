@@ -232,7 +232,7 @@ void * input_monitoring(void * server_ptr) {
 			} else if (strcmp(servername, "ready") == 0 && strcmp(server->name, "bot") == 0) {
 				//Bot startup is complete, it is ready to continue
 				bot_ready = 1;
-			}  else if (strcmp(servername, "DEBUG") == 0) {
+			} else if (strcmp(servername, "DEBUG") == 0) {
 				//Handle debug messages
 				fprintf(stderr, "%s\n", new_data);
 			} else if (strcmp(servername, "chat") == 0) {
@@ -321,8 +321,13 @@ void * input_monitoring(void * server_ptr) {
 					free(message);
 				}
 			} else if (strcmp(servername, "output") == 0) {
-				message = (char *) malloc((strlen("output$") + strlen(new_data) + 5)*sizeof(char));
-				sprintf(message, "output$%s\n", new_data);
+				message = (char *) malloc((strlen("output$$") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
+				sprintf(message, "output$%s$%s\n", server->name, new_data);
+				send_threaded_chat("bot", message);
+				free(message);
+			} else if (strcmp(servername, "PVPROUND") == 0) {
+				message = (char *) malloc((strlen("PVPROUND$$") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
+				sprintf(message, "PVPROUND$%s$%s\n", server->name, new_data);
 				send_threaded_chat("bot", message);
 				free(message);
 			} else if (strcmp(server->name, "bot") == 0){
