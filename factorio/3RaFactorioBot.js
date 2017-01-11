@@ -225,12 +225,12 @@ var publiccommands = {
 		}
 	},
 	"listservers": function (message, command) {
-		if (Object.keys(channels).length === 0) {
+		if (Object.keys(savedata.channels).length === 0) {
 			message.channel.sendMessage("No servers are currently registered. This may be a bug, please tag Moderators.");
 			return;
 		}
 		let servers = "List of currently running servers:\n\n";
-		for (var serverid in channels) {
+		for (var serverid in savedata.channels) {
 			let current = savedata.channels[serverid];
 			if (current.type == "server" && current.status == "started") {
 				servers = servers + "**" + current.name + "** is currently running. Not PvP. Current players: " + Object.keys(savedata.playerlists[serverid]).length + "\n";
@@ -247,7 +247,7 @@ var publiccommands = {
 	},
 	"status": function (message, command) {
 		let registered_servers = 0;
-		for (var serverid in channels) {
+		for (var serverid in savedata.channels) {
 			let current = savedata.channels[serverid];
 			if (current.type == "server" || current.type == "pvp-main") registered_servers++;
 		}
