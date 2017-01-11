@@ -33,12 +33,13 @@
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
+				$server_select = $server_select ?? "failed";
 				$server_dir = $base_dir . $server_select . "/";
 				if(isset($_REQUEST['d'])) {
 					if($_REQUEST['d']=="Managepgm") {
 						$server_select="Managepgm";
 						$server_dir = $base_dir;
-					} elseif($_REQUEST['d']!=$server_select) {
+					} elseif($_REQUEST['d']!==$server_select||$server_select=="failed") {
 						die('Error in check');
 					}
 				}
