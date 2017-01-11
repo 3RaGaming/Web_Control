@@ -63,16 +63,19 @@
 			}
 		}
 		if(isset($_REQUEST['download'])&&isset($_REQUEST['d'])) {
-			$server_name = $_REQUEST['d'];
-			if($_REQUEST['d']=="Managepgm") {
-				$server_dir = $base_dir . "logs/";
-				$server_name = "managepgm";
+			$server_select = $server_select ?? "failed";
+			$server_dir = $base_dir . $server_select . "/";
+			if(isset($_REQUEST['d'])) {
+				if($_REQUEST['d']=="Managepgm") {
+					$server_select="Managepgm";
+					$server_dir = $base_dir;
+				} elseif($_REQUEST['d']!==$server_select||$server_select=="failed") {
+					die('Error in check');
+				}
 			}
 			//Current running log file, or archived log file?
-			if($_REQUEST['download']=="screenlog.0"||$_REQUEST['download']=="factorio-current.log") {
-				$server_dir = $base_dir . $_REQUEST['d'] . "/";
-			} else {
-				$server_dir = $base_dir . $_REQUEST['d'] . "/logs/";
+			if($_REQUEST['download']!="screenlog.0"||$_REQUEST['download']!="factorio-current.log") {
+				$server_dir = $server_dir "logs/";
 			}
 			if(file_exists($server_dir)) {
 				$file_path = $server_dir . $_REQUEST['download'];
