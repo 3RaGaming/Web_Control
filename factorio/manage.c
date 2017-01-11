@@ -52,6 +52,7 @@ char * stop_server(char *);
 void stop_all_servers();
 void launch_bot();
 void server_crashed(struct ServerData *);
+void * bot_ready_watch(void *);
 
 //Find server with given name
 struct ServerData * find_server(char * name) {
@@ -163,6 +164,7 @@ char * get_server_status(char * name) {
 	struct ServerData * server = find_server(name);
 	if (server == NULL) return "Server Does Not Exist";
 	else if (strcmp(server->status, "Stopped") == 0) return "Server Stopped";
+	else if (strcmp(server->status, "Restarting") == 0) return "Bot Restarting";
 	else return "Server Running";
 }
 
@@ -485,6 +487,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 
 		return "New Server Started";
 	} else {
+		free(name_copy);
 		struct ServerData *server = find_server(name);
 		server->pid = pid;
 		server->input = in_pipe[1];
@@ -492,6 +495,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		server->logfile = logfile;
 		server->chatlog = chatlog;
 		if (strcmp(server->status, "Restarting") != 0) pthread_create(&thread_list[server->serverid], &thread_attr, input_monitoring, (void *) server_list[server->serverid]);
+		else pthread_create(&thread_list[server->serverid], &thread_attr, bot_ready_watch, (void *) server_list[server->serverid]);
 		server->status = "Started";
 
 		return "Old Server Restarted";
@@ -590,6 +594,20 @@ void stop_all_servers() {
 	close(bot->output); //Close output pipe
 	//Exit successfully
 	exit(0);
+}
+
+void * bot_ready_watch(void * vbot) {
+	struct  ServerData *bot = (struct ServerData *) vbot;
+	FILE *input = fdopen(dup(bot->output), "r");
+	char *data = (char *) malloc(2001*sizeof(char));
+	while (1) {
+		fgets(data, 2001, input);
+		if (strcmp(data, "ready$\n") == 0) break;
+	}
+	bot_ready = 1;
+	fclose(input);
+	free(data);
+	return (void *) NULL;
 }
 
 void launch_bot() {
