@@ -63,16 +63,21 @@
 			}
 		}
 		if(isset($_REQUEST['download'])&&isset($_REQUEST['d'])) {
-			$server_name = $_REQUEST['d'];
-			if($_REQUEST['d']=="Managepgm") {
-				$server_dir = $base_dir . "logs/";
-				$server_name = "managepgm";
+			$server_select = $server_select ?? "failed";
+			$server_dir = $base_dir . $server_select . "/";
+			if(isset($_REQUEST['d'])) {
+				if($_REQUEST['d']=="Managepgm") {
+					$server_select="Managepgm";
+					$server_dir = $base_dir;
+				} elseif($_REQUEST['d']!==$server_select||$server_select=="failed") {
+					die('Error in check');
+				}
 			}
 			//Current running log file, or archived log file?
 			if($_REQUEST['download']=="screenlog.0"||$_REQUEST['download']=="factorio-current.log") {
-				$server_dir = $base_dir . $_REQUEST['d'] . "/";
+				//um... how can this be done better?
 			} else {
-				$server_dir = $base_dir . $_REQUEST['d'] . "/logs/";
+				$server_dir = $server_dir . "logs/";
 			}
 			if(file_exists($server_dir)) {
 				$file_path = $server_dir . $_REQUEST['download'];
@@ -108,11 +113,11 @@
 							header("Pragma: public");
 							header("Expires: -1");
 							header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
-							header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
+							header("Content-Disposition: attachment; filename=\"$server_select-$file_name.$file_ext\"");
 
 							// set appropriate headers for attachment or streamed file
 							if ($is_attachment) {
-								header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
+								header("Content-Disposition: attachment; filename=\"$server_select-$file_name.$file_ext\"");
 							} else {
 								header('Content-Disposition: inline;');
 							}
@@ -178,7 +183,7 @@
 					//no reason to continue
 					die();
 				} else {
-					echo "NOT exists $file_path $server_name";
+					echo "NOT exists $file_path $server_select";
 					die();
 				}
 			}
