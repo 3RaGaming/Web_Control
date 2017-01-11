@@ -113,11 +113,11 @@
 							header("Pragma: public");
 							header("Expires: -1");
 							header("Cache-Control: public, must-revalidate, post-check=0, pre-check=0");
-							header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
+							header("Content-Disposition: attachment; filename=\"$server_select-$file_name.$file_ext\"");
 
 							// set appropriate headers for attachment or streamed file
 							if ($is_attachment) {
-								header("Content-Disposition: attachment; filename=\"$server_name-$file_name.$file_ext\"");
+								header("Content-Disposition: attachment; filename=\"$server_select-$file_name.$file_ext\"");
 							} else {
 								header('Content-Disposition: inline;');
 							}
@@ -183,7 +183,7 @@
 					//no reason to continue
 					die();
 				} else {
-					echo "NOT exists $file_path $server_name";
+					echo "NOT exists $file_path $server_select";
 					die();
 				}
 			}
