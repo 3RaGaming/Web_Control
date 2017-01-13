@@ -230,7 +230,7 @@ void * input_monitoring(void * server_ptr) {
 				close(server->input);
 				launch_bot();
 				input = fdopen(server->output, "a");
-				pthread_mutex_lock(&server->mutex);
+				pthread_mutex_unlock(&server->mutex);
 			} else if (strcmp(servername, "ready") == 0 && strcmp(server->name, "bot") == 0) {
 				//Bot startup is complete, it is ready to continue
 				bot_ready = 1;
