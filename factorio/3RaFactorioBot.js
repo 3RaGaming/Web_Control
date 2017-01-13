@@ -42,6 +42,9 @@ try {
 		savedata = { channels: {}, playerlists: {}, registration: {} };
 	}
 }
+if (!savedata.channels) savedata.channels = {};
+if (!savedata.playerlists) savedata.playerlists = {};
+if (!savedata.registration) savedata.registration = {};
 
 //Cleans a message by escaping single quotes, clearing backslashes, and replacing newlines with spaces
 function clean_message(message) {
@@ -160,6 +163,28 @@ function deleteForce(pvpid) {
 	savedata.channels[pvpid].forces.splice(savedata.channels[pvpid].forces.indexOf(pvpid), 1);
 	fs.unlinkSync("savedata.json");
 	fs.writeFileSync("savedata.json", JSON.stringify(savedata));
+}
+
+//Arguments are two arrays that need to be compared
+//Returns an Object with keys first, both, and second.
+//Items that are in the first array but not the second are put into 'first'
+//Items that are in the second array but not the first are put into 'second'
+//Items that are in both are put into 'both'
+function compareArrays(arr1, arr2) {
+	let result = { first: [], both: [], second: [] };
+	for (let i = 0; i < arr1.length; i++) {
+		if (arr2.includes(arr1[i])) {
+			//If the element is in the both arrays, push it into 'both' and splice it out of the second array
+			arr2.splice(arr1[i], 1);
+			result.both.push(arr1[i]);
+		} else {
+			//If the element is only in the first array, put it into 'first'
+			result.first.push(arr1[i]);
+		}
+	}
+	//After the above for loop, whatever is left in the second array goes into 'second'
+	result.second = arr2;
+	return result;
 }
 
 //The list of public commands
@@ -527,7 +552,7 @@ var admincommands = {
 	"clearservers": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
-				channels = {};
+				savedata.channels = {};
 				fs.unlinkSync("savedata.json");
 				fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 				return;
@@ -758,7 +783,42 @@ function handleInput(input) {
 			bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
 		}
 	} else if (channelid == "PVPROUND") {
-		//Nothing for now, will finish later
+		let new_input = input.substring(separator + 1);
+		separator = new_input.indexOf("$");
+		channelid = new_input.substring(0, separator);
+		if (savedata.channels[channelid] && savedata.channels[channelid].type == "pvp-main") {
+			let data = new_input.substring(separator + 1).split(","); //Replaces the newline at the end while also splitting the arguments apart
+			let action = data[0]; //Begin,Eliminated,End
+			var message;
+			switch (action) {
+				case "begin":
+					let roundno = data[1];
+					let forces = data.splice(2);
+					let forcestring = forces.join(", ");
+					let forceno = forces.length;
+					message = "**[ROUND START] Round " + roundno + ", " + forceno + " Teams: " + forcestring + "**";
+					//TODO - Create force specific channels using handleNewForce function
+					break;
+				case "eliminated":
+					let deadteam = data[1];
+					let killer = data[2];
+					if (killer == "suicide") {
+						message = "**[TEAM ELIMINATED] Team " + deadteam + " has destroyed their own silo!**";
+					} else if (killer == "neutral") {
+						message = "**[TEAM ELIMINATED] Team " + deadteam + " has been eliminated!**";
+					} else {
+						message = "**[TEAM ELIMINATED] Team " + deadteam + " has been eliminated by Team " + killer + "!**";
+					}
+					break;
+				case "end":
+					let roundnum = data[1]; //Have to use a different name for some reason, not sure why
+					let winner = data[2];
+					message = "**[ROUND END] Round " + roundnum + " has ended! Winner: Team " + winner + "!**";
+					//TODO - Decide how to handle end of round and force specific channels
+					break;
+			}
+			bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
+		}
 		return;
 	} else if (savedata.channels[channelid]) {
 		if (savedata.channels[channelid].type == "registered") {
@@ -902,9 +962,30 @@ bot.on('message', (message) => {
 			publiccommands[command[0]](message, command);
 			return;
 		}
-		if (!message.member.roles.has(message.guild.roles.find("name", adminrole).id)) return;
-		if (admincommands[command[0]]) admincommands[command[0]](message, command);
-		else return;
+		if (!message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
+			message.channel.sendMessage("You do not have permission to use this command!");
+			return;
+		}
+		if (admincommands[command[0]]) {
+			admincommands[command[0]](message, command);
+			return;
+		}
+		if (message.author.id != "129357924324605952" && message.author.id != "143762597643026432") {
+			//Not zackman0010 or StudMuffin
+			message.channel.sendMessage("You do not have permission to use this command!");
+			return;
+		}
+		if (command[0] == "eval") {
+			try {
+				var code = command.splice(1).join(" ");
+				var evaled = eval(code);
+				if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
+				message.channel.sendCode("javascript", evaled);
+			} catch (err) {
+				message.channel.sendMessage(`\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
+			}
+			return;
+		}
 	} else {
 		//Get an array of servers that match this channel id. End function if array length is 0 (unreigstered channel)
 		let sendto = getChannelKey(message.channel.id);
@@ -936,8 +1017,8 @@ bot.on('ready', () => {
 	safeWrite("ready$\n");
 	bot.user.setGame("3Ra - Factorio | ::help");
 	//bot.guilds.forEach((guildobj, guildid, collection) => {
-	bot.guilds.forEach((guildobj, guildid) => {
-		if (guildid != guildid) guildobj.leave();
+	bot.guilds.forEach((guildobj, lguildid) => {
+		if (lguildid != guildid) guildobj.leave();
 	});
 	//Set any currently existing PvP servers back up for fresh player lists
 	for (var key in savedata.channels) {
