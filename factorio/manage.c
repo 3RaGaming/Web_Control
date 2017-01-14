@@ -323,8 +323,8 @@ void * input_monitoring(void * server_ptr) {
 					free(message);
 				}
 			} else if (strcmp(servername, "output") == 0) {
-				message = (char *) malloc((strlen("output$$") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
-				sprintf(message, "output$%s$%s\n", server->name, new_data);
+				message = (char *) malloc((strlen("output$()") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
+				sprintf(message, "output$(%s)%s\n", server->name, new_data);
 				send_threaded_chat("bot", message);
 				free(message);
 			} else if (strcmp(servername, "PVPROUND") == 0) {
