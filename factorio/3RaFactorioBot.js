@@ -109,8 +109,8 @@ function assignRole(server, force, userid) {
 //Remove a player from any Role in a PvP Server, if he has one
 function removeRole(server, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
-	for (let i = 0; i < savedata.channels[server].forces.length; i++) {
-		let rolename = savedata.channels[server].forces[i];
+	for (let i = 0; i < savedata.channels[server].forceids.length; i++) {
+		let rolename = savedata.channels[server].forceids[i];
 		let role = bot.guilds.get(guildid).roles.find("name", rolename);
 		if (role !== null && user.roles.has(role.id)) user.removeRole(role.id);
 	}
@@ -138,9 +138,10 @@ function handleNewForce(serverid, forcename) {
 	let create_role = guild.createRole({ name: pvpid });
 	Promise.all([create_text, create_voice, create_role]).then((textchannel, voicechannel, role) => {
 		textchannel.sendMessage("Messages from force *" + forcename + "* on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
-		savedata.channels[serverid].forces.push(pvpid);
+		savedata.channels[serverid].forceids.push(pvpid);
+		savedata.channels[serverid].forcenames.push(forcename);
 		textchannel.setTopic("Server registered");
-		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position + savedata.channels[serverid].forces.length);
+		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position + savedata.channels[serverid].forceids.length);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }) //Allow bot to read
 		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'READ_MESSAGES': true }) //Allow Moderators to read
 		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }) //Allow force to read
@@ -149,7 +150,7 @@ function handleNewForce(serverid, forcename) {
 		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'CONNECT': true }) //Allow Moderators to connect
 		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }) //Allow force to connect
 		voicechannel.overwritePermissions(guild.roles.get(guildid), { 'CONNECT': false }) //Don't allow anyone else to connect
-		savedata.channels[pvpid] = { id: textchannel.id, name: pvpname, type: "pvp", main: serverid, role: role.id, voiceid: voicechannel.id };
+		savedata.channels[pvpid] = { id: textchannel.id, name: pvpname, type: "pvp", main: serverid, role: role.id, voiceid: voicechannel.id, status: "alive" };
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 	});
@@ -160,7 +161,8 @@ function deleteForce(pvpid) {
 	guild.channels.get(savedata.channels[pvpid].id).delete();
 	guild.channels.get(savedata.channels[pvpid].voiceid).delete();
 	guild.roles.get(savedata.channels[pvpid].role).delete();
-	savedata.channels[pvpid].forces.splice(savedata.channels[pvpid].forces.indexOf(pvpid), 1);
+	savedata.channels[pvpid].forceids.splice(savedata.channels[pvpid].forceids.indexOf(pvpid), 1);
+	savedata.channels[pvpid].forcenames.splice(savedata.channels[pvpid].forcenames.indexOf(pvpid), 1);
 	fs.unlinkSync("savedata.json");
 	fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 }
@@ -363,7 +365,7 @@ var admincommands = {
 		}
 		//Get the name to tag the server as
 		let servername = command[2];
-		savedata.channels[serverid] = { id: message.channel.id, name: servername, type: "pvp-main", forces: [] };
+		savedata.channels[serverid] = { id: message.channel.id, name: servername, type: "pvp-main", forceids: [], forcenames: [] };
 		message.channel.sendMessage("Shouts from any force on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "].\n");
 		if (!savedata.playerlists[serverid]) savedata.playerlists[serverid] = {};
 		let name_changed = message.channel.setName("factorio-" + servername);
@@ -388,8 +390,8 @@ var admincommands = {
 		if (savedata.channels[current].type == "pvp") {
 			let oldname = savedata.channels[savedata.channels[current].main].name;
 			savedata.channels[savedata.channels[current].main].name = newname;
-			for (let i = 0; i < savedata.channels[savedata.channels[current].main].forces.length; i++) {
-				let currentserver = savedata.channels[savedata.channels[current].main].forces[i];
+			for (let i = 0; i < savedata.channels[savedata.channels[current].main].forceids.length; i++) {
+				let currentserver = savedata.channels[savedata.channels[current].main].forceids[i];
 				savedata.channels[currentserver].name = savedata.channels[currentserver].name.replace(oldname, newname);
 				bot.channels.get(savedata.channels[currentserver].id).setName("factorio-" + savedata.channels[currentserver].name);
 			}
@@ -413,9 +415,9 @@ var admincommands = {
 			return;
 		}
 		if (savedata.channels[remove].type == "pvp-main") {
-			let forces = savedata.channels[remove].forces;
-			for (let i = 0; i < forces.length; i++) {
-				deleteForce(forces[i]);
+			let forceids = savedata.channels[remove].forceids;
+			for (let i = 0; i < forceids.length; i++) {
+				deleteForce(forceids[i]);
 			}
 		}
 		//Delete the server registration and update the channel_list.json
@@ -796,8 +798,17 @@ function handleInput(input) {
 					let forces = data.splice(2);
 					let forcestring = forces.join(", ");
 					let forceno = forces.length;
-					message = "**[ROUND START] Round " + roundno + ", " + forceno + " Teams: " + forcestring + "**";
-					//TODO - Create force specific channels using handleNewForce function
+					message = "**[ROUND START] Round " + roundno + "; " + forceno + " Teams: " + forcestring + "**";
+					//Create any forces that did not previously exist while deleting any old forces that no longer exist
+					//Also set any forces that still exist to be alive again so messages can be sent
+					let previousforces = savedata.channels[channelid].forcenames;
+					let compare = compareArrays(previousforces, forces);
+					let deletedforces = compare.first;
+					let newforces = compare.second;
+					let sameforces = compare.both;
+					for (let i = 0; i < deletedforces.length; i++) deleteForce(channelid + "-" + deletedforces[i]);
+					for (let i = 0; i < newforces.length; i++) handleNewForce(channelid, newforces[i]);
+					for (let i = 0; i < sameforces.length; i++) savedata.channels[channelid + "-" + sameforces[i]].status = "alive";
 					break;
 				case "eliminated":
 					let deadteam = data[1];
@@ -809,14 +820,17 @@ function handleInput(input) {
 					} else {
 						message = "**[TEAM ELIMINATED] Team " + deadteam + " has been eliminated by Team " + killer + "!**";
 					}
+					//Set force status as dead so messages are no longer sent
+					savedata.channels[channelid + "-" + deadteam].status = "dead";
 					break;
 				case "end":
 					let roundnum = data[1]; //Have to use a different name for some reason, not sure why
 					let winner = data[2];
 					message = "**[ROUND END] Round " + roundnum + " has ended! Winner: Team " + winner + "!**";
-					//TODO - Decide how to handle end of round and force specific channels
 					break;
 			}
+			fs.unlinkSync("savedata.json");
+			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
 		}
 		return;
@@ -833,9 +847,9 @@ function handleInput(input) {
 					bot.channels.get(savedata.channels[mainserver].id).sendMessage(message);
 				});
 				bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
-				let forces = savedata.channels[channelid].forces;
-				for (let i = 0; i < forces.length; i++) {
-					let insideid = forces[i];
+				let forceids = savedata.channels[channelid].forceids;
+				for (let i = 0; i < forceids.length; i++) {
+					let insideid = forceids[i];
 					let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 					open_server.then(() => {
 						bot.channels.get(savedata.channels[insideid].id).sendMessage(message);
@@ -853,14 +867,14 @@ function handleInput(input) {
 				let mainserver = channelid;
 				let message_sent = bot.channels.get(savedata.channels[mainserver].id).sendMessage(message);
 				message_sent.then((message) => {
-					message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
+					//message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 				});
-				let forces = savedata.channels[channelid].forces;
-				for (let i = 0; i < forces.length; i++) {
-					let insideid = forces[i];
+				let forceids = savedata.channels[channelid].forceids;
+				for (let i = 0; i < forceids.length; i++) {
+					let insideid = forceids[i];
 					let message_sent = bot.channels.get(savedata.channels[insideid].id).sendMessage(message);
 					message_sent.then((message) => {
-						message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
+						//message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 					});
 					bot.channels.get(savedata.channels[insideid].id).setTopic("Server offline");
 				}
@@ -917,7 +931,7 @@ function handleInput(input) {
 				//Close the channel for chat if the server is stopped
 				let message_sent = bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
 				message_sent.then((message) => {
-					bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
+					//bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 				});
 				savedata.channels[channelid].status = "stopped";
 				bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
@@ -980,14 +994,14 @@ bot.on('message', (message) => {
 				var code = command.splice(1).join(" ");
 				var evaled = eval(code);
 				if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
-				message.channel.sendCode("javascript", evaled);
+				if (evaled != "undefined") message.channel.sendCode("javascript", evaled);
 			} catch (err) {
 				message.channel.sendMessage(`\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
 			}
 			return;
 		}
 	} else {
-		//Get an array of servers that match this channel id. End function if array length is 0 (unreigstered channel)
+		//Get the server that matches this channel. If this channel is unregistered, the result will be null.
 		let sendto = getChannelKey(message.channel.id);
 		var name;
 		if (message.member.nickname === null) name = message.author.username;
@@ -997,18 +1011,19 @@ bot.on('message', (message) => {
 			//Wait here until safe to continue, should not happen often
 		}
 		var addon;
-		if (savedata.channels[sendto].type == "chat") addon = "chat$" + sendto; //Setup to send to a chat channel
-		else if (savedata.channels[sendto].type == "server" || savedata.channels[sendto].type == "pvp-main") addon = sendto; //Setup to send to a server
-		else if (savedata.channels[sendto].type == "pvp") {
+		let channel = savedata.channels[sendto];
+		if (channel.type == "chat") addon = "chat$" + sendto; //Setup to send to a chat channel
+		else if (channel.type == "server" || channel.type == "pvp-main") addon = sendto; //Setup to send to a server
+		else if (channel.type == "pvp") {
 			//Setup to send to a PVP server
 			let serverid = sendto.substring(0, sendto.indexOf("-"));
 			let force_name = sendto.substring(sendto.indexOf("-") + 1);
 			addon = "PVP$" + serverid + "$" + force_name;
 		} else return;
 		var sendstring;
-		if (savedata.channels[sendto].type == "pvp-main") sendstring = clean_message(addon + "$[DISCORD] " + name + " (shout): " + message.cleanContent) + "\n";
+		if (channel.type == "pvp-main") sendstring = clean_message(addon + "$[DISCORD] " + name + " (shout): " + message.cleanContent) + "\n";
 		else sendstring = clean_message(addon + "$[DISCORD] " + name + ": " + message.cleanContent) + "\n";
-		safeWrite(sendstring);
+		if (channel.type == "chat" || (channel.type != "pvp" && channel.status != "stopped") || (channel.type == "pvp" && channel.status != "dead")) safeWrite(sendstring);
 	}
 });
 
