@@ -42,6 +42,10 @@ try {
 		savedata = { channels: {}, playerlists: {}, registration: {} };
 	}
 }
+if (!savedata) {
+	savedata = {};
+	console.log("DEBUG$Non-critical failure! Unknown bug caused savedata not to load. Please investigate.");
+}
 if (!savedata.channels) savedata.channels = {};
 if (!savedata.playerlists) savedata.playerlists = {};
 if (!savedata.registration) savedata.registration = {};
@@ -136,7 +140,10 @@ function handleNewForce(serverid, forcename) {
 	let create_text = guild.createChannel("factorio-" + pvpname, "text");
 	let create_voice = guild.createChannel("Factorio " + servername + " " + forcename, "voice");
 	let create_role = guild.createRole({ name: pvpid });
-	Promise.all([create_text, create_voice, create_role]).then((textchannel, voicechannel, role) => {
+	Promise.all([create_text, create_voice, create_role]).then((values) => {
+		let textchannel = values[0];
+		let voicechannel = values[1];
+		let role = values[2];
 		textchannel.sendMessage("Messages from force *" + forcename + "* on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
 		savedata.channels[serverid].forceids.push(pvpid);
 		savedata.channels[serverid].forcenames.push(forcename);
