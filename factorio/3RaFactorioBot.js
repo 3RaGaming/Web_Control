@@ -113,9 +113,9 @@ function assignRole(server, force, userid) {
 //Remove a player from any Role in a PvP Server, if he has one
 function removeRole(server, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
-	for (let i = 0; i < savedata.channels[server].forceids.length; i++) {
-		let rolename = savedata.channels[server].forceids[i];
-		let role = bot.guilds.get(guildid).roles.find("name", rolename);
+	let forceids = savedata.channels[server].forceids;
+	for (let i = 0; i < forceids.length; i++) {
+		let role = bot.guilds.get(guildid).roles.get(savedata.channels[forceids[i]].role);
 		if (role !== null && user.roles.has(role.id)) user.removeRole(role.id);
 	}
 }
@@ -828,7 +828,7 @@ function handleInput(input) {
 						message = "**[TEAM ELIMINATED] Team " + deadteam + " has been eliminated by Team " + killer + "!**";
 					}
 					//Set force status as dead so messages are no longer sent
-					savedata.channels[channelid + "-" + deadteam].status = "dead";
+					if (savedata.channels[channelid + "-" + deadteam]) savedata.channels[channelid + "-" + deadteam].status = "dead";
 					break;
 				case "end":
 					let roundnum = data[1]; //Have to use a different name for some reason, not sure why
