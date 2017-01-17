@@ -1260,9 +1260,9 @@ $(document).ready(function() {
 	$('#upload_file').on('change', function() {
 		upload();
 	});
-    $('#delete_files').click(function(){
-        files_delete();
-    };
+    $('#delete_files').on('click', function() {
+        files_delete()
+    });
 	$('#server_select').on('change', function() {
 		window.location = "./?d=" + this.value ; // or $(this).val()
 	});
