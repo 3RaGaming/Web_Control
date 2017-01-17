@@ -1246,6 +1246,13 @@ function update_web_control(user_name) {
     }
 }
 
+function files_delete() {
+    $("input[id^=filesCheck]").each(function(){
+        var value = $(this).id();
+        alert(value);
+    });
+}
+
 //Things to only start doing after the page has finished loading
 $(document).ready(function() {
 	$('#welcome_user').text(user_name);
@@ -1253,6 +1260,9 @@ $(document).ready(function() {
 	$('#upload_file').on('change', function() {
 		upload();
 	});
+    $('#delete_files').click(function(){
+        files_delete();
+    };
 	$('#server_select').on('change', function() {
 		window.location = "./?d=" + this.value ; // or $(this).val()
 	});
