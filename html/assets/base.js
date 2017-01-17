@@ -1251,6 +1251,7 @@ function files_delete() {
         var value = $(this).id();
         alert(value);
     });
+    alert("done");
 }
 
 //Things to only start doing after the page has finished loading
@@ -1261,7 +1262,7 @@ $(document).ready(function() {
 		upload();
 	});
     $('#delete_files').on('click', function() {
-        files_delete()
+        files_delete();
     });
 	$('#server_select').on('change', function() {
 		window.location = "./?d=" + this.value ; // or $(this).val()
