@@ -26,11 +26,11 @@ function move_logs() {
     fi
     #Work in a screenlog archive here
 	if [ -s "$1/screenlog.0" ]; then
-		mv "$1/screenlog.0" "$1/logs/screenlog.0-${datetime}"
+		mv "$1/screenlog.0" "$1/logs/screenlog-${datetime}.log"
 	fi
     #Work in a factorio-current archive here
 	if [ -s "$1/factorio-current.log" ]; then
-		mv "$1/factorio-current.log" "$1/logs/factorio-current.log-${datetime}"
+		mv "$1/factorio-current.log" "$1/logs/factorio-current-${datetime}.log"
 	fi
     
 }
@@ -111,7 +111,7 @@ else
 				#Work in a screenlog archive here
 				if [ -s "screenlog.0" ]; then
 					mkdir -p logs
-					mv screenlog.0 logs/screenlog.0-${datetime}
+					mv screenlog.0 logs/screenlog-${datetime}.log
 				fi
 				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
 				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M"
@@ -141,9 +141,13 @@ else
 				else
 					echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 					if [ -e "$dir_server/screenlog.0" ]; then
-						LASTDATA=$(tail -n 50 $dir_server/screenlog.0)
+						LASTSCREEN=$(tail -n 50 $dir_server/screenlog.0)
                         move_logs "$server"
-						echo "${LASTDATA}" > $dir_server/screenlog.0 ;
+						echo "${LASTSCREEN}" > $dir_server/screenlog.0 ;
+					fi
+					if [ -e "$dir_server/chatlog.0" ]; then
+						LASTCHAT=$(tail -n 50 $dir_server/chatlog.0)
+						echo "${LASTCHAT}" > $dir_server/chatlog.0 ;
 					fi
 					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"	
 				fi

@@ -11,7 +11,7 @@
 		}
 	}
 	
-	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "guest"; }
+	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 	
 	//Set the base directory the factorio servers will be stored
@@ -28,7 +28,7 @@
 	<script type="text/javascript">
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
-		//This is just for a better graphical experience, ie: if you're a guest, why upload a file, just to be told you can't do that?
+		//This is just for a better graphical experience, ie: if you're a viewonly account, why upload a file, just to be told you can't do that?
 <?php
 		echo "\t\tvar user_level = \"$user_level\";\xA";
 		echo "\t\tvar user_name = \"$user_name\";\xA";
@@ -50,7 +50,7 @@
 			if($server_settings != NULL) {
 				//Do we have a server
 				if(isset($server_settings["name"])) {
-					if($user_level == "guest" ) {
+					if($user_level == "viewonly") {
 						echo "\t\t\t$('#server_name').hide();\xA";
 					} else {
 						$server_name = htmlspecialchars($server_settings["name"]);
@@ -64,7 +64,7 @@
 					/*var_dump($server_settings);*/
 				}
 				if(isset($server_settings["game_password"])) {
-					if($user_level == "guest" ) {
+					if($user_level == "viewonly") {
 						echo "\t\t\t$('#server_password').hide();\xA";
 					} else {
 						$server_password = $server_settings["game_password"];
