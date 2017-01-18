@@ -4,24 +4,43 @@
 		header("Location: ./login.php");
 		die();
 	} else {
-		if($_SERVER["HTTPS"] != "on")
+		if(isset($_SERVER["HTTPS"]) == false)
 		{
 			header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
 			die();
 		}
 	}
-	
+
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
+
+	if($user_level=="viewonly") {
+		die('Not allowed for view only');
+	}
 	
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
 	if(!isset($server_select)) {
-		die('Error in server selection index.php');
+		$server_select = "servertest";
+	}
+	
+	if(isset($_REQUEST)) {
+		if(isset($_REQUEST['show'])) {
+			if($_REQUEST['show']=="true") {
+				$server_dir = $base_dir . $server_select . "/";
+
+				$server_settings_path = $server_dir . "server-settings.json";
+				$server_settings_run_path = $server_dir . "running-server-settings.json";
+				if(file_exists($server_settings_path)) {
+					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
+					echo "<pre>$server_settings</pre>";
+				}
+				die();
+			}
+		}
 	}
 ?>
-</script>
 <html>
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
@@ -39,12 +58,9 @@
 			echo "\t\t\t$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
 			unset($_SESSION['login']['reload_report']);
 		}
-		
+
 		// This is for displaying the server name & password in an input box
-		if(file_exists("$base_dir$server_select/server-settings.json")) {
-			// 
-			$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
-			if($server_settings != NULL) {
+			if(isset($server_settings) && $server_settings != NULL) {
 				//Do we have a server
 				if(isset($server_settings["name"])) {
 					if($user_level == "viewonly") {
@@ -59,6 +75,10 @@
 						echo "\t\t\t$('#server_name').attr('size',$server_name_length);\xA";
 					}
 					/*var_dump($server_settings);*/
+				} else {
+					// Report file came back invalid
+					echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH SERVER NAME#\";\xA";
+					echo "\t\t\t$('#server_name').attr('size',30);\xA"; 
 				}
 				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
 					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i>');\xA";
@@ -67,18 +87,22 @@
 				}
 			} else {
 				// Report file came back invalid
-				echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH SERVER NAME#\";\xA";
-				echo "\t\t\t$('#server_name').attr('size',30);\xA"; 
+				echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH server-settings.json#\";\xA";
+				echo "\t\t\t$('#server_name').attr('size',40);\xA";
+				echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i>');\xA";
 			}
-		} else {
-			// Report server-settings missing";
-			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
-			echo "\t\t\t$('#server_name').attr('size',40);\xA";
-		}
+
 		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";";
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
 ?>
+		function load_list(server) {
+			$.get("logs.php?show=true&d=" + server, function(html) {
+				// replace the "ajax'd" data to the table body
+				$('#server_list-' + server).html(html);
+				return false;
+			});
+		}
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
@@ -87,23 +111,21 @@
 <body>
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
-			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
+			<a href="./index.php">Home</a>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<span id="server_password"></span>
+			config&nbsp;-&nbsp;
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
-			<a href="./logs.php" id="logs_link">Logs</a>
 			<div style="float: right;">
-				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
 			</div>
 		</div>
-		<!-- console and chat windows -->
-		<div style="width: 52%; height: 99%; float: left;">
-			Some Settings Here
-		</div>
 		<!-- server files -->
-		<div style="width: 46%; height: 99%; float: left;">
-			Other settings there.
+		<div style="width: 92%; height: 99%; float: left;">
+			<div id="server_list">
+				<ul>
+				</ul>
+			</div>
 		</div>
 	</div>
 </body>
