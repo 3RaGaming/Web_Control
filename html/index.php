@@ -131,7 +131,7 @@
 				<button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
 				<button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
 				<button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
-				<button id="delete_files" style="background-color: #ffcccc;">Delete</button>
+				<button id="delete_files" name="delete_files" style="background-color: #ffcccc;">Delete</button>
 				<a id="fileStatus"></a>
 				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 			</div>
