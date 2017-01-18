@@ -321,7 +321,7 @@ if(isset($_REQUEST['archive'])) {
 						mkdir($server_delete_loc);
 					}
 					file_put_contents($server_delete_path, $delete_record, FILE_APPEND);
-					if($file_list_prehash !== md5(serialize($file_list))) {
+					if(isset($file_list) && $file_list_prehash !== md5(serialize($file_list))) {
 						$newJsonString = json_encode($file_list, JSON_PRETTY_PRINT);
 						file_put_contents($file_users_path, $newJsonString);
 					}
