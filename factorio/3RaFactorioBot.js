@@ -996,7 +996,7 @@ bot.on('message', (message) => {
 			publiccommands[command[0]](message, command);
 			return;
 		}
-		if (!message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
+		if (admincommands[command[0]] && !message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
 		}
@@ -1004,7 +1004,7 @@ bot.on('message', (message) => {
 			admincommands[command[0]](message, command);
 			return;
 		}
-		if (message.author.id != "129357924324605952" && message.author.id != "143762597643026432") {
+		if (command[0] == "eval" && message.author.id != "129357924324605952" && message.author.id != "143762597643026432") {
 			//Not zackman0010 or StudMuffin
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
@@ -1020,6 +1020,8 @@ bot.on('message', (message) => {
 			}
 			return;
 		}
+		message.channel.sendMessage("That command does not exist. Please use ::help to see the list of commands.");
+		return;
 	} else {
 		//Get the server that matches this channel. If this channel is unregistered, the result will be null.
 		let sendto = getChannelKey(message.channel.id);
