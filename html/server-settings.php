@@ -46,7 +46,14 @@
 <html>
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
-	<script type="text/javascript">
+	<script type="text/javascript" >
+		function load_list(server) {
+			$.get("server-settings.php?show=true&d=" + server, function(html) {
+				// replace the "ajax'd" data to the table body
+				$('#server_list-' + server).html(html);
+				return false;
+			});
+		}
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a viewonly account, why upload a file, just to be told you can't do that?
@@ -84,18 +91,11 @@
 		echo "\t\t\t$('#logs_link').html('<a href=\"./logs.php#$server_select\" id=\"logs_link\">Logs</a>');\xA";
 		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
-		echo "\t\tload_list('$server_select');\xA";
+		
+		echo "\xA\t\t\tload_list('$server_select');\xA";
 		echo "\t\t})\xA";
 ?>
-		function load_list(server) {
-			$.get("server-settings.php?show=true&d=" + server, function(html) {
-				// replace the "ajax'd" data to the table body
-				$('#server_list-' + server).html(html);
-				return false;
-			});
-		}
 	</script>
-	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
 	<style type="text/css">@import "assets/log-ui.css";</style>
