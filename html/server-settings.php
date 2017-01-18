@@ -92,9 +92,14 @@
 		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
 		
-		echo "\xA\t\t\tload_list('$server_select');\xA";
 		echo "\t\t})\xA";
 ?>
+			$.get("server-settings.php?show=true&d=" + server, function(html) {
+				// replace the "ajax'd" data to the table body
+				$('#server_list-' + server).html(html);
+				return false;
+			});
+		});
 	</script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
