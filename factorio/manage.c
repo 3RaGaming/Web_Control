@@ -52,6 +52,7 @@ char * stop_server(char *);
 void stop_all_servers();
 void launch_bot();
 void server_crashed(struct ServerData *);
+void * bot_ready_watch(void *);
 
 //Find server with given name
 struct ServerData * find_server(char * name) {
@@ -163,6 +164,7 @@ char * get_server_status(char * name) {
 	struct ServerData * server = find_server(name);
 	if (server == NULL) return "Server Does Not Exist";
 	else if (strcmp(server->status, "Stopped") == 0) return "Server Stopped";
+	else if (strcmp(server->status, "Restarting") == 0) return "Bot Restarting";
 	else return "Server Running";
 }
 
@@ -228,11 +230,11 @@ void * input_monitoring(void * server_ptr) {
 				close(server->input);
 				launch_bot();
 				input = fdopen(server->output, "a");
-				pthread_mutex_lock(&server->mutex);
+				pthread_mutex_unlock(&server->mutex);
 			} else if (strcmp(servername, "ready") == 0 && strcmp(server->name, "bot") == 0) {
 				//Bot startup is complete, it is ready to continue
 				bot_ready = 1;
-			}  else if (strcmp(servername, "DEBUG") == 0) {
+			} else if (strcmp(servername, "DEBUG") == 0) {
 				//Handle debug messages
 				fprintf(stderr, "%s\n", new_data);
 			} else if (strcmp(servername, "chat") == 0) {
@@ -321,8 +323,13 @@ void * input_monitoring(void * server_ptr) {
 					free(message);
 				}
 			} else if (strcmp(servername, "output") == 0) {
-				message = (char *) malloc((strlen("output$") + strlen(new_data) + 5)*sizeof(char));
-				sprintf(message, "output$%s\n", new_data);
+				message = (char *) malloc((strlen("output$()") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
+				sprintf(message, "output$(%s)%s\n", server->name, new_data);
+				send_threaded_chat("bot", message);
+				free(message);
+			} else if (strcmp(servername, "PVPROUND") == 0) {
+				message = (char *) malloc((strlen("PVPROUND$$") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
+				sprintf(message, "PVPROUND$%s$%s\n", server->name, new_data);
 				send_threaded_chat("bot", message);
 				free(message);
 			} else if (strcmp(server->name, "bot") == 0){
@@ -342,8 +349,8 @@ void * input_monitoring(void * server_ptr) {
 
 					log_chat(actual_server_name, message_to_send);
 
-					message = (char *) malloc((strlen("/silent-command game.forces[''].print('')") + strlen(force_name) + strlen(message_to_send) + 4)*sizeof(char));
-					sprintf(message, "/silent-command game.forces['%s'].print('%s')\n", force_name, message_to_send);
+					message = (char *) malloc((strlen("/silent-command if game.forces[''] then game.forces[''].print('') end") + (2 * strlen(force_name)) + strlen(message_to_send) + 10)*sizeof(char));
+					sprintf(message, "/silent-command if game.forces['%s'] then game.forces['%s'].print('%s') end\n", force_name, force_name, message_to_send);
 					send_threaded_chat(actual_server_name, message);
 					free(actual_server_name);
 					free(message);
@@ -480,6 +487,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 
 		return "New Server Started";
 	} else {
+		free(name_copy);
 		struct ServerData *server = find_server(name);
 		server->pid = pid;
 		server->input = in_pipe[1];
@@ -487,6 +495,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		server->logfile = logfile;
 		server->chatlog = chatlog;
 		if (strcmp(server->status, "Restarting") != 0) pthread_create(&thread_list[server->serverid], &thread_attr, input_monitoring, (void *) server_list[server->serverid]);
+		else pthread_create(&thread_list[server->serverid], &thread_attr, bot_ready_watch, (void *) server_list[server->serverid]);
 		server->status = "Started";
 
 		return "Old Server Restarted";
@@ -585,6 +594,20 @@ void stop_all_servers() {
 	close(bot->output); //Close output pipe
 	//Exit successfully
 	exit(0);
+}
+
+void * bot_ready_watch(void * vbot) {
+	struct  ServerData *bot = (struct ServerData *) vbot;
+	FILE *input = fdopen(dup(bot->output), "r");
+	char *data = (char *) malloc(2001*sizeof(char));
+	while (1) {
+		fgets(data, 2001, input);
+		if (strcmp(data, "ready$\n") == 0) break;
+	}
+	bot_ready = 1;
+	fclose(input);
+	free(data);
+	return (void *) NULL;
 }
 
 void launch_bot() {
