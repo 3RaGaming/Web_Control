@@ -64,9 +64,9 @@
 					/*var_dump($server_settings);*/
 				}
 				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i><a href=\"./server-settings.php?d=$server_select\">config</a>');\xA";
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php?d=$server_select\">config</a>');\xA";
 				} else {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"><a href=\"./server-settings.php?d=$server_select\">config</a></i>');\xA";
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"> <a href=\"./server-settings.php?d=$server_select\">config</a></i>');\xA";
 				}
 			} else {
 				// Report file came back invalid

@@ -60,7 +60,9 @@
 		}
 
 		// This is for displaying the server name & password in an input box
-			if(isset($server_settings) && $server_settings != NULL) {
+		if(file_exists("$base_dir$server_select/server-settings.json")) {
+			$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
+			if($server_settings != NULL) {
 				//Do we have a server
 				if(isset($server_settings["name"])) {
 					if($user_level == "viewonly") {
@@ -91,6 +93,12 @@
 				echo "\t\t\t$('#server_name').attr('size',40);\xA";
 				echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i>');\xA";
 			}
+		} else {
+			// Report file came back invalid
+			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH server-settings.json#\";\xA";
+			echo "\t\t\t$('#server_name').attr('size',40);\xA";
+			echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i>');\xA";
+		}
 
 		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";";
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
