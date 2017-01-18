@@ -1142,10 +1142,10 @@ function uploadProgress(evt) {
 
 function uploadComplete(evt) {
 	if(evt.target.readyState == 4 && evt.target.status == 200) {
-			document.getElementById('fileStatus').innerHTML = evt.target.responseText;
-			if(evt.target.responseText.includes("complete")) {
-				location.reload();
-			}
+		document.getElementById('fileStatus').innerHTML = evt.target.responseText;
+		if(evt.target.responseText.includes("complete")) {
+			location.reload();
+		}
 	}
 }
 
@@ -1246,6 +1246,46 @@ function update_web_control(user_name) {
     }
 }
 
+function hex2bin(hex) {
+    bytes = [];
+
+    for(var i=0; i< hex.length-1; i+=2){
+        bytes.push(parseInt(hex.substr(i, 2), 16));
+    }
+    
+    str = String.fromCharCode.apply(String, bytes);
+    return str;
+}
+
+function files_delete() {
+    var list = [];
+    $("input[id^=filesCheck]").each(function(){
+        var value = $(this).attr('id');
+        if ($(this).is(':checked')) {
+            var data = value.split("-");
+            if ( typeof data[1] !== 'undefined' && typeof data[2] !== 'undefined' ) {
+                list.push(hex2bin(data[2]));
+            }
+        }
+    });
+    console.log("sending");
+    var http = new XMLHttpRequest();
+    http.open("POST", "files.php?d=" + server_select, true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "delete=" + encodeURIComponent(JSON.stringify(list));
+    http.send(params);
+    http.onload = function() {
+        if(http.responseText) {
+            if(http.responseText == "success") {
+                location.reload();
+            } else {
+                alert(http.responseText);
+            }
+        }
+    };
+    console.log(list);
+}
+
 //Things to only start doing after the page has finished loading
 $(document).ready(function() {
 	$('#welcome_user').text(user_name);
@@ -1253,6 +1293,13 @@ $(document).ready(function() {
 	$('#upload_file').on('change', function() {
 		upload();
 	});
+    $('#delete_files').on('click', function() {
+        if(user_level == "viewonly") {
+        	alert("You have view only access.");
+        	return;
+        }
+		files_delete();
+    });
 	$('#server_select').on('change', function() {
 		window.location = "./?d=" + this.value ; // or $(this).val()
 	});
