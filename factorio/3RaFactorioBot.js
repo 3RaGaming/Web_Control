@@ -100,7 +100,7 @@ function assignRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
 	if (!savedata.channels[server + "-" + force]) return;
 	let roleid = savedata.channels[server + "-" + force].role;
-	if (roleid === null && savedata.channels[rolename]) {
+	if (roleid === null && savedata.channels[server + "-" + force]) {
 		let created = bot.guilds.get(guildid).createRole({ name: server + "-" + force });
 		created.then((role) => {
 			savedata.channels[server + "-" + force].role = role.id;
@@ -115,7 +115,7 @@ function assignRole(server, force, userid) {
 				bot.guilds.get(guildid).channels.get(savedata.channels.admin.id).sendMessage(tag + ": The role for server *" + server + "*, force *" + force + "* was missing and has been recreated. Please manually correct the channel permissions.");  
 			}
 		});
-	} else if (roleid !== null && savedata.channels[rolename] && !user.roles.has(roleid)) {
+	} else if (roleid !== null && savedata.channels[server + "-" + force] && !user.roles.has(roleid)) {
 		user.addRole(roleid);
 		if (!user.roles.has(roleid)) user.addRole(bot.guilds.get(guildid).roles.get(roleid)); //Redundancy to make sure it's added
 	}
@@ -749,7 +749,7 @@ function handleInput(input) {
 			let data = new_input.substring(separator + 1).split(","); //Replaces the newline at the end while also splitting the arguments apart
 			let action = data[0]; //Join,Leave,Force,Die,Respawn
 			let player_id = data[1]; //Not really relevant, but included in case it may be needed sometime in the future
-			let player_name = data[2].toLowerCase(); //Player's username
+			let player_name = data[2]; //Player's username
 			let force_name = data[3]; //Name of player's force
 			var message;
 			var old_force;
