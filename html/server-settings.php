@@ -35,7 +35,7 @@
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
 					echo "<pre>";
-					echo var_dump($server_settings)";"
+					echo var_dump($server_settings);
 					echo "</pre>";
 				}
 				die();
