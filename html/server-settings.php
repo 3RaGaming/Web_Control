@@ -105,7 +105,7 @@
 		echo "\t\t})\xA";
 ?>
 		function load_list(server) {
-			$.get("logs.php?show=true&d=" + server, function(html) {
+			$.get("server-settings.php?show=true&d=" + server, function(html) {
 				// replace the "ajax'd" data to the table body
 				$('#server_list-' + server).html(html);
 				return false;
