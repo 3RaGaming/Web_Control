@@ -34,7 +34,7 @@
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
-					echo "<pre>$server_settings</pre>";
+					echo "<pre>".var_dump($server_settings)."</pre>";
 				}
 				die();
 			}
@@ -83,9 +83,9 @@
 					echo "\t\t\t$('#server_name').attr('size',30);\xA"; 
 				}
 				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i>');\xA";
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> config');\xA";
 				} else {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"></i>');\xA";
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"></i> config');\xA";
 				}
 			} else {
 				// Report file came back invalid
