@@ -34,7 +34,9 @@
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
-					echo "<pre>".var_dump($server_settings)."</pre>";
+					echo "<pre>";
+					echo var_dump($server_settings)";"
+					echo "</pre>";
 				}
 				die();
 			}
@@ -64,24 +66,6 @@
 			$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
 			if($server_settings != NULL) {
 				//Do we have a server
-				if(isset($server_settings["name"])) {
-					if($user_level == "viewonly") {
-						echo "\t\t\t$('#server_name').hide();\xA";
-					} else {
-						$server_name = htmlspecialchars($server_settings["name"]);
-						$server_name_length = strlen($server_name);
-						if($server_name_length<20) {
-							$server_name_length = 20;
-						}
-						echo "\t\t\tdocument.getElementById('server_name').value = \"".addslashes($server_name)."\";\xA";
-						echo "\t\t\t$('#server_name').attr('size',$server_name_length);\xA";
-					}
-					/*var_dump($server_settings);*/
-				} else {
-					// Report file came back invalid
-					echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH SERVER NAME#\";\xA";
-					echo "\t\t\t$('#server_name').attr('size',30);\xA"; 
-				}
 				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
 					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> config');\xA";
 				} else {
@@ -89,14 +73,12 @@
 				}
 			} else {
 				// Report file came back invalid
-				echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH server-settings.json#\";\xA";
-				echo "\t\t\t$('#server_name').attr('size',40);\xA";
+				echo "\t\t\t$('#alert').html('#ERROR WITH server-settings.json#');\xA";
 				echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> config');\xA";
 			}
 		} else {
 			// Report file came back invalid
-			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH server-settings.json#\";\xA";
-			echo "\t\t\t$('#server_name').attr('size',40);\xA";
+			echo "\t\t\t$('#alert').html('#ERROR WITH server-settings.json#');\xA";
 			echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> config');\xA";
 		}
 		echo "\t\t\t$('#logs_link').html('<a href=\"./logs.php#$server_select\" id=\"logs_link\">Logs</a>');\xA";
@@ -121,9 +103,9 @@
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			<a href="./index.php">Home</a>&nbsp;-&nbsp;
-			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<span id="server_password"></span>&nbsp;-&nbsp;
-			<a href="./logs.php" id="logs_link">Logs</a>
+			<a href="./logs.php" id="logs_link">Logs</a>&nbsp;-&nbsp;
+			<span id="alert"></span>
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
 			<div style="float: right;">
 				<a href="login.php?logout">Logout</a>
