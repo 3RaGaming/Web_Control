@@ -35,7 +35,7 @@
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
 					echo "<pre>";
-					echo var_dump($server_settings);
+					var_dump($server_settings);
 					echo "</pre>";
 				}
 				die();
@@ -82,8 +82,9 @@
 			echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> config');\xA";
 		}
 		echo "\t\t\t$('#logs_link').html('<a href=\"./logs.php#$server_select\" id=\"logs_link\">Logs</a>');\xA";
-		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";";
+		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
+		echo "\t\tload_list('$server_select');\xA";
 		echo "\t\t})\xA";
 ?>
 		function load_list(server) {

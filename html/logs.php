@@ -209,6 +209,7 @@
 
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
+		echo "\t\tload_list('$server_select');\xA";
 		echo "\t\t})\xA";
 ?>
 		function load_list(server) {
