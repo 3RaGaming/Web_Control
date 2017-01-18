@@ -91,17 +91,17 @@
 				// Report file came back invalid
 				echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH server-settings.json#\";\xA";
 				echo "\t\t\t$('#server_name').attr('size',40);\xA";
-				echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i>');\xA";
+				echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> config');\xA";
 			}
 		} else {
 			// Report file came back invalid
 			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH server-settings.json#\";\xA";
 			echo "\t\t\t$('#server_name').attr('size',40);\xA";
-			echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i>');\xA";
+			echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> config');\xA";
 		}
-
+		echo "\t\t\t$('#logs_link').html('<a href=\"./logs.php#$server_select\" id=\"logs_link\">Logs</a>');\xA";
 		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";";
-		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
+		if(isset($server_tab_list)) { echo $server_tab_list; }
 		echo "\t\t})\xA";
 ?>
 		function load_list(server) {
@@ -121,8 +121,8 @@
 		<div style="float: left; width: 100%;">
 			<a href="./index.php">Home</a>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
-			<span id="server_password"></span>
-			config&nbsp;-&nbsp;
+			<span id="server_password"></span>&nbsp;-&nbsp;
+			<a href="./logs.php" id="logs_link">Logs</a>
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
 			<div style="float: right;">
 				<a href="login.php?logout">Logout</a>
