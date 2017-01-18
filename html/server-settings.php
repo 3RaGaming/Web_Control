@@ -39,9 +39,6 @@
 			echo "\t\t\t$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
 			unset($_SESSION['login']['reload_report']);
 		}
-		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
-			echo "\t\t\this_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
-		}
 		
 		// This is for displaying the server name & password in an input box
 		if(file_exists("$base_dir$server_select/server-settings.json")) {
@@ -84,7 +81,6 @@
 ?>
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
-	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<style type="text/css">@import "assets/base.css";</style>
 </head>
@@ -92,18 +88,9 @@
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-			<button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
-			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<span id="server_password"></span>
-			<a href="./server-settings.php">config</a>&nbsp;-&nbsp;
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
-			<button onclick="update_web_control(user_level);">Update Web Control</button>
-			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
-				<input type="hidden" id="update" name="update" value="yes" />
-			</form>
-			<button onclick="force_kill('forcekill')">force kill</button>
 			<a href="./logs.php" id="logs_link">Logs</a>
 			<div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
@@ -112,37 +99,11 @@
 		</div>
 		<!-- console and chat windows -->
 		<div style="width: 52%; height: 99%; float: left;">
-			<textarea id="console" style="width: 98%; height: 46%;"></textarea>
-			<textarea id="chat" style="width: 98%; height: 46%;"></textarea><br />
-			<input type="text" id="command" placeholder="" style="width: 98%;" />&nbsp;
-			<button id="command_button">Send</button>
+			Some Settings Here
 		</div>
 		<!-- server files -->
 		<div style="width: 46%; height: 99%; float: left;">
-			<div>
-				<input type="file" name="upload_file" id="upload_file" style="display: none;">
-				<button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
-				<button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
-				<button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
-				<button id="delete_files" name="delete_files" style="background-color: #ffcccc;">Delete</button>
-				<a id="fileStatus"></a>
-				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
-			</div>
-			<table id="fileTable" class="tablesorter">
-				<thead>
-					<tr>
-						<th><input type="checkbox" style="margin: 0; padding: 0; height:13px;" checked="false" /></th>
-						<th>File</th>
-						<th>Size</th>
-						<th>Creation</th>
-						<th>Editor</th>
-					</tr>
-				</thead>
-				<tbody>
-					
-				</tbody>
-			</table>
-			<iframe id="file_iframe" style="display:none;"></iframe>
+			Other settings there.
 		</div>
 	</div>
 </body>
