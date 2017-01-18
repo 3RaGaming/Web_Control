@@ -98,25 +98,36 @@ function findPlayer(username) {
 //Assign a player to a PvP Role
 function assignRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
-	let rolename = server + "-" + force;
-	let role = bot.guilds.get(guildid).roles.find("name", rolename);
-	if (role === null && savedata.channels[rolename]) {
-		let created = bot.guilds.get(guildid).createRole({ name: rolename });
+	if (!savedata.channels[server + "-" + force]) return;
+	let roleid = savedata.channels[server + "-" + force].role;
+	if (roleid === null && savedata.channels[rolename]) {
+		let created = bot.guilds.get(guildid).createRole({ name: server + "-" + force });
 		created.then((role) => {
+			savedata.channels[server + "-" + force].role = role.id;
 			user.addRole(role);
+			roleid = role.id;
+			if (!user.roles.has(roleid)) user.addRole(bot.guilds.get(guildid).roles.get(roleid)); //Redundancy to make sure it's added
+			fs.unlinkSync("savedata.json");
+			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
+			if (savedata.channels.admin) {
+				let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
+				let tag = "<@&" + roleid + ">";
+				bot.guilds.get(guildid).channels.get(savedata.channels.admin.id).sendMessage(tag + ": The role for server *" + server + "*, force *" + force + "* was missing and has been recreated. Please manually correct the channel permissions.");  
+			}
 		});
-	} else if (role !== null && savedata.channels[rolename] && !user.roles.has(role.id)) {
-		user.addRole(role);
+	} else if (roleid !== null && savedata.channels[rolename] && !user.roles.has(roleid)) {
+		user.addRole(roleid);
+		if (!user.roles.has(roleid)) user.addRole(bot.guilds.get(guildid).roles.get(roleid)); //Redundancy to make sure it's added
 	}
 }
 
 //Remove a player from any Role in a PvP Server, if he has one
 function removeRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
-	if (!let roleid = savedata.channels[server + "-" + force]) return;
+	if (!savedata.channels[server + "-" + force]) return;
 	let roleid = savedata.channels[server + "-" + force].role;
-	if (roleid && user.has(roleid)) user.removeRole(bot.guilds.get(guildid).roles.get(roleid));
-	if (roleid && user.has(roleid)) user.removeRole(roleid); //Redundancy to make sure it's removed
+	if (roleid && user.roles.has(roleid)) user.removeRole(bot.guilds.get(guildid).roles.get(roleid));
+	if (roleid && user.roles.has(roleid)) user.removeRole(roleid); //Redundancy to make sure it's removed
 }
 
 //Replace any mentions with an actual tag
