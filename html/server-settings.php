@@ -92,7 +92,7 @@
 		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
 		
-		echo "\t\t})\xA";
+		//echo "\t\t})\xA";
 ?>
 			$.get("server-settings.php?show=true&d=" + server, function(html) {
 				// replace the "ajax'd" data to the table body
