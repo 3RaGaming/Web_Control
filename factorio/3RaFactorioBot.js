@@ -105,19 +105,18 @@ function assignRole(server, force, userid) {
 		created.then((role) => {
 			user.addRole(role);
 		});
-	} else if (role !== null && !user.roles.has(role.id)) {
+	} else if (role !== null && savedata.channels[rolename] && !user.roles.has(role.id)) {
 		user.addRole(role);
 	}
 }
 
 //Remove a player from any Role in a PvP Server, if he has one
-function removeRole(server, userid) {
+function removeRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
-	let forceids = savedata.channels[server].forceids;
-	for (let i = 0; i < forceids.length; i++) {
-		let role = bot.guilds.get(guildid).roles.get(savedata.channels[forceids[i]].role);
-		if (role !== null && user.roles.has(role.id)) user.removeRole(role.id);
-	}
+	if (!let roleid = savedata.channels[server + "-" + force]) return;
+	let roleid = savedata.channels[server + "-" + force].role;
+	if (roleid && user.has(roleid)) user.removeRole(bot.guilds.get(guildid).roles.get(roleid));
+	if (roleid && user.has(roleid)) user.removeRole(roleid); //Redundancy to make sure it's removed
 }
 
 //Replace any mentions with an actual tag
@@ -739,9 +738,12 @@ function handleInput(input) {
 			let data = new_input.substring(separator + 1).split(","); //Replaces the newline at the end while also splitting the arguments apart
 			let action = data[0]; //Join,Leave,Force,Die,Respawn
 			let player_id = data[1]; //Not really relevant, but included in case it may be needed sometime in the future
-			let player_name = data[2]; //Player's username
+			let player_name = data[2].toLowerCase(); //Player's username
 			let force_name = data[3]; //Name of player's force
 			var message;
+			var old_force;
+			if (savedata.playerlists[channelid][player_name]) old_force = savedata.playerlists[channelid][player_name].force;
+			else old_force = null;
 
 			switch (action) {
 				case "join":
@@ -776,10 +778,10 @@ function handleInput(input) {
 			fs.unlinkSync("savedata.json");
 			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			if (savedata.channels[channelid].type == "pvp-main") {
-				if (action == "force") {
+				if (old_force && old_force != force_name) {
 					let userid = getPlayerID(player_name);
 					if (userid !== null) {
-						removeRole(channelid, userid);
+						removeRole(channelid, old_force, userid);
 						assignRole(channelid, force_name, userid);
 					}
 				}
