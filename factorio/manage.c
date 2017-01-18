@@ -282,7 +282,7 @@ void * input_monitoring(void * server_ptr) {
 					sprintf(player_announcement, "[PUPDATE] %s was killed [%s]", player_args[2], player_args[3]);
 				} else if (strcmp(player_args[0], "respawn") == 0) {
 					sprintf(player_announcement, "[PUPDATE] %s has respawned [%s]", player_args[2], player_args[3]);
-				} else {
+				} else if (strcmp(player_args[0], "update") != 0) {
 					free(player_args);
 					free(player_announcement);
 					free(message);
