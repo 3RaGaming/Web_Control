@@ -64,9 +64,9 @@
 					/*var_dump($server_settings);*/
 				}
 				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i>');\xA";
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i><a href=\"./server-settings.php?d=$server_select\">config</a>');\xA";
 				} else {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"></i>');\xA";
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"><a href=\"./server-settings.php?d=$server_select\">config</a></i>');\xA";
 				}
 			} else {
 				// Report file came back invalid
@@ -96,8 +96,7 @@
 			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
 			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
-			<span id="server_password"></span>
-			<a href="./server-settings.php">config</a>&nbsp;-&nbsp;
+			<span id="server_password"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
 			<button onclick="update_web_control(user_level);">Update Web Control</button>
 			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
