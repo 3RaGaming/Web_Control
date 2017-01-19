@@ -95,6 +95,40 @@ function findPlayer(username) {
 	return null;
 }
 
+//Sets up an object to store queries, not necessary for this to persist through saves.
+var queryResponse = {};
+
+//A function to resolve a promise when given a certain UID
+function resolveQuery(uid, response) {
+	queryResponse[uid].resolve(response);
+	clearTimeout(queryResponse[uid].reject);
+	delete queryResponse[uid];
+}
+
+//Query a server for information, returns a Promise to await the response properly
+function serverQuery(server, query) {
+	var randomuid;
+	var uid;
+	while (true) {
+		//Generate a random UID that is not in use
+		randomuid = Math.floor((Math.random() * 9999) + 1000);
+		if (randomuid >= 10000) randomuid = randomuid - 1000;
+		if (randomuid <= 999) randomuid = randomuid + 1000;
+		uid = randomuid.toString();
+		if (!queryResponse[uid]) break;
+	}
+	let sendstring = "admin$" + server + "$/silent-command local s,e = pcall(loadstring('" + clean_message(query) + "')) e = e ~= nil and print('output$" + uid + "$ ' .. tostring(e))\n";
+	safeWrite(sendstring);
+	queryResponse[uid] = { resolve: null, reject: null };
+	return new Promise((resolve, reject) => {
+		queryResponse[uid].resolve = resolve;
+		queryResponse[uid].reject = setTimeout(() => {
+			delete queryResponse[uid];
+			reject("No response from server");
+		}, 5000);
+	});
+};
+
 //Assign a player to a PvP Role
 function assignRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
@@ -740,6 +774,13 @@ function handleInput(input) {
 		if (!savedata.channels.admin) return;
 		let message = input.substring(separator + 1);
 		bot.channels.get(savedata.channels.admin.id).sendMessage("Response: " + message + "\n");
+	} else if (channelid == "query") {
+		let new_input = input.substring(separator + 1);
+		separator = new_input.indexOf("$");
+		let uid = new_input.substring(0, separator);
+		if (!queryResponse[uid]) return;
+		let response = new_input.substring(separator + 1);
+		resolveQuery(uid, response);
 	} else if (channelid == "PLAYER") {
 		//Player Update
 		let new_input = input.substring(separator + 1);
