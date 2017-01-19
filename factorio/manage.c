@@ -327,6 +327,11 @@ void * input_monitoring(void * server_ptr) {
 				sprintf(message, "output$(%s)%s\n", server->name, new_data);
 				send_threaded_chat("bot", message);
 				free(message);
+			} else if (strcmp(servername, "query") == 0) {
+				message = (char *) malloc((strlen("query$") + strlen(new_data) + 6)*sizeof(char));
+				sprintf(message, "query$%s\n", new_data);
+				send_threaded_chat("bot", message);
+				free(message);
 			} else if (strcmp(servername, "PVPROUND") == 0) {
 				message = (char *) malloc((strlen("PVPROUND$$") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
 				sprintf(message, "PVPROUND$%s$%s\n", server->name, new_data);
