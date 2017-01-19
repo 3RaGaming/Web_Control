@@ -39,6 +39,8 @@
 					$replace_with_that = array('verify users', 'upload kbps', 'ignore player limit', 'admin pause only', 'afk autokick', ' ');
 					//$doublespan = array('name', 'description', 'tags', 'admins');
 					$doublespan = array();
+					echo "<form id=\"$server_select\" >";
+					echo "<span id=\"error_msg\"></span>";
 					echo "<table>";
 					foreach($server_settings as $key => $value) {
 						//if (strpos($key, '_comment') === false) {
@@ -77,9 +79,11 @@
 									echo "<br />";
 								} else {
 									echo "$display:$col";
-									foreach($value as $sub_key => $sub_value) {
-										echo "<input type=text name=\"$key-$sub_key\" value=\"$sub_value\" size=\"".strlen($sub_value)."\" /> ";
+									$sub_value = "";
+									if($value!="") {
+										$sub_value = implode(", ", $value);
 									}
+									echo "<input type=text name=\"$key\" value=\"$sub_value\" size=\"".strlen($sub_value)."\" /> ";
 									//var_dump($value);
 									echo "<br />";
 								}
@@ -98,6 +102,8 @@
 						}
 					}
 					echo "</table>";
+					echo "<input type=\"button\" id=\"$server_select\" name=\"submit\" value=\"Save Config\" onclick=\"return validate('$server_select');\" /></form>";
+					
 					echo "<pre>";
 					var_dump($server_settings);
 					echo "</pre>";
@@ -111,6 +117,14 @@
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" >
+		function validate(leForm) {
+			var Form = document.getElementById(leForm);         
+			var childs = Form.children;         
+			for(I = 0; I < childs.length; I++) {                    
+				var Value = childs[I].getAttribute('name');                             
+				console.log(Value);
+			}
+		}
 		function load_list(server) {
 			$.get("server-settings.php?show=true&d=" + server, function(html) {
 				// replace the "ajax'd" data to the table body
