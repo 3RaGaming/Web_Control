@@ -37,17 +37,37 @@
 					$disabled = array('token', 'username', 'password');
 					$replace_this = array('require_user_verification', 'max_upload_in_kilobytes_per_second', 'ignore_player_limit_for_returning_players', 'only_admins_can_pause_the_game', 'afk_autokick_interval', '_');
 					$replace_with_that = array('verify users', 'upload kbps', 'ignore player limit', 'admin pause only', 'afk autokick', ' ');
+					//$doublespan = array('name', 'description', 'tags', 'admins');
+					$doublespan = array();
+					echo "<table>";
 					foreach($server_settings as $key => $value) {
 						//if (strpos($key, '_comment') === false) {
 						if(strpos($key, '_comment') === false && !in_array($key, $disabled)) {
+							if(in_array($key, $doublespan)) {
+								echo "<tr><td colspan=2>";
+								$col = "";
+							} else {
+								echo "<tr><td>";
+								$col = "</td><td>";
+							}
 							$display = str_replace($replace_this, $replace_with_that, $key);
 							if(is_string($value)||is_int($value)) {
-								echo "$display: <input type=text name=\"$key\" value=\"$value\" size=\"".strlen($value)."\" /><br />";
+								if($key=="allow_commands") {
+									if($value=="true") {
+										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true selected>True</option><option value=false>False</option></select><br />";
+									} elseif($value=="false")  {
+										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true>True</option><option value=false selected>False</option></select><br />";
+									} else {
+										echo "$display:$col<select name=\"$key\"><option value=admins-only selected>Admins Only</option><option value=true>True</option><option value=false>False</option></select><br />";
+									}
+								} else {
+									echo "$display:$col<input type=text name=\"$key\" value=\"$value\" size=\"".strlen($value)."\" /><br />";
+								}
 							} elseif(is_array($value)) {
 								if($key == "visibility") {
-									echo "$display: ";
+									echo "$display:$col";
 									foreach($value as $sub_key => $sub_value) {
-										if($sub_value==true) {
+										if($sub_value=="true") {
 											echo "$sub_key: <select name=\"$key-$sub_key\"><option value=true selected>True</option><option value=false>False</option></select> ";
 										} else {
 											echo "$sub_key: <select name=\"$key-$sub_key\"><option value=true>True</option><option value=false selected>False</option></select> ";
@@ -56,7 +76,7 @@
 									//var_dump($value);
 									echo "<br />";
 								} else {
-									echo "$display: ";
+									echo "$display:$col";
 									foreach($value as $sub_key => $sub_value) {
 										echo "<input type=text name=\"$key-$sub_key\" value=\"$sub_value\" size=\"".strlen($sub_value)."\" /> ";
 									}
@@ -65,20 +85,22 @@
 								}
 							} elseif(is_bool($value)) {
 								if($value==true) {
-									echo "$display: <select name=\"$key\"><option value=true selected>True</option><option value=false>False</option></select><br />";
+									echo "$display:$col<select name=\"$key\"><option value=true selected>True</option><option value=false>False</option></select><br />";
 								} else {
-									echo "$display: <select name=\"$key\"><option value=true>True</option><option value=false selected>False</option></select><br />";
+									echo "$display:$col<select name=\"$key\"><option value=true>True</option><option value=false selected>False</option></select><br />";
 								}
 							} else {
-								echo "$key: ";
+								echo "$key:$col";
 								var_dump($value);
 								echo "<br />";
 							}
+							echo "</td>";
 						}
 					}
-					/*echo "<pre>";
+					echo "</table>";
+					echo "<pre>";
 					var_dump($server_settings);
-					echo "</pre>";*/
+					echo "</pre>";
 				}
 			}
 			die();
