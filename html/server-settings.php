@@ -76,9 +76,9 @@
 							}
 						}
 					}
-					echo "<pre>";
+					/*echo "<pre>";
 					var_dump($server_settings);
-					echo "</pre>";
+					echo "</pre>";*/
 				}
 			}
 			die();
