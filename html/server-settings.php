@@ -134,7 +134,7 @@
 		echo "\t\t\t$('#logs_link').html('<a href=\"./logs.php#$server_select\" id=\"logs_link\">Logs</a>');\xA";
 		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
-		echo "\xA\t\t\t setTimeout(load_list('$server_select'), 500);\xA";
+		//echo "\xA\t\t\t setTimeout(load_list('$server_select'), 500);\xA";
 		echo "\t\t})\xA";
 ?>
 	</script>

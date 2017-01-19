@@ -220,7 +220,7 @@
 
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
-		echo "\xA\t\t\t setTimeout(Function() { load_list('$server_select'); }, 500);\xA";
+		//echo "\xA\t\t\t setTimeout(load_list('$server_select'), 500);\xA";
 		echo "\t\t})\xA";
 ?>
 	</script>
