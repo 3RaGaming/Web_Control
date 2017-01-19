@@ -140,6 +140,9 @@ else
 					echo "Cannot start server";
 				else
 					echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
+					if [ -e "$dir_server/server-settings.json" ]; then
+						cp $dir_server/server-settings.json $dir_server/running-server-settings.json;
+					fi
 					if [ -e "$dir_server/screenlog.0" ]; then
 						LASTSCREEN=$(tail -n 50 $dir_server/screenlog.0)
                         move_logs "$server"
@@ -159,6 +162,9 @@ else
 			if [ "$check" == "Server Running" ]; then 
 				#echo "Server Shutting Down" ;
 				echo -e "Server Shutting Down. Initiated by $cur_user\r\n" >> screenlog.0 ;
+				if [ -e "$dir_server/running-server-settings.json" ]; then
+					rm $dir_server/running-server-settings.json;
+				fi
 				sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$stop\n"
 			else
 				echo "Server is already Stopped.";

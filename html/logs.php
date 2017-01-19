@@ -196,6 +196,17 @@
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript">
+		function load_list(server) {
+			$.get("logs.php?show=true&d=" + server, function(html) {
+				// replace the "ajax'd" data to the table body
+				$('#server_list-' + server).html(html);
+				return false;
+			});
+		}
+		function Download(url) {
+			if (user_level == "viewonly") { return; }
+			document.getElementById('file_iframe').src = url;
+		}
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		<?php if(isset($server_select)) { echo "\t\t$(\"logs\").attr(\"href\", \"./logs.php?$server_select\");\xA"; } ?>
 		//you can try to change this if you really want. Validations are also done server side.
@@ -209,19 +220,9 @@
 
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
+		echo "\xA\t\t\t setTimeout(Function() { load_list('$server_select'); }, 500);\xA";
 		echo "\t\t})\xA";
 ?>
-		function load_list(server) {
-			$.get("logs.php?show=true&d=" + server, function(html) {
-				// replace the "ajax'd" data to the table body
-				$('#server_list-' + server).html(html);
-				return false;
-			});
-		}
-		function Download(url) {
-			if (user_level == "viewonly") { return; }
-			document.getElementById('file_iframe').src = url;
-		}
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
 	<style type="text/css">@import "assets/log-ui.css";</style>

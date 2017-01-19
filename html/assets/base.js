@@ -1054,8 +1054,7 @@ function server_sss(cmd) {
 	http.open("POST", "process.php?d=" + server_select, true);
 	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	var server_name = $('#server_name').val();
-	var server_password = $('#server_password').val();
-	var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
+	var params = cmd + "&server_name=" + server_name;
 	http.send(params);
 	http.onload = function() {
 		if(http.responseText) {
