@@ -34,12 +34,31 @@
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
+					foreach($server_settings as $key => $value) {
+						if(is_string($value)||is_int($value)) {
+							echo "$key: <input type=text name=\"$key\" value=\"$value\" /><br />";
+						} elseif(is_array($value)) {
+							echo "$key: ";
+							var_dump($value);
+							echo "<br />";
+						} elseif(is_bool($value)) {
+							if($value==true) {
+								echo "$key: <select name=\"$key\"><option value=true selected>True</option><option value=false>False</option></select><br />";
+							} else {
+								echo "$key: <select name=\"$key\"><option value=true>True</option><option value=false selected>False</option></select><br />";
+							}
+						} else {
+							echo "$key: ";
+							var_dump($value);
+							echo "<br />";
+						}
+					}
 					echo "<pre>";
 					var_dump($server_settings);
 					echo "</pre>";
 				}
-				die();
 			}
+			die();
 		}
 	}
 ?>
@@ -50,7 +69,8 @@
 		function load_list(server) {
 			$.get("server-settings.php?show=true&d=" + server, function(html) {
 				// replace the "ajax'd" data to the table body
-				$('#server_list-' + server).html(html);
+				//$('#server_list-' + server).html(html);
+				var serverSettings = $.map(html, function(el) { return el });
 				return false;
 			});
 		}
@@ -91,15 +111,9 @@
 		echo "\t\t\t$('#logs_link').html('<a href=\"./logs.php#$server_select\" id=\"logs_link\">Logs</a>');\xA";
 		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
-		
-		//echo "\t\t})\xA";
+		echo "\xA\t\t\t setTimeout(Function() { load_list('$server_select'); }, 500);\xA";
+		echo "\t\t})\xA";
 ?>
-			$.get("server-settings.php?show=true&d=" + server, function(html) {
-				// replace the "ajax'd" data to the table body
-				$('#server_list-' + server).html(html);
-				return false;
-			});
-		});
 	</script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
