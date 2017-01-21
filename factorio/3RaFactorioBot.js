@@ -729,7 +729,10 @@ function handleInput(input) {
 	//Get the channelid
 	let separator = input.indexOf("$");
 	let channelid = input.substring(0, separator);
-	if (channelid == "emergency") {
+	if (channelid == "heartbeat") {
+		//Heartbeat function to insure the bot is still running, meant to be functionless
+		return;
+	} else if (channelid == "emergency") {
 		//Bot crashed, must restart
 		if (!savedata.channels.admin) return;
 		let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
