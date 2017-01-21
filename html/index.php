@@ -18,7 +18,11 @@
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
 	if(!isset($server_select)) {
-		die('Error in server selection index.php');
+		if(isset($_REQUEST['d'])&&$_REQUEST['d']=="Managepgm") {
+			$server_select = "servertest";
+		} else {
+			die('Error in server selection index.php');
+		}
 	}
 ?>
 </script>
@@ -64,9 +68,9 @@
 					/*var_dump($server_settings);*/
 				}
 				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php?d=$server_select\">config</a>');\xA";
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php#server_list-".$server_select."\">config</a>');\xA";
 				} else {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"> <a href=\"./server-settings.php?d=$server_select\">config</a></i>');\xA";
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"> <a href=\"./server-settings.php#server_list-".$server_select."\">config</a></i>');\xA";
 				}
 			} else {
 				// Report file came back invalid

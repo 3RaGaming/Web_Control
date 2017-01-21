@@ -39,9 +39,10 @@
 					$replace_with_that = array('verify users', 'upload kbps', 'ignore player limit', 'admin pause only', 'afk autokick', ' ');
 					//$doublespan = array('name', 'description', 'tags', 'admins');
 					$doublespan = array();
+					echo "<form id=\"$server_select\" >";
+					echo "<span id=\"error_msg\"></span>";
 					echo "<table>";
 					foreach($server_settings as $key => $value) {
-						//if (strpos($key, '_comment') === false) {
 						if(strpos($key, '_comment') === false && !in_array($key, $disabled)) {
 							if(in_array($key, $doublespan)) {
 								echo "<tr><td colspan=2>";
@@ -73,14 +74,14 @@
 											echo "$sub_key: <select name=\"$key-$sub_key\"><option value=true>True</option><option value=false selected>False</option></select> ";
 										}
 									}
-									//var_dump($value);
 									echo "<br />";
 								} else {
 									echo "$display:$col";
-									foreach($value as $sub_key => $sub_value) {
-										echo "<input type=text name=\"$key-$sub_key\" value=\"$sub_value\" size=\"".strlen($sub_value)."\" /> ";
+									$sub_value = "";
+									if($value!="") {
+										$sub_value = implode(", ", $value);
 									}
-									//var_dump($value);
+									echo "<input type=text name=\"$key\" value=\"$sub_value\" size=\"".strlen($sub_value)."\" /> ";
 									echo "<br />";
 								}
 							} elseif(is_bool($value)) {
@@ -98,9 +99,11 @@
 						}
 					}
 					echo "</table>";
-					echo "<pre>";
-					var_dump($server_settings);
-					echo "</pre>";
+					echo "<input type=\"button\" id=\"$server_select\" name=\"submit\" value=\"Save Config\" onclick=\"return validate('$server_select');\" /></form>";
+					
+					//echo "<pre>";
+					//var_dump($server_settings);
+					//echo "</pre>";
 				}
 			}
 			die();
@@ -111,6 +114,17 @@
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" >
+		function validate(leForm) {
+			var Form = document.getElementById(leForm);
+			console.log(document.getElementById(leForm).elements);     
+			for (var i = 0; i < Form.length; i++) {
+				if (Form.type === "text" && Form.value === "") {
+					console.log("it's an empty textfield");
+				} else {
+					console.log(Form[i].name + " - " + Form[i].value);
+				}
+			}
+		}
 		function load_list(server) {
 			$.get("server-settings.php?show=true&d=" + server, function(html) {
 				// replace the "ajax'd" data to the table body
@@ -118,6 +132,8 @@
 				//var serverSettings = $.map(html, function(el) { return el });
 				return false;
 			});
+			$('#homelink').attr("href", "./index.php?d=" + server);
+			$('#logslink').attr("href", "./logs.php?#server_list-" + server);
 		}
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
@@ -132,29 +148,8 @@
 			echo "\t\t\t$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
 			unset($_SESSION['login']['reload_report']);
 		}
-
-		// This is for displaying the server name & password in an input box
-		if(file_exists("$base_dir$server_select/server-settings.json")) {
-			$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
-			if($server_settings != NULL) {
-				//Do we have a server
-				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> config');\xA";
-				} else {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"></i> config');\xA";
-				}
-			} else {
-				// Report file came back invalid
-				echo "\t\t\t$('#alert').html('#ERROR WITH server-settings.json#');\xA";
-				echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> config');\xA";
-			}
-		} else {
-			// Report file came back invalid
-			echo "\t\t\t$('#alert').html('#ERROR WITH server-settings.json#');\xA";
-			echo "\t\t\t$('#server_password').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> config');\xA";
-		}
-		echo "\t\t\t$('#logs_link').html('<a href=\"./logs.php#$server_select\" id=\"logs_link\">Logs</a>');\xA";
-		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";\xA";
+		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
+		echo "\t\t\t$('#logslink').attr(\"href\", \"./logs.php?#server_list-\" + server_select);\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
 		//echo "\xA\t\t\t setTimeout(load_list('$server_select'), 500);\xA";
 		echo "\t\t})\xA";
@@ -164,12 +159,13 @@
 	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
 	<style type="text/css">@import "assets/log-ui.css";</style>
 </head>
-<body>
+<body onLoad="load_list(server_select)">
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
-			<a href="./index.php">Home</a>&nbsp;-&nbsp;
-			<span id="server_password"></span>&nbsp;-&nbsp;
-			<a href="./logs.php" id="logs_link">Logs</a>&nbsp;-&nbsp;
+			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
+			<a id="homelink" href="./index.php">Home</a>&nbsp;-&nbsp;
+			Config&nbsp;-&nbsp;
+			<a href="./logs.php" id="logslink">Logs</a>&nbsp;&nbsp;
 			<span id="alert"></span>
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
 			<div style="float: right;">
@@ -186,3 +182,6 @@
 	</div>
 </body>
 </html>
+<?php
+die();
+?>
