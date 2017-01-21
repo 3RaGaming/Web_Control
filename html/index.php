@@ -18,7 +18,11 @@
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
 	if(!isset($server_select)) {
-		die('Error in server selection index.php');
+		if(isset($_REQUEST['d'])&&$_REQUEST['d']=="Managepgm") {
+			$server_select = "servertest";
+		} else {
+			die('Error in server selection index.php');
+		}
 	}
 ?>
 </script>
