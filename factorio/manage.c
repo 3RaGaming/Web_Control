@@ -689,7 +689,7 @@ void * heartbeat() {
 	while (1) {
 		send_threaded_chat("bot", "heartbeat$");
 		for (int i = 1; i < servers; i++) {
-			send_threaded_chat(server_list[i]->name, "/silent-command local heartbeat = true");
+			send_threaded_chat(server_list[i]->name, "/silent-command local heartbeat = true\n");
 		}
 		sleep(15);
 	}
