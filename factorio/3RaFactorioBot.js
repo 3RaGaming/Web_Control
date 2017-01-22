@@ -193,14 +193,15 @@ function handleNewForce(serverid, forcename) {
 		savedata.channels[serverid].forcenames.push(forcename);
 		textchannel.setTopic("Server registered");
 		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position + savedata.channels[serverid].forceids.length);
-		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }) //Allow bot to read
-		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'READ_MESSAGES': true }) //Allow Moderators to read
-		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }) //Allow force to read
-		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }) //Don't allow anyone else to read
-		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }) //Allow bot to connect
-		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'CONNECT': true }) //Allow Moderators to connect
-		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }) //Allow force to connect
-		voicechannel.overwritePermissions(guild.roles.get(guildid), { 'CONNECT': false }) //Don't allow anyone else to connect
+		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
+		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
+		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
+		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
+		voicechannel.setPosition(savedata.channels[serverid].forceids.length + 2);
+		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
+		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'CONNECT': true }); //Allow Moderators to connect
+		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }); //Allow force to connect
+		voicechannel.overwritePermissions(guild.roles.get(guildid), { 'CONNECT': false }); //Don't allow anyone else to connect
 		savedata.channels[pvpid] = { id: textchannel.id, name: pvpname, type: "pvp", main: serverid, role: role.id, voiceid: voicechannel.id, status: "alive" };
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
