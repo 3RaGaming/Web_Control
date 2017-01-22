@@ -779,9 +779,9 @@ function handleInput(input) {
 		if (!savedata.channels[servername]) return;
 		bot.channels.get(savedata.channels.admin.id).sendMessage(tag + " Server *" + servername + "* (" + savedata.channels[servername].name + ") has crashed!\n");
 		let message_sent = bot.channels.get(savedata.channels[servername].id).sendMessage("**Server crash was detected. Moderators have been notified. Please wait for restart.**");
-		message_sent.then((message) => {
-			message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
-		});
+		//message_sent.then((message) => {
+		//	message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
+		//});
 		savedata.channels[servername].status = "stopped";
 		delete savedata.playerlists[servername];
 		fs.unlinkSync("savedata.json");
