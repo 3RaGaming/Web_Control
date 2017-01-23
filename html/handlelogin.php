@@ -11,6 +11,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 
 <html>
 	<head>
+		<title> Checking Discord Response </title>
 		<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 		<script>
 			function checkPermissions(memberobject, rolesarray) {
@@ -52,7 +53,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 					}
 				});
 			}
-			$(document).ready(function() {
+			function onPageLoad() {
 				alert("On Load Running");
 				var checkerror = window.location.hash.split("&")[0].split("=");
 				var token;
@@ -72,7 +73,12 @@ if(isset($_SERVER["HTTPS"]) == false)
 						getGuildMember(returndata, token);
 					}
 				});
-			});
+			}
+			$(document).ready(onPageLoad());
+			window.onload = onPageLoad();
 		</script>
 	</head>
+	<body>
+		<p> "Nothing important here" </p>
+	</body>
 </html>
