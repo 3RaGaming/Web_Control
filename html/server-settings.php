@@ -101,9 +101,9 @@
 					echo "</table>";
 					echo "<input type=\"button\" id=\"$server_select\" name=\"submit\" value=\"Save Config\" onclick=\"return validate('$server_select');\" /></form>";
 					
-					///echo "<pre>";
-					///var_dump($server_settings);
-					///echo "</pre>";
+					echo "<pre>";
+					var_dump($server_settings);
+					echo "</pre>";
 				}
 			}
 			die();
@@ -115,11 +115,14 @@
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" >
 		function validate(leForm) {
+			var err = 0;
 			var Form = document.getElementById(leForm);
 			console.log(document.getElementById(leForm).elements);     
 			for (var i = 0; i < Form.length; i++) {
 				if (Form.type === "text" && Form.value === "") {
 					console.log("it's an empty textfield");
+					$("#"+Form[i].name).css("background-color", "red");
+					err++;
 				} else {
 					console.log(Form[i].name + " - " + Form[i].value);
 				}
