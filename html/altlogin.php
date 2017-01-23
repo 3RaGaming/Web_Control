@@ -19,39 +19,6 @@ if(isset($_SESSION['login'])) {
 	}
 }
 
-$userN="";
-$passW="";
-if(isset($_POST['uname'])) {
-	$userN = addslashes($_POST['uname']);
-}
-if(isset($_POST['passw'])) {
-	$passW = addslashes(md5(trim($_POST['passw'])));
-}
-if(!empty($userN) && !empty($passW)) {
-	$userlist = file ('/var/www/users.txt');
-	$success = false;
-	foreach ($userlist as $user) {
-		$user_details = explode('|', $user);
-		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
-			$userN = $user_details[0];
-			$userL = $user_details[2];
-			$success = true;
-			break;
-		}
-	}
-	if ($success) {
-		$_SESSION['login']['user']=$userN;
-		$_SESSION['login']['level']=$userL;
-		//Send home if logged in
-		header("Location: ./?d=server1");
-		die();
-	} else {
-		$report =  "<br />You have entered the wrong username or password. Please try again.<br />";
-	}
-} elseif(isset($_POST['submit'])) {
-	$report = "<br />I don't like no input<br />";
-}
-
 ?>
 <html>
 <head>
@@ -60,9 +27,9 @@ if(!empty($userN) && !empty($passW)) {
 <body>
 <div class="login-page">
   <div class="form">
-    <form class="login-form" name="login" method="post">
-		<input type="image" src="./3rabutton.png" />
-    </form>
+    <a href = "https://discordapp.com/oauth2/authorize?client_id=271167532340084736&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Fhandlelogin.php&response_type=token">
+	  <img src="./3rabutton.png" alt="Login With Discord"/>
+	</a>
 	<?php if(isset($report)) { echo $report; } ?>
   </div>
 </div>
