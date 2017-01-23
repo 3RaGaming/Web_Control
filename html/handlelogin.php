@@ -13,7 +13,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 	<head>
 		<title> Checking Discord Response </title>
 		<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
-		<script>
+		<script type="text/javascript">
 			function checkPermissions(memberobject, rolesarray) {
 				alert("Checking permissions");
 				var roleid;
@@ -78,7 +78,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 			window.onload = onPageLoad();
 		</script>
 	</head>
-	<body>
+	<body onLoad = "onPageLoad()">
 		<p> "Nothing important here" </p>
 	</body>
 </html>
