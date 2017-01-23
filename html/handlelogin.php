@@ -57,7 +57,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 				alert("On Load Running");
 				var checkerror = window.location.hash.split("&")[0].split("=");
 				var token;
-				if (checkerror[0] == "token") {
+				if (checkerror[0] == "access_token") {
 					token = checkerror[1];
 				} else {
 					//Ask Stud how to best to a redirect to the login screen here
