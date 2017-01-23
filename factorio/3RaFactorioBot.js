@@ -193,14 +193,15 @@ function handleNewForce(serverid, forcename) {
 		savedata.channels[serverid].forcenames.push(forcename);
 		textchannel.setTopic("Server registered");
 		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position + savedata.channels[serverid].forceids.length);
-		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }) //Allow bot to read
-		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'READ_MESSAGES': true }) //Allow Moderators to read
-		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }) //Allow force to read
-		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }) //Don't allow anyone else to read
-		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }) //Allow bot to connect
-		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'CONNECT': true }) //Allow Moderators to connect
-		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }) //Allow force to connect
-		voicechannel.overwritePermissions(guild.roles.get(guildid), { 'CONNECT': false }) //Don't allow anyone else to connect
+		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
+		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
+		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
+		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
+		voicechannel.setPosition(savedata.channels[serverid].forceids.length + 2);
+		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
+		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'CONNECT': true }); //Allow Moderators to connect
+		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }); //Allow force to connect
+		voicechannel.overwritePermissions(guild.roles.get(guildid), { 'CONNECT': false }); //Don't allow anyone else to connect
 		savedata.channels[pvpid] = { id: textchannel.id, name: pvpname, type: "pvp", main: serverid, role: role.id, voiceid: voicechannel.id, status: "alive" };
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
@@ -212,8 +213,11 @@ function deleteForce(pvpid) {
 	guild.channels.get(savedata.channels[pvpid].id).delete();
 	guild.channels.get(savedata.channels[pvpid].voiceid).delete();
 	guild.roles.get(savedata.channels[pvpid].role).delete();
-	savedata.channels[pvpid].forceids.splice(savedata.channels[pvpid].forceids.indexOf(pvpid), 1);
-	savedata.channels[pvpid].forcenames.splice(savedata.channels[pvpid].forcenames.indexOf(pvpid), 1);
+	let server = pvpid.substring(0, pvpid.indexOf("-"));
+	let force = pvpid.substring(pvpid.indexOf("-") + 1);
+	savedata.channels[server].forceids.splice(savedata.channels[server].forceids.indexOf(pvpid), 1);
+	savedata.channels[server].forcenames.splice(savedata.channels[server].forcenames.indexOf(force), 1);
+	delete savedata.channels[pvpid];
 	fs.unlinkSync("savedata.json");
 	fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 }
@@ -282,7 +286,7 @@ var publiccommands = {
 	},
 	"register": function (message, command) {
 		if (command.length != 2) {
-			message.channel.sendMessage("Correct usage: ::register *Factorio_username*");
+			message.channel.sendMessage("Correct usage: ::register *username*");
 			return;
 		}
 		let userid = message.author.id;
@@ -302,7 +306,7 @@ var publiccommands = {
 			assignRole(server, savedata.playerlists[server][username].force, userid);
 		}
 	},
-	"listservers": function (message, command) {
+	"servers": function (message, command) {
 		if (Object.keys(savedata.channels).length === 0) {
 			message.channel.sendMessage("No servers are currently registered. This may be a bug, please tag Moderators.");
 			return;
@@ -323,6 +327,12 @@ var publiccommands = {
 			message.channel.sendMessage(servers);
 		}
 	},
+	"listservers": function (message, command) {
+		publiccommands.servers(message, command);
+	},
+	"serverlist": function (message, command) {
+		publiccommands.servers(message, command);
+	},
 	"status": function (message, command) {
 		let registered_servers = 0;
 		for (var serverid in savedata.channels) {
@@ -333,8 +343,9 @@ var publiccommands = {
 	},
 	"help": function (message, command) {
 		message.channel.sendMessage("**::players** *[force]* - Get a list of all currently connected players, must be run in a registered channel. If the optional argument force is provided, it will print players only on that force.\n\n" +
-			"**::register** *Factorio_username* - Register your Factorio username to your Discord account. This is required for PvP roles to be added to your account.\n\n" +
-			"**::listservers** - Get a list of all currently running servers, as well as the amount of players currently connected to each.\n\n" +
+			"**::register** *username* - Register your Factorio username to your Discord account. This is required for PvP roles to be added to your account.\n\n" +
+			"**::servers** - Get a list of all currently running servers, as well as the amount of players currently connected to each.\n" +
+			"**::listservers** and **::serverlist** - Same function as **::servers**, included because of how often they're used as well.\n\n" + 
 			"**::status** - Have the bot print a message saying that it is running correctly\n\n" + 
 			"**::serverhelp** - Must have the Moderators role, shows commands related to server/channel management.\n\n" +
 			"**::adminhelp** - Must have the Moderators role, can only be run in the admin channel, shows admin management commands."
@@ -399,7 +410,7 @@ var admincommands = {
 	},
 	"setpvp": function (message, command) {
 		if (command.length < 3) {
-			message.channel.sendMessage("The setpvpmain command requires 2 arguments. ::setchannel serverid servername");
+			message.channel.sendMessage("The setpvp command requires 2 arguments. ::setpvp serverid servername");
 			return;
 		}
 		//Check to see if pvpid is already registered
@@ -415,7 +426,7 @@ var admincommands = {
 			return;
 		}
 		//Get the name to tag the server as
-		let servername = command[2];
+		let servername = command.slice(2).join(" ");
 		savedata.channels[serverid] = { id: message.channel.id, name: servername, type: "pvp-main", forceids: [], forcenames: [] };
 		message.channel.sendMessage("Shouts from any force on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "].\n");
 		if (!savedata.playerlists[serverid]) savedata.playerlists[serverid] = {};
@@ -432,7 +443,7 @@ var admincommands = {
 			message.channel.sendMessage("The changename command requires one argument. ::changename newname\n");
 			return;
 		}
-		let newname = command[1];
+		let newname = command.slice(1).join(" ");
 		let current = getChannelKey(message.channel.id);
 		if (current === null) {
 			message.channel.sendMessage("This channel is not registered to any server!\n");
@@ -580,14 +591,33 @@ var admincommands = {
 	"banhammer": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
-				if (command.length != 2) {
-					message.channel.sendMessage("Correct usage: ::banhammer Factorio_username");
+				if (command.length < 2) {
+					message.channel.sendMessage("Correct usage: ::banhammer username [reason]");
 					return;
 				}
 				let username = command[1];
-				let sendstring = "admin$all$/ban " + username + " 'Speak to us at www.3ragaming.com/Discord to request an appeal'\n";
+				var reason;
+				if (command.length > 2) reason = command.slice(2).join(" ") + " - Speak to us at www.3ragaming.com/Discord to request an appeal";
+				else reason = "Speak to us at www.3ragaming.com/Discord to request an appeal";
+				let sendstring = "admin$all$/ban " + username + " '" + reason + "'\n";
 				safeWrite(sendstring);
 				message.channel.sendMessage("Player " + username + " has been banned from all currently running 3Ra servers.\n");
+				return;
+			}
+		}
+		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+	},
+	"unban": function (message, command) {
+		if (savedata.channels.admin) {
+			if (savedata.channels.admin.id == message.channel.id) {
+				if (command.length != 2) {
+					message.channel.sendMessage("Correct usage: ::unban username");
+					return;
+				}
+				let username = command[1];
+				let sendstring = "admin$all$/unban " + username + "\n";
+				safeWrite(sendstring);
+				message.channel.sendMessage("Player " + username + " has been unbanned from all currently running 3Ra servers.\n");
 				return;
 			}
 		}
@@ -676,7 +706,8 @@ var admincommands = {
 			"**::adminannounce** *[serverid/all] announcement* - Sends an announcement to 'serverid'. Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
 			"**::registerserver** *serverid* - Register a server for use, but do not attach a Discord channel to it. (Allows ::sendadmin and ::adminanounce to work).\n\n" +
 			"**::unregister** *serverid* - Unregister a server registered with ::registerserver.\n\n" +
-			"**::banhammer** *Factorio_username* - Bans a player from all running servers at once.\n\n" +
+			"**::banhammer** *username* - Bans a player from all running servers at once.\n\n" +
+			"**::unban** *username* - Unbans a player from all running servers at once.\n\n" +
 			"**::restart** - Have the bot restart, allowing any updates to the source code to occur without requiring shutting down everything else.\n\n" +
 			"**::clearservers** - Delete and recreate a blank channel_list.json. This will unregister every server, including the admin channel. Used in case an update changes the structure of channel_list.json.\n\n" +
 			"**::removeregistration** *Factorio_username* - Remove a username from the registration list.\n\n" +
@@ -729,7 +760,10 @@ function handleInput(input) {
 	//Get the channelid
 	let separator = input.indexOf("$");
 	let channelid = input.substring(0, separator);
-	if (channelid == "emergency") {
+	if (channelid == "heartbeat") {
+		//Heartbeat function to insure the bot is still running, meant to be functionless
+		return;
+	} else if (channelid == "emergency") {
 		//Bot crashed, must restart
 		if (!savedata.channels.admin) return;
 		let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
@@ -745,9 +779,9 @@ function handleInput(input) {
 		if (!savedata.channels[servername]) return;
 		bot.channels.get(savedata.channels.admin.id).sendMessage(tag + " Server *" + servername + "* (" + savedata.channels[servername].name + ") has crashed!\n");
 		let message_sent = bot.channels.get(savedata.channels[servername].id).sendMessage("**Server crash was detected. Moderators have been notified. Please wait for restart.**");
-		message_sent.then((message) => {
-			message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
-		});
+		//message_sent.then((message) => {
+		//	message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
+		//});
 		savedata.channels[servername].status = "stopped";
 		delete savedata.playerlists[servername];
 		fs.unlinkSync("savedata.json");
