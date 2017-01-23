@@ -19,7 +19,7 @@
 	include('./getserver.php');
 	if(!isset($server_select)) {
 		if(isset($_REQUEST['d'])&&$_REQUEST['d']=="Managepgm") {
-			$server_select = "servertest";
+			$server_select = "server1";
 		} else {
 			die('Error in server selection index.php');
 		}
