@@ -53,6 +53,7 @@ void stop_all_servers();
 void launch_bot();
 void server_crashed(struct ServerData *);
 void * bot_ready_watch(void *);
+void * heartbeat();
 
 //Find server with given name
 struct ServerData * find_server(char * name) {
@@ -229,7 +230,7 @@ void * input_monitoring(void * server_ptr) {
 				fclose(input);
 				close(server->input);
 				launch_bot();
-				input = fdopen(server->output, "a");
+				input = fdopen(server->output, "r");
 				pthread_mutex_unlock(&server->mutex);
 			} else if (strcmp(servername, "ready") == 0 && strcmp(server->name, "bot") == 0) {
 				//Bot startup is complete, it is ready to continue
@@ -282,7 +283,7 @@ void * input_monitoring(void * server_ptr) {
 					sprintf(player_announcement, "[PUPDATE] %s was killed [%s]", player_args[2], player_args[3]);
 				} else if (strcmp(player_args[0], "respawn") == 0) {
 					sprintf(player_announcement, "[PUPDATE] %s has respawned [%s]", player_args[2], player_args[3]);
-				} else {
+				} else if (strcmp(player_args[0], "update") != 0) {
 					free(player_args);
 					free(player_announcement);
 					free(message);
@@ -325,6 +326,11 @@ void * input_monitoring(void * server_ptr) {
 			} else if (strcmp(servername, "output") == 0) {
 				message = (char *) malloc((strlen("output$()") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
 				sprintf(message, "output$(%s)%s\n", server->name, new_data);
+				send_threaded_chat("bot", message);
+				free(message);
+			} else if (strcmp(servername, "query") == 0) {
+				message = (char *) malloc((strlen("query$") + strlen(new_data) + 6)*sizeof(char));
+				sprintf(message, "query$%s\n", new_data);
 				send_threaded_chat("bot", message);
 				free(message);
 			} else if (strcmp(servername, "PVPROUND") == 0) {
@@ -678,6 +684,19 @@ void server_crashed(struct ServerData * server) {
 	pthread_mutex_unlock(&server->mutex);
 }
 
+void * heartbeat() {
+	//Sends a heartbeat to every running server. This heartbeat doesn't actually do anything except force C to use the pipe, which triggers crash detection
+	while (1) {
+		send_threaded_chat("bot", "heartbeat$");
+		for (int i = 1; i < servers; i++) {
+			send_threaded_chat(server_list[i]->name, "/silent-command local heartbeat = true");
+		}
+		sleep(15);
+	}
+
+	return (void *) NULL;
+}
+
 int main() {
 	//Initial setup of variables
 	servers = 0;
@@ -691,10 +710,16 @@ int main() {
 	pthread_attr_init(&thread_attr);
 	pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_JOINABLE);
 
-	if (signal(SIGINT, stop_all_servers) == SIG_ERR) fprintf(stderr, "Failure to ignore interrupt signal.\n");
-	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) fprintf(stderr, "Failure to ignore broken pipe signal.\n");
+	//Redirect certain signals to perform other functions
+	if (signal(SIGINT, stop_all_servers) == SIG_ERR) fprintf(stderr, "Failure to ignore interrupt signal.\n"); //Safe shutdown of all servers
+	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) fprintf(stderr, "Failure to ignore broken pipe signal.\n"); //Crash detection
 
+	//Launch the bot
 	launch_bot();
+
+	//Create the heartbeat, also for improved crash detection
+	pthread_t heartbeat_thread;
+	pthread_create(&heartbeat_thread, &thread_attr, heartbeat, (void *) NULL);
 
 	//Declare variables used in input parsing
 	char *new_input;

@@ -21,6 +21,9 @@
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
+	if(!isset($server_select)&&!isset($_REQUEST['d'])) {
+		$server_select = "servertest";
+	}
 
 	// function to print files size in human-readable form
 	function human_filesize($file, $decimals = 2) {
@@ -196,6 +199,19 @@
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript">
+		function load_list(server) {
+			$.get("logs.php?show=true&d=" + server, function(html) {
+				// replace the "ajax'd" data to the table body
+				$('#server_list-' + server).html(html);
+				return false;
+			});
+			$('#homelink').attr("href", "./index.php?d=" + server);
+			$('#configlink').attr("href", "./server-settings.php?#server_list-" + server);
+		}
+		function Download(url) {
+			if (user_level == "viewonly") { return; }
+			document.getElementById('file_iframe').src = url;
+		}
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		<?php if(isset($server_select)) { echo "\t\t$(\"logs\").attr(\"href\", \"./logs.php?$server_select\");\xA"; } ?>
 		//you can try to change this if you really want. Validations are also done server side.
@@ -206,31 +222,24 @@
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
-
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
+		echo "\t\t\t$('#configlink').attr(\"href\", \"./server-settings.php?#server_list-\" + server_select);\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
+		//echo "\xA\t\t\t setTimeout(load_list('$server_select'), 500);\xA";
 		echo "\t\t})\xA";
 ?>
-		function load_list(server) {
-			$.get("logs.php?show=true&d=" + server, function(html) {
-				// replace the "ajax'd" data to the table body
-				$('#server_list-' + server).html(html);
-				return false;
-			});
-		}
-		function Download(url) {
-			if (user_level == "viewonly") { return; }
-			document.getElementById('file_iframe').src = url;
-		}
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
 	<style type="text/css">@import "assets/log-ui.css";</style>
 </head>
-<body>
+<body onLoad="load_list(server_select)">
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-			<a href="./index.php">Home</a>
+			<a id="homelink" href="./index.php">Home</a>&nbsp;-&nbsp;
+			<a id="configlink" href="./server-settings.php">Config</a>&nbsp;-&nbsp;
+			Logs</a>&nbsp;&nbsp;
+			<span id="alert"></span>
 			<div style="float: right;">
 				<a href="login.php?logout">Logout</a>
 			</div>
@@ -248,3 +257,6 @@
 	</div>
 </body>
 </html>
+<?php
+die();
+?>

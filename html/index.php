@@ -18,7 +18,11 @@
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
 	if(!isset($server_select)) {
-		die('Error in server selection index.php');
+		if(isset($_REQUEST['d'])&&$_REQUEST['d']=="Managepgm") {
+			$server_select = "servertest";
+		} else {
+			die('Error in server selection index.php');
+		}
 	}
 ?>
 </script>
@@ -63,20 +67,10 @@
 					}
 					/*var_dump($server_settings);*/
 				}
-				if(isset($server_settings["game_password"])) {
-					if($user_level == "viewonly") {
-						echo "\t\t\t$('#server_password').hide();\xA";
-					} else {
-						$server_password = $server_settings["game_password"];
-						if(!empty($server_password)) {
-							$server_password_length = strlen($server_password);
-							if($server_password_length<14) {
-								$server_password_length = 14;
-							}
-							echo "\t\t\tdocument.getElementById('server_password').value = \"".addslashes($server_password)."\";\xA";
-							echo "\t\t\t$('#server_password').attr('size',$server_password_length);\xA";
-						}
-					}
+				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php#server_list-".$server_select."\">config</a>');\xA";
+				} else {
+					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"> <a href=\"./server-settings.php#server_list-".$server_select."\">config</a></i>');\xA";
 				}
 			} else {
 				// Report file came back invalid
@@ -95,6 +89,7 @@
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
+	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<style type="text/css">@import "assets/base.css";</style>
 </head>
 <body>
@@ -105,7 +100,8 @@
 			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
 			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
-			<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />
+			<span id="server_password"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
+			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
 			<button onclick="update_web_control(user_level);">Update Web Control</button>
 			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
 				<input type="hidden" id="update" name="update" value="yes" />
@@ -131,7 +127,7 @@
 				<button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
 				<button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
 				<button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
-				<button id="delete" style="background-color: #ffcccc;">Delete</button>
+				<button id="delete_files" name="delete_files" style="background-color: #ffcccc;">Delete</button>
 				<a id="fileStatus"></a>
 				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 			</div>

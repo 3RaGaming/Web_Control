@@ -95,29 +95,73 @@ function findPlayer(username) {
 	return null;
 }
 
+//Sets up an object to store queries, not necessary for this to persist through saves.
+var queryResponse = {};
+
+//A function to resolve a promise when given a certain UID
+function resolveQuery(uid, response) {
+	queryResponse[uid].resolve(response);
+	clearTimeout(queryResponse[uid].reject);
+	delete queryResponse[uid];
+}
+
+//Query a server for information, returns a Promise to await the response properly
+function serverQuery(server, query) {
+	var randomuid;
+	var uid;
+	while (true) {
+		//Generate a random UID that is not in use
+		randomuid = Math.floor((Math.random() * 9999) + 1000);
+		if (randomuid >= 10000) randomuid = randomuid - 1000;
+		if (randomuid <= 999) randomuid = randomuid + 1000;
+		uid = randomuid.toString();
+		if (!queryResponse[uid]) break;
+	}
+	let sendstring = "admin$" + server + "$/silent-command local s,e = pcall(loadstring('" + clean_message(query) + "')) e = e ~= nil and print('output$" + uid + "$ ' .. tostring(e))\n";
+	safeWrite(sendstring);
+	queryResponse[uid] = { resolve: null, reject: null };
+	return new Promise((resolve, reject) => {
+		queryResponse[uid].resolve = resolve;
+		queryResponse[uid].reject = setTimeout(() => {
+			delete queryResponse[uid];
+			reject("No response from server");
+		}, 5000);
+	});
+};
+
 //Assign a player to a PvP Role
 function assignRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
-	let rolename = server + "-" + force;
-	let role = bot.guilds.get(guildid).roles.find("name", rolename);
-	if (role === null && savedata.channels[rolename]) {
-		let created = bot.guilds.get(guildid).createRole({ name: rolename });
+	if (!savedata.channels[server + "-" + force]) return;
+	let roleid = savedata.channels[server + "-" + force].role;
+	if (roleid === null && savedata.channels[server + "-" + force]) {
+		let created = bot.guilds.get(guildid).createRole({ name: server + "-" + force });
 		created.then((role) => {
+			savedata.channels[server + "-" + force].role = role.id;
 			user.addRole(role);
+			roleid = role.id;
+			if (!user.roles.has(roleid)) user.addRole(bot.guilds.get(guildid).roles.get(roleid)); //Redundancy to make sure it's added
+			fs.unlinkSync("savedata.json");
+			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
+			if (savedata.channels.admin) {
+				let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
+				let tag = "<@&" + roleid + ">";
+				bot.guilds.get(guildid).channels.get(savedata.channels.admin.id).sendMessage(tag + ": The role for server *" + server + "*, force *" + force + "* was missing and has been recreated. Please manually correct the channel permissions.");  
+			}
 		});
-	} else if (role !== null && !user.roles.has(role.id)) {
-		user.addRole(role);
+	} else if (roleid !== null && savedata.channels[server + "-" + force] && !user.roles.has(roleid)) {
+		user.addRole(roleid);
+		if (!user.roles.has(roleid)) user.addRole(bot.guilds.get(guildid).roles.get(roleid)); //Redundancy to make sure it's added
 	}
 }
 
 //Remove a player from any Role in a PvP Server, if he has one
-function removeRole(server, userid) {
+function removeRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
-	let forceids = savedata.channels[server].forceids;
-	for (let i = 0; i < forceids.length; i++) {
-		let role = bot.guilds.get(guildid).roles.get(savedata.channels[forceids[i]].role);
-		if (role !== null && user.roles.has(role.id)) user.removeRole(role.id);
-	}
+	if (!savedata.channels[server + "-" + force]) return;
+	let roleid = savedata.channels[server + "-" + force].role;
+	if (roleid && user.roles.has(roleid)) user.removeRole(bot.guilds.get(guildid).roles.get(roleid));
+	if (roleid && user.roles.has(roleid)) user.removeRole(roleid); //Redundancy to make sure it's removed
 }
 
 //Replace any mentions with an actual tag
@@ -685,7 +729,10 @@ function handleInput(input) {
 	//Get the channelid
 	let separator = input.indexOf("$");
 	let channelid = input.substring(0, separator);
-	if (channelid == "emergency") {
+	if (channelid == "heartbeat") {
+		//Heartbeat function to insure the bot is still running, meant to be functionless
+		return;
+	} else if (channelid == "emergency") {
 		//Bot crashed, must restart
 		if (!savedata.channels.admin) return;
 		let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
@@ -730,6 +777,13 @@ function handleInput(input) {
 		if (!savedata.channels.admin) return;
 		let message = input.substring(separator + 1);
 		bot.channels.get(savedata.channels.admin.id).sendMessage("Response: " + message + "\n");
+	} else if (channelid == "query") {
+		let new_input = input.substring(separator + 1);
+		separator = new_input.indexOf("$");
+		let uid = new_input.substring(0, separator);
+		if (!queryResponse[uid]) return;
+		let response = new_input.substring(separator + 1);
+		resolveQuery(uid, response);
 	} else if (channelid == "PLAYER") {
 		//Player Update
 		let new_input = input.substring(separator + 1);
@@ -742,6 +796,9 @@ function handleInput(input) {
 			let player_name = data[2]; //Player's username
 			let force_name = data[3]; //Name of player's force
 			var message;
+			var old_force;
+			if (savedata.playerlists[channelid][player_name]) old_force = savedata.playerlists[channelid][player_name].force;
+			else old_force = null;
 
 			switch (action) {
 				case "join":
@@ -776,10 +833,10 @@ function handleInput(input) {
 			fs.unlinkSync("savedata.json");
 			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			if (savedata.channels[channelid].type == "pvp-main") {
-				if (action == "force") {
+				if (old_force && old_force != force_name) {
 					let userid = getPlayerID(player_name);
 					if (userid !== null) {
-						removeRole(channelid, userid);
+						removeRole(channelid, old_force, userid);
 						assignRole(channelid, force_name, userid);
 					}
 				}
@@ -983,7 +1040,7 @@ bot.on('message', (message) => {
 			publiccommands[command[0]](message, command);
 			return;
 		}
-		if (!message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
+		if (admincommands[command[0]] && !message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
 		}
@@ -991,7 +1048,7 @@ bot.on('message', (message) => {
 			admincommands[command[0]](message, command);
 			return;
 		}
-		if (message.author.id != "129357924324605952" && message.author.id != "143762597643026432") {
+		if (command[0] == "eval" && message.author.id != "129357924324605952" && message.author.id != "143762597643026432") {
 			//Not zackman0010 or StudMuffin
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
@@ -1007,6 +1064,8 @@ bot.on('message', (message) => {
 			}
 			return;
 		}
+		message.channel.sendMessage("That command does not exist. Please use ::help to see the list of commands.");
+		return;
 	} else {
 		//Get the server that matches this channel. If this channel is unregistered, the result will be null.
 		let sendto = getChannelKey(message.channel.id);

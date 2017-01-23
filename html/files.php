@@ -281,7 +281,59 @@ if(isset($_REQUEST['archive'])) {
 		{
 			die('No files selected for deletion');
 		}
-		die('Deletion almost possible!');
+		//2017-01-06-10:54:26.log 
+		$date = date('Y-m-d');
+		$time = date('H:i:s');
+		$delete_record = "";
+		$server_save_loc = "$base_dir$server_select/saves/";
+		$server_delete_loc = "$base_dir$server_select/logs/";
+		$server_delete_path = "$base_dir$server_select/logs/file_deletion-$date.log";
+		$file_users_path = "$base_dir$server_select/saves.json";
+		if(file_exists($server_save_loc)) {
+			if(isset($_POST['delete'])) {
+				//var_dump(json_decode($_POST['delete']));
+				$delete_array = json_decode($_POST['delete']);
+				if ($delete_array == NULL || $delete_array === FALSE) {
+					die('Error p'.__LINE__.': invalid json in post');
+				}
+				//set earlier $file_users_path
+				if(file_exists($file_users_path)) {
+					$jsonString = file_get_contents($file_users_path);
+					$file_list = json_decode($jsonString, true);
+					$file_list_prehash = md5(serialize($file_list));
+				}
+				foreach($delete_array as $file) {
+					if(file_exists($server_save_loc.$file)) {
+						//echo "Will delete $server_save_loc$file\xA";
+						$tmp_file = $server_save_loc.$file;
+						if(unlink($tmp_file)) {
+							if(isset($file_list[$file])) {
+								unset($file_list[$file]);
+							}
+							$delete_record = $delete_record ."$date-$time\t".$_SESSION['login']['user']."\t$file\xA";
+						}
+						//log the delete and the user
+					}
+				}
+				if($delete_record != "") {
+					if (!is_dir($server_delete_loc)) {
+						// dir doesn't exist, make it
+						mkdir($server_delete_loc);
+					}
+					file_put_contents($server_delete_path, $delete_record, FILE_APPEND);
+					if(isset($file_list) && $file_list_prehash !== md5(serialize($file_list))) {
+						$newJsonString = json_encode($file_list, JSON_PRETTY_PRINT);
+						file_put_contents($file_users_path, $newJsonString);
+					}
+				}
+				$_SESSION['login']['reload_report'] = "Files Deleted";
+				die('success');
+			} else {
+				die('Error p'.__LINE__.': with post information.');
+			}
+		} else {
+			die('Error p'.__LINE__.': in server path');
+		}
 	}
 	//no reason to carry on
 	die();
