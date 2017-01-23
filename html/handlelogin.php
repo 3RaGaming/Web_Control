@@ -28,6 +28,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 			}
 			function getGuildRoles(memberobject, token) {
 				alert("Getting list of roles");
+				alert("Token is " + token);
 				$.ajax({
 					url: 'https://discordapp.com/api/guilds/143772809418637313/roles',
 					type: 'GET',
@@ -42,6 +43,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 			function getGuildMember(userobject, token) {
 				let userid = userobject.id;
 				alert("Getting Guild Member of User ID " + userid);
+				alert("Token is " + token);
 				$.ajax({
 					url: 'https://discordapp.com/api/guilds/143772809418637313/members/' + userid,
 					type: 'GET',
