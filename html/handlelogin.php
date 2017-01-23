@@ -55,18 +55,16 @@ if(isset($_SERVER["HTTPS"]) == false)
 			}
 			function onPageLoad() {
 				alert("On Load Running");
-				alert(window.location.hash);
 				var checkerror = window.location.hash.split("&")[0].split("=");
-				alert(checkerror);
 				var token;
-				if (checkerror[0] == "access_token") {
+				if (checkerror[0] == "#access_token") {
 					token = checkerror[1];
 				} else {
 					//Ask Stud how to best to a redirect to the login screen here
 				}
 				alert("Token is " + token);
 				$.ajax({
-					url: 'https://discordapp.com/api/oauth2/users/{@me}',
+					url: 'https://discordapp.com/api/oauth2/users/me',
 					type: 'GET',
 					dataType: 'json',
 					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
@@ -79,7 +77,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 			$(document).ready(onPageLoad());
 		</script>
 	</head>
-	<body onLoad = "onPageLoad()">
+	<body>
 		<p> "Nothing important here" </p>
 	</body>
 </html>
