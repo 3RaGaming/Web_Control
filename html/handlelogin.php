@@ -29,7 +29,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 			function getGuildRoles(memberobject, token) {
 				alert("Getting list of roles");
 				$.ajax({
-					url: '/guilds/143772809418637313/roles',
+					url: 'https://discordapp.com/api/guilds/143772809418637313/roles',
 					type: 'GET',
 					dataType: 'json',
 					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
@@ -43,7 +43,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 				let userid = userobject.id;
 				alert("Getting Guild Member of User ID " + userid);
 				$.ajax({
-					url: 'https://discordapp.com/api/oauth2/guilds/143772809418637313/members/' + userid,
+					url: 'https://discordapp.com/api/guilds/143772809418637313/members/' + userid,
 					type: 'GET',
 					dataType: 'json',
 					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
@@ -64,7 +64,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 				}
 				alert("Token is " + token);
 				$.ajax({
-					url: 'https://discordapp.com/api/oauth2/users/me',
+					url: 'https://discordapp.com/api/users/me',
 					type: 'GET',
 					dataType: 'json',
 					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
