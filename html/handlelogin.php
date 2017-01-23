@@ -29,10 +29,10 @@ if(isset($_SERVER["HTTPS"]) == false)
 			function getGuildRoles(memberobject, token) {
 				alert("Getting list of roles");
 				$.ajax({
-					url: '/guilds/143772809418637313/roles' + userid;
+					url: '/guilds/143772809418637313/roles',
 					type: 'GET',
 					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token)},
+					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
 					success: function (returndata) {
 						alert("Roles successfully retrieved");
 						checkPermissions(memberobject, returndata);
@@ -43,10 +43,10 @@ if(isset($_SERVER["HTTPS"]) == false)
 				let userid = userobject.id;
 				alert("Getting Guild Member of User ID " + userid);
 				$.ajax({
-					url: 'https://discordapp.com/api/oauth2/guilds/143772809418637313/members/' + userid;
+					url: 'https://discordapp.com/api/oauth2/guilds/143772809418637313/members/' + userid,
 					type: 'GET',
 					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token)},
+					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
 					success: function (returndata) {
 						alert("Successfully retrieved Guild Member");
 						getGuildRoles(returndata, token);
@@ -64,10 +64,10 @@ if(isset($_SERVER["HTTPS"]) == false)
 				}
 				alert("Token is " + token);
 				$.ajax({
-					url: 'https://discordapp.com/api/oauth2/users/{@me}'
+					url: 'https://discordapp.com/api/oauth2/users/{@me}',
 					type: 'GET',
 					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token)},
+					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
 					success: function (returndata) {
 						alert("Retrieved User ID");
 						getGuildMember(returndata, token);
@@ -75,7 +75,6 @@ if(isset($_SERVER["HTTPS"]) == false)
 				});
 			}
 			$(document).ready(onPageLoad());
-			window.onload = onPageLoad();
 		</script>
 	</head>
 	<body onLoad = "onPageLoad()">
