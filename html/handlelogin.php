@@ -14,6 +14,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 		<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 		<script>
 			function checkPermissions(memberobject, rolesarray) {
+				alert("Checking permissions");
 				var roleid;
 				var allowed = false;
 				for (var i = 0; i < rolesarray.length; i++) {
@@ -22,28 +23,37 @@ if(isset($_SERVER["HTTPS"]) == false)
 				for (var i = 0; i < memberobject.roles.length; i++) {
 					if (memberobject.roles[i] == roleid) allowed = true;
 				}
-				alert(allowed);
+				alert("User allowed: " + allowed);
 			}
 			function getGuildRoles(memberobject, token) {
+				alert("Getting list of roles");
 				$.ajax({
 					url: '/guilds/143772809418637313/roles' + userid;
 					type: 'GET',
 					dataType: 'json',
 					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token)},
-					success: function (returndata) {checkPermissions(memberobject, returndata)}
+					success: function (returndata) {
+						alert("Roles successfully retrieved");
+						checkPermissions(memberobject, returndata);
+					}
 				});
 			}
 			function getGuildMember(userobject, token) {
 				let userid = userobject.id;
+				alert("Getting Guild Member of User ID " + userid);
 				$.ajax({
 					url: 'https://discordapp.com/api/oauth2/guilds/143772809418637313/members/' + userid;
 					type: 'GET',
 					dataType: 'json',
 					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token)},
-					success: function (returndata) {getGuildRoles(returndata, token)}
+					success: function (returndata) {
+						alert("Successfully retrieved Guild Member");
+						getGuildRoles(returndata, token);
+					}
 				});
 			}
 			$(document).ready(function() {
+				alert("On Load Running");
 				var checkerror = window.location.hash.split("&")[0].split("=");
 				var token;
 				if (checkerror[0] == "token") {
@@ -51,12 +61,16 @@ if(isset($_SERVER["HTTPS"]) == false)
 				} else {
 					//Ask Stud how to best to a redirect to the login screen here
 				}
+				alert("Token is " + token);
 				$.ajax({
 					url: 'https://discordapp.com/api/oauth2/users/{@me}'
 					type: 'GET',
 					dataType: 'json',
 					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token)},
-					success: function (returndata) {getGuildMember(returndata, token)}
+					success: function (returndata) {
+						alert("Retrieved User ID");
+						getGuildMember(returndata, token);
+					}
 				});
 			});
 		</script>
