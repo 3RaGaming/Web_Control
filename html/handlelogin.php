@@ -64,7 +64,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 				}
 				alert("Token is " + token);
 				$.ajax({
-					url: 'https://discordapp.com/api/users/me',
+					url: 'https://discordapp.com/api/users/@me',
 					type: 'GET',
 					dataType: 'json',
 					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
