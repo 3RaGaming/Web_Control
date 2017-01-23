@@ -55,7 +55,9 @@ if(isset($_SERVER["HTTPS"]) == false)
 			}
 			function onPageLoad() {
 				alert("On Load Running");
+				alert(window.location.hash);
 				var checkerror = window.location.hash.split("&")[0].split("=");
+				alert(checkerror);
 				var token;
 				if (checkerror[0] == "access_token") {
 					token = checkerror[1];
