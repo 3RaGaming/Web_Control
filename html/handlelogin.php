@@ -14,52 +14,7 @@ if(isset($_SERVER["HTTPS"]) == false)
 		<title> Checking Discord Response </title>
 		<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 		<script type="text/javascript">
-			function onPageLoad() {
-				alert("On Load Running");
-				var checkerror = window.location.hash.split("&")[0].split("=");
-				var token;
-				if (checkerror[0] == "#access_token") {
-					token = checkerror[1];
-				} else {
-					//Ask Stud how to best to a redirect to the login screen here
-				}
-				alert("Token is " + token);
-				/*$.ajax({
-					url: 'https://discordapp.com/api/users/@me',
-					type: 'GET',
-					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
-					success: function (returndata) {
-						alert("Retrieved User ID");
-					},
-					async: false
-				});*/
-				//var userid = userobject.id;
-				var userid = 129357924324605952;
-				alert("Getting Guild Member of User ID " + userid);
-				alert("Token is " + token);
-				$.ajax({
-					url: 'https://discordapp.com/api/guilds/143772809418637313/members/' + userid,
-					type: 'GET',
-					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
-					success: function (returndata) {
-						alert("Successfully retrieved Guild Member");
-					},
-					async: false
-				});
-				alert("Getting list of roles");
-				alert("Token is " + token);
-				$.ajax({
-					url: 'https://discordapp.com/api/guilds/143772809418637313/roles',
-					type: 'GET',
-					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
-					success: function (returndata) {
-						alert("Roles successfully retrieved");
-					},
-					async: false
-				});
+			function checkPermissions(memberobject, rolesarray) {
 				alert("Checking permissions");
 				var roleid;
 				var allowed = false;
@@ -70,6 +25,56 @@ if(isset($_SERVER["HTTPS"]) == false)
 					if (memberobject.roles[i] == roleid) allowed = true;
 				}
 				alert("User allowed: " + allowed);
+			}
+			function getGuildRoles(memberobject, token) {
+				alert("Getting list of roles");
+				alert("Token is " + token);
+				$.ajax({
+					url: 'https://discordapp.com/api/guilds/143772809418637313/roles',
+					type: 'GET',
+					dataType: 'json',
+					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
+					success: function (returndata) {
+						alert("Roles successfully retrieved");
+						checkPermissions(memberobject, returndata);
+					}
+				});
+			}
+			function getGuildMember(userobject, token) {
+				let userid = userobject.id;
+				alert("Getting Guild Member of User ID " + userid);
+				alert("Token is " + token);
+				$.ajax({
+					url: 'https://discordapp.com/api/guilds/143772809418637313/members/' + userid,
+					type: 'GET',
+					dataType: 'json',
+					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
+					success: function (returndata) {
+						alert("Successfully retrieved Guild Member");
+						getGuildRoles(returndata, token);
+					}
+				});
+			}
+			function onPageLoad() {
+				alert("On Load Running");
+				var checkerror = window.location.hash.split("&")[0].split("=");
+				var token;
+				if (checkerror[0] == "#access_token") {
+					token = checkerror[1];
+				} else {
+					//Ask Stud how to best to a redirect to the login screen here
+				}
+				alert("Token is " + token);
+				$.ajax({
+					url: 'https://discordapp.com/api/users/@me',
+					type: 'GET',
+					dataType: 'json',
+					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
+					success: function (returndata) {
+						alert("Retrieved User ID");
+						getGuildMember(returndata, token);
+					}
+				});
 			}
 			$(document).ready(onPageLoad());
 		</script>
