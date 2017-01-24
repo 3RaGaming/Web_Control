@@ -116,17 +116,31 @@
 	<script type="text/javascript" >
 		function validate(leForm) {
 			var err = 0;
+			var rdy = 0;
 			var Form = document.getElementById(leForm);
 			console.log(document.getElementById(leForm).elements);     
 			for (var i = 0; i < Form.length; i++) {
-				if (Form.type === "text" && Form.value === "") {
+				if (Form[i].value === "" && Form[i].name != "game_password") {
 					console.log("it's an empty textfield");
-					$("#"+Form[i].name).css("background-color", "red");
+					$('[name="'+Form[i].name+'"]').css("background-color", "red");
+					console.log('[name="'+Form[i].name+'"]');
 					err++;
 				} else {
-					console.log(Form[i].name + " - " + Form[i].value);
+					if(Form[i].name == "max_players" || Form[i].name == "max_upload_in_kilobytes_per_second" || Form[i].name == "autosave_interval" || Form[i].name == "autosave_slots" || Form[i].name == "afk_autokick_interval") {
+						if(Form[i].value >= 0 ) {
+							console.log('Correct! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
+							rdy++;
+						} else {
+							console.log('Invalid! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
+							err++;
+						}
+					} else {
+						console.log(Form[i].name + " - " + Form[i].value);
+						rdy++;
+					}
 				}
 			}
+			console.log('Error:'+err + ' Ready:' + rdy + '/18');
 		}
 		function load_list(server) {
 			$.get("server-settings.php?show=true&d=" + server, function(html) {
