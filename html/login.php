@@ -55,7 +55,7 @@ if(!empty($userN) && !empty($passW)) {
 ?>
 <html>
 <head>
-<link rel="stylesheet" media="all" href="assets/login.css" />
+<link rel="stylesheet" media="all" href="assets/css/login.css" />
 </head>
 <body>
 <div class="login-page">
