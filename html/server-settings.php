@@ -99,13 +99,34 @@
 						}
 					}
 					echo "</table>";
+					echo "<input type=\"hidden\" name=\"server_select\" value=\"".$server_select."\" /></form>";
 					echo "<input type=\"button\" id=\"$server_select\" name=\"submit\" value=\"Save Config\" onclick=\"return validate('$server_select');\" /></form>";
-					
+					echo "<br /><span id=\"$server_select-return_output\"></span>";
 					echo "<pre>";
 					var_dump($server_settings);
 					echo "</pre>";
 				}
 			}
+			die();
+		} elseif(isset($_REQUEST['server_select'])) {
+			echo "Start!<br />";
+			if(isset($_REQUEST['name'])) { echo "name - ".$_REQUEST['name']." - is set!"; } else { echo "name - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['description'])) { echo "description - ".$_REQUEST['description']." - is set!"; } else { echo "description - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['tags'])) { echo "tags - ".$_REQUEST['tags']." - is set!"; } else { echo "tags - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['max_players'])) { echo "max_players - ".$_REQUEST['max_players']." - is set!"; } else { echo "max-players - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['visibility-public'])) { echo "visibility-public - ".$_REQUEST['visibility-public']." - is set!"; } else { echo "visibility-public - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['visibility-lan'])) { echo "visibility-lan - ".$_REQUEST['visibility-lan']." - is set!"; } else { echo "visibility-lan - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['game_password'])) { echo "game_password - ".$_REQUEST['game_password']." - is set!"; } else { echo "game_password - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['require_user_verification'])) { echo "require_user_verification - ".$_REQUEST['require_user_verification']." - is set!"; } else { echo "require_user_verification - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['max_upload_in_kilobytes_per_second'])) { echo "max_upload_in_kilobytes_per_second - ".$_REQUEST['max_upload_in_kilobytes_per_second']." - is set!"; } else { echo "max_upload_in_kilobytes_per_second - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['ignore_player_limit_for_returning_players'])) { echo "ignore_player_limit_for_returning_players - ".$_REQUEST['ignore_player_limit_for_returning_players']." - is set!"; } else { echo "ignore_player_limit_for_returning_players - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['allow_commands'])) { echo "allow_commands - ".$_REQUEST['allow_commands']." - is set!"; } else { echo "allow_commands - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['autosave_slots'])) { echo "autosave_slots - ".$_REQUEST['autosave_slots']." - is set!"; } else { echo "autosave_slots - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['afk_autokick_interval'])) { echo "afk_autokick_interval - ".$_REQUEST['afk_autokick_interval']." - is set!"; } else { echo "afk_autokick_interval - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['auto_pause'])) { echo "auto_pause - ".$_REQUEST['auto_pause']." - is set!"; } else { echo "auto_pause - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['only_admins_can_pause_the_game'])) { echo "only_admins_can_pause_the_game - ".$_REQUEST['only_admins_can_pause_the_game']." - is set!"; } else { echo "only_admins_can_pause_the_game - Not Set!"; } echo "<br />";
+			if(isset($_REQUEST['admins'])) { echo "admins - ".$_REQUEST['admins']." - is set!"; } else { echo "admins - Not Set!"; } echo "<br />";
+//			if(isset($_REQUEST['']) { echo " - ".$_REQUEST['']." - is set!"; } else { echo " - Not Set!"; } echo "<br />";
 			die();
 		}
 	}
@@ -121,26 +142,58 @@
 			console.log(document.getElementById(leForm).elements);     
 			for (var i = 0; i < Form.length; i++) {
 				if (Form[i].value === "" && Form[i].name != "game_password") {
-					console.log("it's an empty textfield");
+					console.log('[name="'+Form[i].name+'"]' + "it's an empty textfield");
 					$('[name="'+Form[i].name+'"]').css("background-color", "red");
-					console.log('[name="'+Form[i].name+'"]');
 					err++;
 				} else {
 					if(Form[i].name == "max_players" || Form[i].name == "max_upload_in_kilobytes_per_second" || Form[i].name == "autosave_interval" || Form[i].name == "autosave_slots" || Form[i].name == "afk_autokick_interval") {
 						if(Form[i].value >= 0 ) {
-							console.log('Correct! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
+							console.log('Correct int! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 							rdy++;
 						} else {
 							console.log('Invalid! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 							err++;
 						}
-					} else {
-						console.log(Form[i].name + " - " + Form[i].value);
+					} else if(Form[i].name == "name" || Form[i].name == "description" || Form[i].name == "tags" || Form[i].name == "admins" || Form[i].name == "game_password" || Form[i].name == "server_select") {
+						if(Form[i].name == "server_select") {
+							var server_select = Form[i].value;
+						}
+						console.log('Correct str! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
+					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game") && (Form[i].value == "true" || Form[i].value == "false")) {
+						console.log('Correct bln! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
+						rdy++;
+					} else if((Form[i].name == "allow_commands") && (Form[i].value == "true" || Form[i].value == "false" || Form[i].value == "admins-only")) {
+						console.log('Correct opt! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
+						rdy++;
+					} else if(Form[i].name == "submit") {
+						console.log('Ready! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
+					} else {
+						console.log('Invalid! [name="'+Form[i].name+'"]' + " - " + Form[i].value + typeof(Form[i].value));
+						err++;
 					}
 				}
 			}
 			console.log('Error:'+err + ' Ready:' + rdy + '/18');
+			if(err === 0) {
+				console.log('No Errors! Ready to submit!');
+				Form = $('#'+leForm).serialize();
+				console.log(Form);
+				if(user_level == "viewonly") {
+					alert("You have view only access");
+					return;
+				}
+				var http = new XMLHttpRequest();
+				http.open("POST", "server-settings.php?d=" + server_select, true);
+				http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+				http.send(Form);
+				http.onload = function() {
+					if(http.responseText) {
+						$('#' + server_select + '-return_output').html(http.responseText);
+						//alert(http.responseText);
+					}
+				};
+			}
 		}
 		function load_list(server) {
 			$.get("server-settings.php?show=true&d=" + server, function(html) {
