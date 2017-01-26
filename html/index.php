@@ -91,7 +91,7 @@
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/js/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/js/console.js"></script>
-    <script type="text/javascript" language="javascript" src="assets/js/test.js"></script>
+    <script type="text/javascript" language="javascript" src="assets/js/cpumeminfo.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<style type="text/css">@import "assets/css/base.css";</style>
 </head>
