@@ -76,5 +76,11 @@ if(isset($_POST['token'])) {
 			<?php if (!isset($_POST['token'])) echo 'document.forms["gettoken"].submit();'; ?>
 		</script>
 		<?php if ($allowed) echo "Successful"; ?>
+		<?php if (isset($_POST['token'])) {
+			echo 'Guild ID: '.$guildid;
+			echo 'Admin Role: '.$adminrole;
+			echo 'User ID: '.$userid;
+		}
+		?>
 	</body>
 </html>
