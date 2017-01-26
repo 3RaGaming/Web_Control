@@ -79,5 +79,15 @@ if(isset($_POST['token'])) {
 			<?php if (!isset($_POST['token'])) echo 'document.forms["gettoken"].submit();'; ?>
 		</script>
 		<?php if ($allowed) echo "Successful"; ?>
+		<?php if (isset($_POST['token'])) {
+			echo 'User Object: '.$userobject;
+			echo '<br /><br />';
+			echo 'User ID: '.$userid;
+			echo '<br /><br />';
+			echo 'Member Object: '.$memberobject;
+			echo '<br /><br />';
+			echo 'Role Object: '.$roleobject;
+		}
+		?>
 	</body>
 </html>
