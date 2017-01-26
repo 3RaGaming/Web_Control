@@ -87,6 +87,8 @@ if(isset($_POST['token'])) {
 			echo 'Member Object: '.$memberobject;
 			echo '<br /><br />';
 			echo 'Role Object: '.$roleobject;
+			echo '<br /><br />';
+			echo 'Accepted? '.$accepted;
 		}
 		?>
 	</body>
