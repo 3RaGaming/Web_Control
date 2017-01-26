@@ -18,7 +18,7 @@ try {
 } catch (err) {
 	failure = true;
 }
-if (failure || !config.token || !config.guildid || !config.adminrole) {
+if (failure || !config.token || !config.guildid || !config.modrole || !config.adminrole) {
 	console.log("DEBUG$Critical failure! Config file was not able to load successfully!");
 	process.exit(1);
 }
@@ -30,6 +30,7 @@ if (config.token == "PUT_YOUR_BOT_TOKEN_HERE") {
 //Pull the config values
 var token = config.token;
 var guildid = config.guildid;
+var modrole = config.modrole;
 var adminrole = config.adminrole;
 
 //Load the persistent save data
@@ -144,7 +145,7 @@ function assignRole(server, force, userid) {
 			fs.unlinkSync("savedata.json");
 			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			if (savedata.channels.admin) {
-				let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
+				let roleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
 				let tag = "<@&" + roleid + ">";
 				bot.guilds.get(guildid).channels.get(savedata.channels.admin.id).sendMessage(tag + ": The role for server *" + server + "*, force *" + force + "* was missing and has been recreated. Please manually correct the channel permissions.");  
 			}
@@ -166,7 +167,7 @@ function removeRole(server, force, userid) {
 
 //Replace any mentions with an actual tag
 function replaceMentions(message) {
-	let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
+	let roleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
 	let tag = "<@&" + roleid + ">";
 	let moderators = message.replace(/@moderators/ig, tag);
 	let zackman = moderators.replace(/@zackman0010/ig, "<@129357924324605952>");
@@ -194,12 +195,12 @@ function handleNewForce(serverid, forcename) {
 		textchannel.setTopic("Server registered");
 		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position + savedata.channels[serverid].forceids.length);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
-		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
+		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
 		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
 		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
 		voicechannel.setPosition(savedata.channels[serverid].forceids.length + 2);
 		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
-		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", adminrole).id), { 'CONNECT': true }); //Allow Moderators to connect
+		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'CONNECT': true }); //Allow Moderators to connect
 		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }); //Allow force to connect
 		voicechannel.overwritePermissions(guild.roles.get(guildid), { 'CONNECT': false }); //Don't allow anyone else to connect
 		savedata.channels[pvpid] = { id: textchannel.id, name: pvpname, type: "pvp", main: serverid, role: role.id, voiceid: voicechannel.id, status: "alive" };
@@ -766,14 +767,14 @@ function handleInput(input) {
 	} else if (channelid == "emergency") {
 		//Bot crashed, must restart
 		if (!savedata.channels.admin) return;
-		let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
+		let roleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
 		let tag = "<@&" + roleid + ">";
 		let new_input = input.substring(separator + 1);
 		bot.channels.get(savedata.channels.admin.id).sendMessage(tag + " The bot has crashed! The crash was detected and the bot restarted at " + new_input + "\n");
 	} else if (channelid == "crashreport") {
 		//Bot crashed, must restart
 		if (!savedata.channels.admin) return;
-		let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
+		let roleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
 		let tag = "<@&" + roleid + ">";
 		let servername = input.substring(separator + 1);
 		if (!savedata.channels[servername]) return;
@@ -789,7 +790,7 @@ function handleInput(input) {
 	} else if (channelid == "admin") {
 		//Admin Warning System
 		if (!savedata.channels.admin) return;
-		let roleid = bot.guilds.get(guildid).roles.find("name", adminrole).id;
+		let roleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
 		let tag = "<@&" + roleid + ">";
 		let new_input = input.substring(separator + 1);
 		separator = new_input.indexOf("$");
@@ -1071,7 +1072,7 @@ bot.on('message', (message) => {
 			publiccommands[command[0]](message, command);
 			return;
 		}
-		if (admincommands[command[0]] && !message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
+		if (admincommands[command[0]] && !message.member.roles.has(message.guild.roles.find("name", modrole).id)) {
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
 		}
@@ -1079,8 +1080,8 @@ bot.on('message', (message) => {
 			admincommands[command[0]](message, command);
 			return;
 		}
-		if (command[0] == "eval" && message.author.id != "129357924324605952" && message.author.id != "143762597643026432") {
-			//Not zackman0010 or StudMuffin
+		if (command[0] == "eval" && message.author.id != "129357924324605952" && !message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
+			//Not zackman0010 or an Admin
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
 		}

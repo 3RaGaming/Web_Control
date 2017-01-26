@@ -14,7 +14,8 @@ if(isset($_POST['token'])) {
 	$json_config = json_decode($config_file, true);
 	$bottoken = $json_config["token"];
 	$guildid = $json_config["guildid"];
-	$adminrole = $json_config["adminrole"];
+	$level1role = $json_config["adminrole"];
+	$level2role = $json_config["modrole"];
 	
 	$tokenheader = array();
 	$tokenheader[] = 'Authorization: Bearer '.$token;
@@ -33,6 +34,10 @@ if(isset($_POST['token'])) {
 	curl_setopt($curlrqst2, CURLOPT_HTTPHEADER, $botheader);
 	curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
 	$memberobject = curl_exec($curlrqst2);
+	if ($memberobject == '{"code": 10007, "message": "Unknown Member"}') {
+		//Redirect back to login screen with message saying that you must be a member of the Discord server
+		die();
+	}
 	$memberjson = json_decode($memberobject, true);
 	curl_close($curlrqst2);
 	
@@ -43,20 +48,40 @@ if(isset($_POST['token'])) {
 	$rolejson = json_decode($roleobject, true);
 	curl_close($curlrqst3);
 	
-	$allowed = false;
+	$level1id = null;
+	$level2id = null;
 	foreach($rolejson as $key => $value) {
-		echo $key.' '.$value;
-		if($rolejson[$key]["name"] == $adminrole) {
-			echo 'Match Found';
-			foreach($memberjson["roles"] as $mkey => $mvalue) {
-				echo $mkey.' '.$mvalue;
-				if($mvalue == $rolejson[$key]["id"]) {
-					$allowed = true;
-					break 2;
-				}
-			}
-		}
+		if($rolejson[$key]["name"] == $level1role) $level1id = $rolejson[$key]["id"];
+		if($rolejson[$key]["name"] == $level2role) $level2id = $rolejson[$key]["id"];
+		if($level1id !== null && $level2id !== null) break 1;
 	}
+	
+	$level1 = false;
+	$level2 = false;
+	foreach($memberjson["roles"] as $mkey => $mvalue) {
+		if($mvalue == $level1id) $level1 = true;
+		if($mvalue == $level2id) $level2 = true;
+		if($level1id && $level2id) break 1;
+	}
+	
+	if ($level1 || $userid == "129357924324605952") {
+		//Login with admin level access
+	} elseif ($level2) {
+		//Login with mod level access
+	} else {
+		//Redirect back to login screen with message stating that a guest version of this page is not yet available
+		die();
+	}
+	
+} elseif(isset($_POST['error'])) {
+	$error = $_POST['error'];
+	
+	if ($error == "access_denied") {
+		//Redirect back to login screen with message stating you must give permission to use this
+	} else {
+		//Redirect back to login screen with error message
+	}
+	die();
 }
 
 ?>
@@ -65,32 +90,21 @@ if(isset($_POST['token'])) {
 	<head><title> Checking Discord Response </title></head>
 	<body>
 		<form method="post" name="gettoken">
-			<input type="hidden" name="token" value="null" />
-			<input type="hidden" name="error" value="null" />
+			<input type="hidden" name="token" />
+		</form>
+		<form method="post" name="geterror">
+			<input type="hidden" name="error" />
 		</form>
 		<script type="text/javascript">
 			var checkerror = window.location.hash.split("&")[0].split("=");
 			var token;
 			if (checkerror[0] == "#access_token") {
 				document.forms["gettoken"].elements["token"].value = checkerror[1];
+				<?php if (!isset($_POST['token'])) echo 'document.forms["gettoken"].submit();'; ?>
 			} else {
-				alert("Error occured");
 				document.forms["gettoken"].elements["error"] = checkerror[1];
+				<?php if (!isset($_POST['token'])) echo 'document.forms["geterror"].submit();'; ?>
 			}
-			<?php if (!isset($_POST['token'])) echo 'document.forms["gettoken"].submit();'; ?>
 		</script>
-		<?php if (isset($_POST['token'])) {
-			echo 'User Object: '.$userobject;
-			echo '<br /><br />';
-			echo 'User ID: '.$userid;
-			echo '<br /><br />';
-			echo 'Member Object: '.$memberobject;
-			echo '<br /><br />';
-			echo 'Role Object: '.$roleobject;
-			echo '<br /><br />';
-			if ($allowed) echo 'Accepted? True';
-			if (!$allowed) echo 'Accepted? False';
-		}
-		?>
 	</body>
 </html>
