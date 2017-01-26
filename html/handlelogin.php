@@ -68,12 +68,14 @@ if(isset($_POST['token'])) {
 			var checkerror = window.location.hash.split("&")[0].split("=");
 			var token;
 			if (checkerror[0] == "#access_token") {
-				document.forms["gettoken"].elements["token"] = checkerror[1];
+				document.forms["gettoken"].elements["token"].value = checkerror[1];
 				alert("Token Found: " + checkerror[1]);
+				alert(document.forms["gettoken"].elements["token"].value);
 			} else {
+				alert("Error occured");
 				document.forms["gettoken"].elements["error"] = checkerror[1];
 			}
-			<?php if (!isset($_POST['token'])) document.forms[gettoken].submit() ?>
+			<?php if (!isset($_POST['token'])) echo "document.forms[gettoken].submit();" ?>
 		</script>
 		<?php echo $allowed ?>
 	</body>
