@@ -45,8 +45,14 @@ if(isset($_POST['token'])) {
 	
 	$allowed = false;
 	foreach($rolejson as $key => $value) {
-		if($rolejson[$key].name == $adminrole) {
+		echo $key.' '.$value;
+		echo '<br />';
+		if($rolejson[$key]["name"] == $adminrole) {
+			echo 'Match Found';
+			echo '<br />'
 			foreach($memberjson["roles"] as $mkey => $mvalue) {
+				echo $mkey.' '.$mvalue;
+				echo '<br />';
 				if($mvalue == $rolejson[$key]["id"]) {
 					$allowed = true;
 					break 2;
@@ -54,8 +60,6 @@ if(isset($_POST['token'])) {
 			}
 		}
 	}
-	
-	
 }
 
 ?>
