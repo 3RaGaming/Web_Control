@@ -75,7 +75,7 @@ if(isset($_POST['token'])) {
 				alert("Error occured");
 				document.forms["gettoken"].elements["error"] = checkerror[1];
 			}
-			<?php if (!isset($_POST['token'])) echo "document.forms[gettoken].submit();" ?>
+			<?php if (!isset($_POST['token'])) echo 'document.forms["gettoken"].submit();' ?>
 		</script>
 		<?php echo $allowed ?>
 	</body>
