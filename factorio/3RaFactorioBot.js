@@ -857,7 +857,7 @@ function handleInput(input) {
 					savedata.playerlists[channelid][player_name].force = force_name;
 					break;
 				case "update":
-					savedata.playerlists[channelid][player_name] = { "force": force_name, "status": "alive" }
+					savedata.playerlists[channelid][player_name] = { "name": cap_name, "force": force_name }
 					return;
 			}
 			fs.unlinkSync("savedata.json");
