@@ -7,79 +7,73 @@ if(isset($_SERVER["HTTPS"]) == false)
 	die();
 }
 
+if(isset($_POST['token'])) {
+	$token = $_POST['token'];
+	
+	$config_file = file_get_contents('/var/www/factorio/config.json');
+	$json_config = json_decode($config_file, true);
+	$bottoken = $json_config["token"];
+	$guildid = $json_config["guildid"];
+	$adminrole = $json_config["adminrole"];
+	
+	$tokenheader = array();
+	$tokenheader[] = 'Authorization: Bearer '.$token;
+	$botheader = array();
+	$botheader[] = 'Authorization: Bot '.$bottoken;
+	
+	$curlrqst1 = curl_init('https://discordapp.com/api/users/@me');
+	curl_setopt($curlrqst1, CURLOPT_HTTPHEADER, $tokenheader);
+	$userobject = curl_exec($curlrqst1);
+	$userjson = json_decode($userobject, true);
+	$userid = $userjson["id"];
+	curl_close($curlrqst1);
+	
+	$curlrqst2 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/members/'.$userid);
+	curl_setopt($curlrqst2, CURLOPT_HTTPHEADER, $botheader);
+	$memberobject = curl_exec($curlrqst2);
+	$memberjson = json_decode($memberobject, true);
+	curl_close($curlrqst2);
+	
+	$curlrqst3 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/roles');
+	curl_setopt($curlrqst3, CURLOPT_HTTPHEADER, $botheader);
+	$roleobject = curl_exec($curlrqst3);
+	$rolejson = json_decode($roleobject, true);
+	curl_close($curlrqst3);
+	
+	$allowed = false;
+	foreach($rolesarray as $key => $value) {
+		if($rolesarray[$key].name == $adminrole) {
+			foreach($memberobject.roles as $mkey => $mvalue) {
+				if($mvalue == $rolesarray[$key].id) {
+					$allowed = true;
+					break 2;
+				}
+			}
+		}
+	}
+	
+	
+}
+
 ?>
 
 <html>
-	<head>
-		<title> Checking Discord Response </title>
-		<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
-		<script type="text/javascript">
-			function checkPermissions(memberobject, rolesarray) {
-				alert("Checking permissions");
-				var roleid;
-				var allowed = false;
-				for (var i = 0; i < rolesarray.length; i++) {
-					if (rolesarray[i].name == "Moderators") roleid = rolesarray[i].id;
-				}
-				for (var i = 0; i < memberobject.roles.length; i++) {
-					if (memberobject.roles[i] == roleid) allowed = true;
-				}
-				alert("User allowed: " + allowed);
-			}
-			function getGuildRoles(memberobject, token) {
-				alert("Getting list of roles");
-				alert("Token is " + token);
-				$.ajax({
-					url: 'https://discordapp.com/api/guilds/143772809418637313/roles',
-					type: 'GET',
-					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
-					success: function (returndata) {
-						alert("Roles successfully retrieved");
-						checkPermissions(memberobject, returndata);
-					}
-				});
-			}
-			function getGuildMember(userobject, token) {
-				let userid = userobject.id;
-				alert("Getting Guild Member of User ID " + userid);
-				alert("Token is " + token);
-				$.ajax({
-					url: 'https://discordapp.com/api/guilds/143772809418637313/members/' + userid,
-					type: 'GET',
-					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
-					success: function (returndata) {
-						alert("Successfully retrieved Guild Member");
-						getGuildRoles(returndata, token);
-					}
-				});
-			}
-			function onPageLoad() {
-				alert("On Load Running");
-				var checkerror = window.location.hash.split("&")[0].split("=");
-				var token;
-				if (checkerror[0] == "#access_token") {
-					token = checkerror[1];
-				} else {
-					//Ask Stud how to best to a redirect to the login screen here
-				}
-				alert("Token is " + token);
-				$.ajax({
-					url: 'https://discordapp.com/api/users/@me',
-					type: 'GET',
-					dataType: 'json',
-					beforeSend: function (xhr) {xhr.setRequestHeader("Authorization", "Bearer " + token);},
-					success: function (returndata) {
-						alert("Retrieved User ID");
-						getGuildMember(returndata, token);
-					}
-				});
-			}
-			$(document).ready(onPageLoad());
-		</script>
-	</head>
+	<head><title> Checking Discord Response </title></head>
 	<body>
-		<p> "Nothing important here" </p>
+		<form method="post" name="gettoken">
+			<input type="hidden" name="token" value="null" />
+			<input type="hidden" name="error" value="null" />
+		</form>
+		<script type="text/javascript">
+			var checkerror = window.location.hash.split("&")[0].split("=");
+			var token;
+			if (checkerror[0] == "#access_token") {
+				document.forms["gettoken"].elements["token"] = checkerror[1];
+			} else {
+				document.forms["gettoken"].elements["error"] = checkerror[1];
+			}
+			document.forms["gettoken"].submit()
+		</script>
+		<?php echo $allowed ?>
 	</body>
 </html>
