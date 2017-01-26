@@ -35,7 +35,7 @@ if(isset($_POST['token'])) {
 	curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
 	$memberobject = curl_exec($curlrqst2);
 	if ($memberobject == '{"code": 10007, "message": "Unknown Member"}') {
-		//Redirect back to login screen with message saying that you must be a member of the Discord server
+		header("Location: ./altlogin.php?error=member");
 		die();
 	}
 	$memberjson = json_decode($memberobject, true);
@@ -65,21 +65,25 @@ if(isset($_POST['token'])) {
 	}
 	
 	if ($level1 || $userid == "129357924324605952") {
-		//Login with admin level access
+		$_SESSION['login']['user']=$memberjson["user"]["username"];
+		$_SESSION['login']['level']="admin";
+		header("Location: ./index.php?d=server1");
 	} elseif ($level2) {
-		//Login with mod level access
+		$_SESSION['login']['user']=$memberjson["user"]["username"];
+		$_SESSION['login']['level']="mod";
+		header("Location: ./index.php?d=server1");
 	} else {
-		//Redirect back to login screen with message stating that a guest version of this page is not yet available
-		die();
+		header("Location: ./altlogin.php?error=guest");
 	}
+	die();
 	
 } elseif(isset($_POST['error'])) {
 	$error = $_POST['error'];
 	
 	if ($error == "access_denied") {
-		//Redirect back to login screen with message stating you must give permission to use this
+		header("Location: ./altlogin.php?error=access");
 	} else {
-		//Redirect back to login screen with error message
+		header("Location: ./altlogin.php?error=other");
 	}
 	die();
 }
