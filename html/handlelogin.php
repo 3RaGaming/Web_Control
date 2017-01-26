@@ -44,10 +44,10 @@ if(isset($_POST['token'])) {
 	curl_close($curlrqst3);
 	
 	$allowed = false;
-	foreach($rolesarray as $key => $value) {
-		if($rolesarray[$key].name == $adminrole) {
-			foreach($memberobject.roles as $mkey => $mvalue) {
-				if($mvalue == $rolesarray[$key].id) {
+	foreach($rolejson as $key => $value) {
+		if($rolejson[$key].name == $adminrole) {
+			foreach($memberjson["roles"] as $mkey => $mvalue) {
+				if($mvalue == $rolejson[$key]["id"]) {
 					$allowed = true;
 					break 2;
 				}
@@ -78,7 +78,6 @@ if(isset($_POST['token'])) {
 			}
 			<?php if (!isset($_POST['token'])) echo 'document.forms["gettoken"].submit();'; ?>
 		</script>
-		<?php if ($allowed) echo "Successful"; ?>
 		<?php if (isset($_POST['token'])) {
 			echo 'User Object: '.$userobject;
 			echo '<br /><br />';
@@ -88,7 +87,8 @@ if(isset($_POST['token'])) {
 			echo '<br /><br />';
 			echo 'Role Object: '.$roleobject;
 			echo '<br /><br />';
-			echo 'Accepted? '.$accepted;
+			if ($allowed) echo 'Accepted? True';
+			if (!$allowed) echo 'Accepted? False';
 		}
 		?>
 	</body>
