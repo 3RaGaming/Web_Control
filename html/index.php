@@ -19,7 +19,7 @@
 	include('./getserver.php');
 	if(!isset($server_select)) {
 		if(isset($_REQUEST['d'])&&$_REQUEST['d']=="Managepgm") {
-			$server_select = "servertest";
+			$server_select = "server1";
 		} else {
 			die('Error in server selection index.php');
 		}
@@ -62,27 +62,29 @@
 						if($server_name_length<20) {
 							$server_name_length = 20;
 						}
-						echo "\t\t\tdocument.getElementById('server_name').value = \"".addslashes($server_name)."\";\xA";
+						echo "\t\t\t$('#server_name').attr('value',\"".addslashes($server_name)."\");\xA";
 						echo "\t\t\t$('#server_name').attr('size',$server_name_length);\xA";
 					}
 					/*var_dump($server_settings);*/
 				}
 				if( isset($server_settings["game_password"]) && !empty($server_settings["game_password"]) ) {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php#server_list-".$server_select."\">config</a>');\xA";
+					echo "\t\t\t$('#link_config').html('<i class=\"fa fa-lock\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php?d=".$server_select."#server_list-".$server_select."\">config</a>');\xA";
 				} else {
-					echo "\t\t\t$('#server_password').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"> <a href=\"./server-settings.php#server_list-".$server_select."\">config</a></i>');\xA";
+					echo "\t\t\t$('#link_config').html('<i class=\"fa fa-unlock\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php?d=".$server_select."#server_list-".$server_select."\">config</a>');\xA";
 				}
 			} else {
 				// Report file came back invalid
-				echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR WITH SERVER NAME#\";\xA";
+				echo "\t\t\t$('#server_name').attr('value',\"#ERROR: WITH server-settings.json#\");\xA";
+				echo "\t\t\t$('#link_config').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php?d=".$server_select."#server_list-".$server_select."\">config</a>');\xA";
 				echo "\t\t\t$('#server_name').attr('size',30);\xA"; 
 			}
 		} else {
 			// Report server-settings missing";
-			echo "\t\t\tdocument.getElementById('server_name').value = \"#ERROR: server-settings.json NOT FOUND#\";\xA";
+			echo "\t\t\t$('#server_name').attr('value',\"#ERROR: server-settings.json NOT FOUND#\");\xA";
+			echo "\t\t\t$('#link_config').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php?d=".$server_select."#server_list-".$server_select."\">config</a>');\xA";
 			echo "\t\t\t$('#server_name').attr('size',40);\xA";
 		}
-		echo "document.getElementById(\"logs_link\").href=\"logs.php#server_list-".$server_select."\";";
+		echo "\t\t\t$('#link_logs').attr('href',\"logs.php?d=".$server_select."#server_list-".$server_select."\");\xA";
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
 ?>
@@ -100,14 +102,14 @@
 			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
 			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
-			<span id="server_password"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
+			<span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
 			<button onclick="update_web_control(user_level);">Update Web Control</button>
 			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
 				<input type="hidden" id="update" name="update" value="yes" />
 			</form>
 			<button onclick="force_kill('forcekill')">force kill</button>
-			<a href="./logs.php" id="logs_link">Logs</a>
+			<a id="link_logs" href="./logs.php">Logs</a>
 			<div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>

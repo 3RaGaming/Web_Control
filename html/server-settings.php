@@ -101,9 +101,9 @@
 					echo "</table>";
 					echo "<input type=\"button\" id=\"$server_select\" name=\"submit\" value=\"Save Config\" onclick=\"return validate('$server_select');\" /></form>";
 					
-					//echo "<pre>";
-					//var_dump($server_settings);
-					//echo "</pre>";
+					///echo "<pre>";
+					///var_dump($server_settings);
+					///echo "</pre>";
 				}
 			}
 			die();
@@ -132,8 +132,9 @@
 				//var serverSettings = $.map(html, function(el) { return el });
 				return false;
 			});
-			$('#homelink').attr("href", "./index.php?d=" + server);
-			$('#logslink').attr("href", "./logs.php?#server_list-" + server);
+			
+			$('#link_home').attr('href',"index.php?d=" + server);
+			$('#link_logs').attr('href',"logs.php?d=" + server + "#server_list-" + server);
 		}
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
@@ -144,28 +145,46 @@
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
+		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
+		if(isset($server_tab_list)) { echo $server_tab_list; }
 		if(isset($_SESSION['login']['reload_report'])) {
 			echo "\t\t\t$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
 			unset($_SESSION['login']['reload_report']);
 		}
-		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
-		echo "\t\t\t$('#logslink').attr(\"href\", \"./logs.php?#server_list-\" + server_select);\xA";
-		if(isset($server_tab_list)) { echo $server_tab_list; }
-		//echo "\xA\t\t\t setTimeout(load_list('$server_select'), 500);\xA";
-		echo "\t\t})\xA";
+
+		// This is for displaying the server name & password in an input box
+		if(file_exists("$base_dir$server_select/server-settings.json")) {
+			$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
+			if($server_settings != NULL) {
+				//Do we have a server
+				echo "\t\t\t$('#link_config').html('Config');\xA";
+			} else {
+				// Report file came back invalid
+				echo "\t\t\t$('#alert').html('#ERROR WITH server-settings.json#');\xA";
+				echo "\t\t\t$('#link_config').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> Config');\xA";
+			}
+		} else {
+			// Report file came back invalid
+			echo "\t\t\t$('#alert').html('#ERROR WITH server-settings.json#');\xA";
+			echo "\t\t\t$('#link_config').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> Config');\xA";
+		}
+		echo "\t\t\t$('#link_home').attr('href',\"index.php?d=".$server_select."#server_list-".$server_select."\");\xA";
+		echo "\t\t\t$('#link_logs').attr('href',\"logs.php?d=".$server_select."#server_list-".$server_select."\");\xA";
+		echo "\xA\t\t\tload_list('$server_select');\xA";
+		echo "\t\t});\xA";
 ?>
 	</script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
 	<style type="text/css">@import "assets/log-ui.css";</style>
 </head>
-<body onLoad="load_list(server_select)">
+<body>
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-			<a id="homelink" href="./index.php">Home</a>&nbsp;-&nbsp;
-			Config&nbsp;-&nbsp;
-			<a href="./logs.php" id="logslink">Logs</a>&nbsp;&nbsp;
+			<a id="link_home" href="./index.php">Home</a>&nbsp;-&nbsp;
+			<span id="link_config">Config</span>&nbsp;-&nbsp;
+			<a id="link_logs" href="./logs.php">Logs</a>
 			<span id="alert"></span>
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
 			<div style="float: right;">

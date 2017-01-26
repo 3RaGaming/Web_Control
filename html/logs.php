@@ -205,8 +205,8 @@
 				$('#server_list-' + server).html(html);
 				return false;
 			});
-			$('#homelink').attr("href", "./index.php?d=" + server);
-			$('#configlink').attr("href", "./server-settings.php?#server_list-" + server);
+			$('#link_home').attr("href", "./index.php?d=" + server);
+			$('#link_config').attr("href", "./server-settings.php?d=" + server + "#server_list-" + server);
 		}
 		function Download(url) {
 			if (user_level == "viewonly") { return; }
@@ -223,7 +223,9 @@
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
-		echo "\t\t\t$('#configlink').attr(\"href\", \"./server-settings.php?#server_list-\" + server_select);\xA";
+		echo "\t\t\t$('#link_home').attr('href',\"index.php?d=".$server_select."\");\xA";
+		echo "\t\t\t$('#link_config').attr('href',\"logs.php?d=".$server_select."#server_list-".$server_select."\");\xA";
+		echo "\xA\t\t\tload_list('$server_select');;\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
 		//echo "\xA\t\t\t setTimeout(load_list('$server_select'), 500);\xA";
 		echo "\t\t})\xA";
@@ -236,8 +238,8 @@
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-			<a id="homelink" href="./index.php">Home</a>&nbsp;-&nbsp;
-			<a id="configlink" href="./server-settings.php">Config</a>&nbsp;-&nbsp;
+			<a id="link_home" href="./index.php">Home</a>&nbsp;-&nbsp;
+			<a id="link_config" href="./server-settings.php">Config</a>&nbsp;-&nbsp;
 			Logs</a>&nbsp;&nbsp;
 			<span id="alert"></span>
 			<div style="float: right;">
