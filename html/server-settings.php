@@ -103,30 +103,67 @@
 					echo "<input type=\"button\" id=\"$server_select\" name=\"submit\" value=\"Save Config\" onclick=\"return validate('$server_select');\" /></form>";
 					echo "<br /><span id=\"$server_select-return_output\"></span>";
 					echo "<pre>";
-					var_dump($server_settings);
+					echo json_encode($server_settings, JSON_PRETTY_PRINT);
 					echo "</pre>";
 				}
 			}
 			die();
 		} elseif(isset($_REQUEST['server_select'])) {
 			echo "Start!<br />";
-			if(isset($_REQUEST['name'])) { echo "name - ".$_REQUEST['name']." - is set!"; } else { echo "name - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['description'])) { echo "description - ".$_REQUEST['description']." - is set!"; } else { echo "description - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['tags'])) { echo "tags - ".$_REQUEST['tags']." - is set!"; } else { echo "tags - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['max_players'])) { echo "max_players - ".$_REQUEST['max_players']." - is set!"; } else { echo "max-players - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['visibility-public'])) { echo "visibility-public - ".$_REQUEST['visibility-public']." - is set!"; } else { echo "visibility-public - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['visibility-lan'])) { echo "visibility-lan - ".$_REQUEST['visibility-lan']." - is set!"; } else { echo "visibility-lan - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['game_password'])) { echo "game_password - ".$_REQUEST['game_password']." - is set!"; } else { echo "game_password - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['require_user_verification'])) { echo "require_user_verification - ".$_REQUEST['require_user_verification']." - is set!"; } else { echo "require_user_verification - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['max_upload_in_kilobytes_per_second'])) { echo "max_upload_in_kilobytes_per_second - ".$_REQUEST['max_upload_in_kilobytes_per_second']." - is set!"; } else { echo "max_upload_in_kilobytes_per_second - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['ignore_player_limit_for_returning_players'])) { echo "ignore_player_limit_for_returning_players - ".$_REQUEST['ignore_player_limit_for_returning_players']." - is set!"; } else { echo "ignore_player_limit_for_returning_players - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['allow_commands'])) { echo "allow_commands - ".$_REQUEST['allow_commands']." - is set!"; } else { echo "allow_commands - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['autosave_slots'])) { echo "autosave_slots - ".$_REQUEST['autosave_slots']." - is set!"; } else { echo "autosave_slots - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['afk_autokick_interval'])) { echo "afk_autokick_interval - ".$_REQUEST['afk_autokick_interval']." - is set!"; } else { echo "afk_autokick_interval - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['auto_pause'])) { echo "auto_pause - ".$_REQUEST['auto_pause']." - is set!"; } else { echo "auto_pause - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['only_admins_can_pause_the_game'])) { echo "only_admins_can_pause_the_game - ".$_REQUEST['only_admins_can_pause_the_game']." - is set!"; } else { echo "only_admins_can_pause_the_game - Not Set!"; } echo "<br />";
-			if(isset($_REQUEST['admins'])) { echo "admins - ".$_REQUEST['admins']." - is set!"; } else { echo "admins - Not Set!"; } echo "<br />";
-//			if(isset($_REQUEST['']) { echo " - ".$_REQUEST['']." - is set!"; } else { echo " - Not Set!"; } echo "<br />";
+			$verified_data = [];
+			$err_data["error"] = true;
+			$err = 0;
+			$total_array = array("name","description","tags","max_players","visibility-public","visibility-lan","game_password","require_user_verification","max_upload_in_kilobytes_per_second","ignore_player_limit_for_returning_players","allow_commands","autosave_interval","autosave_slots","afk_autokick_interval","auto_pause","only_admins_can_pause_the_game","admins");
+			$ignore_array = array("d","server_select");
+			$settype_integers = array("max_players","max_upload_in_kilobytes_per_second","autosave_interval","autosave_slots","afk_autokick_interval");
+			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game");
+			$check_array_admin = array("true","false","admins-only");
+			foreach($_REQUEST as $key => $value) {
+				$clean_key = preg_replace('/[^\da-z]_/i', '', $key);
+				$clean_value = preg_replace(array("/\</", "/\>/", "/\s+/"), array("", "", " "), $value);
+				if(in_array($clean_key, $total_array)) {
+					if(in_array($clean_key, $settype_integers)) {
+						if(is_numeric($clean_value)) {
+							settype($clean_value, "integer");
+						} else {
+							$err_data[$clean_key]=$clean_value;
+							$err++;
+							continue;
+						}
+					} elseif(in_array($clean_key, $settype_boolean)) {
+						if($clean_value == "true") {
+							$clean_value = true;
+						} elseif($clean_value == "false") {
+							$clean_value = false;
+						} else {
+							$err_data[$clean_key]=$clean_value;
+							$err++;
+							continue;
+						}
+					} elseif($clean_key == "allow_commands" && !in_array($clean_value, $check_array_admin)) {
+						$err_data[$clean_key]=$clean_value;
+						$err++;
+						continue;
+					}
+					$verified_data[$clean_key] = $clean_value;
+				} elseif(!in_array($clean_key, $ignore_array)) {
+					$err_data[$clean_key]=$clean_value;
+					$err++;
+				}
+			}
+			
+			/*if(isset($clean_request['admins'])) {
+				$verified_data['admins'] = $clean_request['admins'];
+			} else {
+				$clean_request['admins'] = "admins - Not Set!";
+				$err++;
+			}*/
+			if(isset($err) && $err > 0) {
+				echo json_encode($err_data, JSON_PRETTY_PRINT);
+			} else {
+				$json = json_encode($verified_data, JSON_PRETTY_PRINT);
+				echo "<pre>".$json."</pre>";
+			}
 			die();
 		}
 	}
@@ -141,6 +178,7 @@
 			var Form = document.getElementById(leForm);
 			console.log(document.getElementById(leForm).elements);     
 			for (var i = 0; i < Form.length; i++) {
+				$('[name="'+Form[i].name+'"]').css("background-color", "white");
 				if (Form[i].value === "" && Form[i].name != "game_password") {
 					console.log('[name="'+Form[i].name+'"]' + "it's an empty textfield");
 					$('[name="'+Form[i].name+'"]').css("background-color", "red");
@@ -152,6 +190,7 @@
 							rdy++;
 						} else {
 							console.log('Invalid! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
+							$('[name="'+Form[i].name+'"]').css("background-color", "red");
 							err++;
 						}
 					} else if(Form[i].name == "name" || Form[i].name == "description" || Form[i].name == "tags" || Form[i].name == "admins" || Form[i].name == "game_password" || Form[i].name == "server_select") {
@@ -170,6 +209,7 @@
 						console.log('Ready! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 					} else {
 						console.log('Invalid! [name="'+Form[i].name+'"]' + " - " + Form[i].value + typeof(Form[i].value));
+						$('[name="'+Form[i].name+'"]').css("background-color", "red");
 						err++;
 					}
 				}
@@ -193,6 +233,8 @@
 						//alert(http.responseText);
 					}
 				};
+			} else {
+				$('#' + server_select + '-return_output').html("Error with one of the things");
 			}
 		}
 		function load_list(server) {
