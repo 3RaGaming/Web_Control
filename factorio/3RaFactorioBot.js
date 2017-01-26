@@ -275,7 +275,7 @@ var publiccommands = {
 		else send_message = "Players currently online on force *" + force_name + "*:\n\n";
 		for (var playername in playerlist) {
 			if (!force_name || playerlist[playername].force == force_name) {
-				send_message = send_message + "**" + playername + "**   Force: " + playerlist[playername].force + "   Status: " + playerlist[playername].status + "\n";
+				send_message = send_message + "**" + playerlist[playername].name + "**   Force: " + playerlist[playername].force + "\n";
 			}
 		}
 		if (send_message == ("Players currently online on force *" + force_name + "*:\n\n")) {
@@ -290,7 +290,7 @@ var publiccommands = {
 			return;
 		}
 		let userid = message.author.id;
-		let username = command[1];
+		let username = command[1].toLowerCase();
 		if (getPlayerID(username) !== null) {
 			message.channel.sendMessage("This Factorio username has already been taken! If you believe this to be an error, please contact @Moderators");
 			return;
@@ -739,7 +739,7 @@ function updateDescription(channelid) {
 	}
 	for (var playername in playerlist) {
 		if (!force_name || playerlist[playername].force == force_name) {
-			playerliststring = playerliststring + playername + ", ";
+			playerliststring = playerliststring + playerlist[playername].name + ", ";
 			playerlistcount++;
 		}
 	}
@@ -824,7 +824,8 @@ function handleInput(input) {
 			let data = new_input.substring(separator + 1).split(","); //Replaces the newline at the end while also splitting the arguments apart
 			let action = data[0]; //Join,Leave,Force,Die,Respawn
 			let player_id = data[1]; //Not really relevant, but included in case it may be needed sometime in the future
-			let player_name = data[2]; //Player's username
+			let cap_name = data[2]; //Player's username (Capitalized)
+			let player_name = cap_name.toLowerCase(); //Player's username (Lowercase)
 			let force_name = data[3]; //Name of player's force
 			var message;
 			var old_force;
@@ -833,28 +834,26 @@ function handleInput(input) {
 
 			switch (action) {
 				case "join":
-					message = "**Player " + player_name + " has joined the server!**";
-					savedata.playerlists[channelid][player_name] = { "force": force_name, "status": "alive" };
+					message = "**Player " + cap_name + " has joined the server!**";
+					savedata.playerlists[channelid][player_name] = { "name": cap_name, "force": force_name };
 					break;
 				case "leave":
-					message = "**Player " + player_name + " has left the server!**";
+					message = "**Player " + cap_name + " has left the server!**";
 					delete savedata.playerlists[channelid][player_name];
 					break;
 				case "force":
-					message = "**Player " + player_name + " has joined force " + force_name + "!**";
+					message = "**Player " + cap_name + " has joined force " + force_name + "!**";
 					if (!savedata.playerlists[channelid][player_name]) return;
 					savedata.playerlists[channelid][player_name].force = force_name;
 					break;
 				case "die":
-					message = "**Player " + player_name + " was killed!**";
+					message = "**Player " + cap_name + " was killed!**";
 					if (!savedata.playerlists[channelid][player_name]) return;
-					savedata.playerlists[channelid][player_name].status = "dead";
 					savedata.playerlists[channelid][player_name].force = force_name;
 					break;
 				case "respawn":
-					message = "**Player " + player_name + " just respawned!**";
+					message = "**Player " + cap_name + " just respawned!**";
 					if (!savedata.playerlists[channelid][player_name]) return;
-					savedata.playerlists[channelid][player_name].status = "alive";
 					savedata.playerlists[channelid][player_name].force = force_name;
 					break;
 				case "update":
@@ -997,6 +996,7 @@ function handleInput(input) {
 					} else {
 						//Send non-shout message to force specific channel
 						if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
+						username = username.toLowerCase(); //Convert username to lowercase
 						if (!savedata.playerlists[channelid][username]) return;
 						let force_name = savedata.playerlists[channelid][username].force;
 						let pvp_channelid = channelid + "-" + force_name;
