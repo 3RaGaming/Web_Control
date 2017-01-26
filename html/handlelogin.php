@@ -23,6 +23,7 @@ if(isset($_POST['token'])) {
 	
 	$curlrqst1 = curl_init('https://discordapp.com/api/users/@me');
 	curl_setopt($curlrqst1, CURLOPT_HTTPHEADER, $tokenheader);
+	curl_setopt($curlrqst1, CURLOPT_RETURNTRANSFER, true);
 	$userobject = curl_exec($curlrqst1);
 	$userjson = json_decode($userobject, true);
 	$userid = $userjson["id"];
@@ -30,12 +31,14 @@ if(isset($_POST['token'])) {
 	
 	$curlrqst2 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/members/'.$userid);
 	curl_setopt($curlrqst2, CURLOPT_HTTPHEADER, $botheader);
+	curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
 	$memberobject = curl_exec($curlrqst2);
 	$memberjson = json_decode($memberobject, true);
 	curl_close($curlrqst2);
 	
 	$curlrqst3 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/roles');
 	curl_setopt($curlrqst3, CURLOPT_HTTPHEADER, $botheader);
+	curl_setopt($curlrqst3, CURLOPT_RETURNTRANSFER, true);
 	$roleobject = curl_exec($curlrqst3);
 	$rolejson = json_decode($roleobject, true);
 	curl_close($curlrqst3);
@@ -76,11 +79,5 @@ if(isset($_POST['token'])) {
 			<?php if (!isset($_POST['token'])) echo 'document.forms["gettoken"].submit();'; ?>
 		</script>
 		<?php if ($allowed) echo "Successful"; ?>
-		<?php if (isset($_POST['token'])) {
-			echo 'Guild ID: '.$guildid;
-			echo 'Admin Role: '.$adminrole;
-			echo 'User ID: '.$userid;
-		}
-		?>
 	</body>
 </html>
