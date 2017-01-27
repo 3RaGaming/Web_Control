@@ -17,10 +17,6 @@
 		$session['login']['reload_report'] = $_SESSION['login']['reload_report'];
 		unset($_SESSION['login']['reload_report']);
 	}
-	if(isset($_SESSION['login']['cmd_history'][$server_select])) {
-		$session['login']['cmd_history'][$server_select] = $_SESSION['login']['cmd_history'][$server_select];
-	}
-	
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
@@ -30,6 +26,9 @@
 		} else {
 			die('Error in server selection index.php');
 		}
+	}
+	if(isset($_SESSION['login']['cmd_history'][$server_select])) {
+		$session['login']['cmd_history'][$server_select] = $_SESSION['login']['cmd_history'][$server_select];
 	}
 	session_write_close();
 ?>
