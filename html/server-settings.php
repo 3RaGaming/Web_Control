@@ -13,7 +13,7 @@
 
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
-	if(isset($_SESSION['login']['reload_report']) {
+	if(isset($_SESSION['login']['reload_report'])) {
 		$session['login']['reload_report'] = $_SESSION['login']['reload_report'];
 		unset($_SESSION['login']['reload_report']);
 	}
