@@ -15,7 +15,7 @@ if(!isset($_SESSION['login']['level'])) {
 }
 //Set the base directory the factorio servers will be stored
 $base_dir="/var/www/factorio/";
-include('../getserver.php');
+include('../../getserver.php');
 if(!isset($server_select)) {
 	die('Error s'.__LINE__.': In server selection files.php');
 }

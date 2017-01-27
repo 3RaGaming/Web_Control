@@ -49,7 +49,7 @@ $( document ).ready(function() {
     function getData(){
         $.ajax({
             dataType: "json",
-            url: "/assets/api/cpumeminfo.php"
+            url: "assets/api/cpumeminfo.php"
         }).done(function(data) {
             if(cpulog.push(data) > 20) cpulog.shift();
         }).fail(function() {
@@ -58,4 +58,3 @@ $( document ).ready(function() {
         });
     }
 });
-
