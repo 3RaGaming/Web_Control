@@ -13,7 +13,10 @@
 	
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
-	
+	if(isset($_SESSION['login']['reload_report'])) {
+		$session['login']['reload_report'] = $_SESSION['login']['reload_report'];
+		unset($_SESSION['login']['reload_report']);
+	}
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
@@ -24,6 +27,10 @@
 			die('Error in server selection index.php');
 		}
 	}
+	if(isset($_SESSION['login']['cmd_history'][$server_select])) {
+		$session['login']['cmd_history'][$server_select] = $_SESSION['login']['cmd_history'][$server_select];
+	}
+	session_write_close();
 ?>
 </script>
 <html>
@@ -39,12 +46,12 @@
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
-		if(isset($_SESSION['login']['reload_report'])) {
-			echo "\t\t\t$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
-			unset($_SESSION['login']['reload_report']);
+		if(isset($session['login']['reload_report'])) {
+			echo "\t\t\t$('#fileStatus').html('".$session['login']['reload_report']."');\xA";
+			unset($session['login']['reload_report']);
 		}
-		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
-			echo "\t\t\this_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
+		if(isset($session['login']['cmd_history'][$server_select])) {
+			echo "\t\t\this_array = ".json_encode($session['login']['cmd_history'][$server_select]).";\xA";
 		}
 		
 		// This is for displaying the server name & password in an input box

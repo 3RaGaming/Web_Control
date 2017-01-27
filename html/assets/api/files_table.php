@@ -10,15 +10,15 @@ if(!isset($_SESSION['login'])) {
 		die();
 	}
 }
-if(!isset($_SESSION['login']['level'])) {
-	die('error with user permissions');
-}
+	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { die('error with user permissions'); }
+	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 //Set the base directory the factorio servers will be stored
 $base_dir="/var/www/factorio/";
 include('../../getserver.php');
 if(!isset($server_select)) {
 	die('Error s'.__LINE__.': In server selection files.php');
 }
+session_write_close();
 
 if(!isset($base_dir)) { die(); }
 if(!isset($server_select)) { die(); }
@@ -49,7 +49,7 @@ if(isset($server_select)) {
 		$file_full_path = "$full_dir$file";
 		$size = human_filesize("$file_full_path");
 		$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
-		if($_SESSION['login']['level']=="viewonly") {
+		if($user_level=="viewonly") {
 			echo "$trs$tds <input type=\"checkbox\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc $file $tdc $size $tdc $date $tdc ";
 		} else {
 			echo "$trs$tds <input type=\"checkbox\" id=\"filesCheck-$server_select-".bin2hex($file)."\" style=\"margin: 0; padding 0;  height:13px\" /> $tdc <a href=\"#\" onClick=\"Download('files.php?d=".$server_select."&download=".$file."')\">$file</a> $tdc $size $tdc $date $tdc ";

@@ -13,7 +13,12 @@
 
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
-
+	if(isset($_SESSION['login']['reload_report'])) {
+		$session['login']['reload_report'] = $_SESSION['login']['reload_report'];
+		unset($_SESSION['login']['reload_report']);
+	}
+	session_write_close();
+	
 	if($user_level=="viewonly") {
 		die('Not allowed for view only');
 	}
@@ -191,7 +196,7 @@
 					$newJsonString = json_encode($server_settings, JSON_PRETTY_PRINT);
 					$newJsonStringUgly = json_encode($server_settings);
 					$newRawQuery = http_build_query($_REQUEST);
-					$log_record = "\xA$date-$time\t".$_SESSION['login']['user']."\xA$newJsonStringUgly\xA$newRawQuery\xA";
+					$log_record = "\xA$date-$time\t".$user_name."\xA$newJsonStringUgly\xA$newRawQuery\xA";
 					if($log_record != "") {
 						if (!is_dir($server_log_loc)) {
 							// dir doesn't exist, make it
@@ -302,9 +307,8 @@
 		echo "\t\t$(document).ready(function() {\xA";
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
 		if(isset($server_tab_list)) { echo $server_tab_list; }
-		if(isset($_SESSION['login']['reload_report'])) {
-			echo "\t\t\t$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
-			unset($_SESSION['login']['reload_report']);
+		if(isset($session['login']['reload_report'])) {
+			echo "\t\t\t$('#fileStatus').html('".$session['login']['reload_report']."');\xA";
 		}
 
 		// This is for displaying the server name & password in an input box

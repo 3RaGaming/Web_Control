@@ -52,6 +52,8 @@ if(!empty($userN) && !empty($passW)) {
 	$report = "<br />I don't like no input<br />";
 }
 
+session_write_close();
+
 ?>
 <html>
 <head>
