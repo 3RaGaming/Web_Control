@@ -13,7 +13,7 @@ if(!isset($_SESSION['login'])) {
 if(isset($_REQUEST['d'])&&isset($_REQUEST['s'])) {
 	$base_dir="/var/www/factorio/";
 	$html_dir="/var/www/html";
-	include($html_dir.'/getserver.php');
+    include('../../getserver.php');
 	if(isset($server_select)) {
 		if($_REQUEST['s']) {
 			$screen = $_REQUEST['s'];
