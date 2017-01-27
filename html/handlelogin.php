@@ -7,20 +7,55 @@ if(isset($_SERVER["HTTPS"]) == false)
 	die();
 }
 
-if(isset($_POST['token'])) {
-	$token = $_POST['token'];
+if(isset($_GET['code'])) {
+	$code = $_GET['code'];
 	
 	$config_file = file_get_contents('/var/www/factorio/config.json');
 	$json_config = json_decode($config_file, true);
 	$bottoken = $json_config["token"];
+	$client_id = $json_config["clientid"];
+	$client_secret = $json_config["clientsecret"];
 	$guildid = $json_config["guildid"];
 	$level1role = $json_config["adminrole"];
 	$level2role = $json_config["modrole"];
-	
-	$tokenheader = array();
-	$tokenheader[] = 'Authorization: Bearer '.$token;
+	echo "<pre>";
 	$botheader = array();
 	$botheader[] = 'Authorization: Bot '.$bottoken;
+	
+	$redirect_url = "https://factorio.3ragaming.com/beta-auth/handlelogin.php";
+	$url = 'https://discordapp.com/api/oauth2/token?';
+	$postField = 'grant_type=authorization_code&client_id='.urlencode($client_id).'&client_secret='.urlencode($client_secret).'&redirect_uri='.urlencode($redirect_url).'&code='.urlencode($code);
+	//echo $postField;
+	$options = array(CURLOPT_URL => $url,
+					CURLOPT_RETURNTRANSFER => 1,
+					CURLOPT_FOLLOWLOCATION => 1,
+					CURLOPT_POST => true,
+					CURLOPT_POSTFIELDS => $postField );
+	
+	$curlrqst0 = curl_init();
+	curl_setopt_array($curlrqst0, $options);
+	$tokenobject = curl_exec($curlrqst0);
+	$tokenjson = json_decode($tokenobject, true);
+	curl_close($curlrqst0);
+	
+	echo "tokenJson" . __LINE__ ."\n";
+	var_dump($tokenjson);
+	
+	
+	if(isset($tokenjson['access_token'])) {
+		$token = $tokenjson['access_token'];
+		echo "TOKEN SET";
+	} else {
+		echo "TOKEN NOT SET";
+	}
+	
+	$tokenheader = array();
+	$tokenheader[] = 'Content-Type application/json';
+	$tokenheader[] = 'Authorization : Bearer '.$token;
+	
+	echo "token header" . __LINE__ ."\n";
+	var_dump($tokenheader);
+	
 	
 	$curlrqst1 = curl_init('https://discordapp.com/api/users/@me');
 	curl_setopt($curlrqst1, CURLOPT_HTTPHEADER, $tokenheader);
@@ -29,17 +64,25 @@ if(isset($_POST['token'])) {
 	$userjson = json_decode($userobject, true);
 	$userid = $userjson["id"];
 	curl_close($curlrqst1);
+			
+	echo "UserJson" . __LINE__ ."\n";
+	var_dump($userjson);
+	
 	
 	$curlrqst2 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/members/'.$userid);
 	curl_setopt($curlrqst2, CURLOPT_HTTPHEADER, $botheader);
 	curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
 	$memberobject = curl_exec($curlrqst2);
 	if ($memberobject == '{"code": 10007, "message": "Unknown Member"}') {
-		header("Location: ./altlogin.php?error=member");
-		die();
+		//header("Location: ./altlogin.php?error=member");
+		//die();
 	}
 	$memberjson = json_decode($memberobject, true);
 	curl_close($curlrqst2);
+	
+	echo "MemberJson" . __LINE__ ."\n";
+	var_dump($memberjson);
+	
 	
 	$curlrqst3 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/roles');
 	curl_setopt($curlrqst3, CURLOPT_HTTPHEADER, $botheader);
@@ -47,6 +90,10 @@ if(isset($_POST['token'])) {
 	$roleobject = curl_exec($curlrqst3);
 	$rolejson = json_decode($roleobject, true);
 	curl_close($curlrqst3);
+	
+	echo "RolesJson" . __LINE__ ."\n";
+	var_dump($rolejson);
+	
 	
 	$level1id = null;
 	$level2id = null;
@@ -65,50 +112,28 @@ if(isset($_POST['token'])) {
 	}
 	
 	if ($level1 || $userid == "129357924324605952") {
-		$_SESSION['login']['user']=$memberjson["user"]["username"];
-		$_SESSION['login']['level']="admin";
-		header("Location: ./index.php?d=server1");
+		//$_SESSION['login']['user']=$memberjson["user"]["username"];
+		echo "admin login verified!";
+		//$_SESSION['login']['level']="admin";
+		//header("Location: ./index.php?d=server1");
 	} elseif ($level2) {
-		$_SESSION['login']['user']=$memberjson["user"]["username"];
-		$_SESSION['login']['level']="mod";
-		header("Location: ./index.php?d=server1");
+		//$_SESSION['login']['user']=$memberjson["user"]["username"];
+		echo "mod login verified!";
+		//$_SESSION['login']['level']="mod";
+		//header("Location: ./index.php?d=server1");
 	} else {
-		header("Location: ./altlogin.php?error=guest");
-	}
-	die();
-	
+		echo "guest login not allowed";
+		//header("Location: ./altlogin.php?error=guest");
+	}	
 } elseif(isset($_POST['error'])) {
 	$error = $_POST['error'];
 	
 	if ($error == "access_denied") {
-		header("Location: ./altlogin.php?error=access");
+		//header("Location: ./altlogin.php?error=access");
 	} else {
-		header("Location: ./altlogin.php?error=other");
+		//header("Location: ./altlogin.php?error=other");
 	}
 	die();
 }
-
+echo "</pre>";
 ?>
-
-<html>
-	<head><title> Checking Discord Response </title></head>
-	<body>
-		<form method="post" name="gettoken">
-			<input type="hidden" name="token" />
-		</form>
-		<form method="post" name="geterror">
-			<input type="hidden" name="error" />
-		</form>
-		<script type="text/javascript">
-			var checkerror = window.location.hash.split("&")[0].split("=");
-			var token;
-			if (checkerror[0] == "#access_token") {
-				document.forms["gettoken"].elements["token"].value = checkerror[1];
-				<?php if (!isset($_POST['token'])) echo 'document.forms["gettoken"].submit();'; ?>
-			} else {
-				document.forms["gettoken"].elements["error"] = checkerror[1];
-				<?php if (!isset($_POST['token'])) echo 'document.forms["geterror"].submit();'; ?>
-			}
-		</script>
-	</body>
-</html>

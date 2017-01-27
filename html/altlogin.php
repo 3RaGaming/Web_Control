@@ -27,6 +27,10 @@ if(isset($_REQUEST['error'])) {
 	if ($error == "other") $report = "Unknown Error Occurred";
 }
 
+$config_file = file_get_contents('/var/www/factorio/config.json');
+$json_config = json_decode($config_file, true);
+$clientid = $json_config['clientid'];
+
 ?>
 <html>
 <head>
@@ -38,7 +42,7 @@ if(isset($_REQUEST['error'])) {
 	<?php
 	//TODO - Fix the styling issue here so that the button looks good
 	?>
-    <a href = "https://discordapp.com/oauth2/authorize?client_id=271167532340084736&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Fhandlelogin.php&response_type=token">
+    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?PHP echo $clientid; ?>&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Fhandlelogin.php&response_type=code">
 	  <img style="width: 100%;" src="./3rabutton.png" alt="Login With Discord"/>
 	</a>
 	<?php if(isset($report)) { echo $report; } ?>
