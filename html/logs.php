@@ -24,6 +24,7 @@
 	if(!isset($server_select)&&!isset($_REQUEST['d'])) {
 		$server_select = "servertest";
 	}
+	session_write_close();
 
 	// function to print files size in human-readable form
 	function human_filesize($file, $decimals = 2) {
@@ -85,7 +86,7 @@
 			if(file_exists($server_dir)) {
 				$file_path = $server_dir . $_REQUEST['download'];
 				if(file_exists($file_path)) {
-					if($_SESSION['login']['level']=="viewonly") {
+					if($user_level=="viewonly") {
 						die('You have read only access.\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
 					}
 					// file download found on http://www.media-division.com/php-download-script-with-resume-option/

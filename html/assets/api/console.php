@@ -8,6 +8,7 @@ if(!isset($_SESSION['login'])) {
 		die('Must use HTTPS');
 	}
 }
+session_write_close();
 
 		//var_dump($_REQUEST);
 if(isset($_REQUEST['d'])&&isset($_REQUEST['s'])) {

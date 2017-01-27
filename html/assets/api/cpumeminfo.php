@@ -10,6 +10,7 @@
 			die();
 		}
 	}
+	session_write_close();
 
 /**
  * Created by PhpStorm.
