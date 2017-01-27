@@ -39,7 +39,7 @@ if(isset($_REQUEST['error'])) {
 	//TODO - Fix the styling issue here so that the button looks good
 	?>
     <a href = "https://discordapp.com/oauth2/authorize?client_id=271167532340084736&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Fhandlelogin.php&response_type=token">
-	  <img src="./3rabutton.png" alt="Login With Discord"/>
+	  <img style="width: 100%;" src="./3rabutton.png" alt="Login With Discord"/>
 	</a>
 	<?php if(isset($report)) { echo $report; } ?>
   </div>
