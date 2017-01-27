@@ -20,7 +20,7 @@ if(isset($_SESSION['login'])) {
 }
 
 if(isset($_REQUEST['error'])) {
-	$error = $_REQUEST['error']
+	$error = $_REQUEST['error'];
 	if ($error == "guest") $report = "We do not have a guest page available at this time.";
 	if ($error == "access") $report = "You must agree to provide access to your account.";
 	if ($error == "member") $report = "You are not a member of the 3Ra Discord Server.";
@@ -35,7 +35,9 @@ if(isset($_REQUEST['error'])) {
 <body>
 <div class="login-page">
   <div class="form">
-	<?php //TODO - Fix the styling issue here so that the button looks good ?>
+	<?php
+	//TODO - Fix the styling issue here so that the button looks good
+	?>
     <a href = "https://discordapp.com/oauth2/authorize?client_id=271167532340084736&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Fhandlelogin.php&response_type=token">
 	  <img src="./3rabutton.png" alt="Login With Discord"/>
 	</a>
