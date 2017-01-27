@@ -33,8 +33,8 @@ if(!empty($userN) && !empty($passW)) {
 	foreach ($userlist as $user) {
 		$user_details = explode('|', $user);
 		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
-			$userN = $user_details[0];
-			$userL = $user_details[2];
+			$userN = trim($user_details[0]);
+			$userL = trim($user_details[2]);
 			$success = true;
 			break;
 		}
