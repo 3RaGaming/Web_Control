@@ -231,8 +231,8 @@
 		echo "\t\t})\xA";
 ?>
 	</script>
-	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
-	<style type="text/css">@import "assets/log-ui.css";</style>
+	<script type="text/javascript" language="javascript" src="assets/js/log-ui.js"></script>
+	<style type="text/css">@import "assets/css/log-ui.css";</style>
 </head>
 <body onLoad="load_list(server_select)">
 	<div style="width: 99%; height: 99%;">

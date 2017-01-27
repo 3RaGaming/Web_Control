@@ -89,10 +89,11 @@
 		echo "\t\t})\xA";
 ?>
 	</script>
-	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
-	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
+	<script type="text/javascript" language="javascript" src="assets/js/base.js"></script>
+	<script type="text/javascript" language="javascript" src="assets/js/console.js"></script>
+    <script type="text/javascript" language="javascript" src="assets/js/cpumeminfo.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
-	<style type="text/css">@import "assets/base.css";</style>
+	<style type="text/css">@import "assets/css/base.css";</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
@@ -110,10 +111,14 @@
 			</form>
 			<button onclick="force_kill('forcekill')">force kill</button>
 			<a id="link_logs" href="./logs.php">Logs</a>
-			<div style="float: right;">
+            <div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
 			</div>
+            <div id="serverload" style="float: right; margin-right: 20px;">
+                <span id="cpu" style="padding: 6px;background-color: rgb(102, 255, 0);">00 %</span>
+                <span id="mem" style="padding: 6px;background-color: rgb(102, 255, 0);">0.00/0.00 GB</span>
+            </div>
 		</div>
 		<!-- console and chat windows -->
 		<div style="width: 52%; height: 99%; float: left;">

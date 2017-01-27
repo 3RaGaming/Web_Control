@@ -330,8 +330,8 @@
 ?>
 	</script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
-	<script type="text/javascript" language="javascript" src="assets/log-ui.js"></script>
-	<style type="text/css">@import "assets/log-ui.css";</style>
+	<script type="text/javascript" language="javascript" src="assets/js/log-ui.js"></script>
+	<style type="text/css">@import "assets/css/log-ui.css";</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">

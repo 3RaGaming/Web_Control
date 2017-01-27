@@ -1304,7 +1304,7 @@ $(document).ready(function() {
 	});
 	$("#fileTable").tablesorter( );
 	//Get the files! Can use this in a function to update without page reload too.
-	$.get("assets/files_table.php?d=" + server_select, function(html) {
+	$.get("assets/api/files_table.php?d=" + server_select, function(html) {
 		// append the "ajax'd" data to the table body
 		$("#fileTable tbody").append(html);
 		// let the plugin know that we made a update
