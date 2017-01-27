@@ -102,67 +102,110 @@
 					echo "<input type=\"hidden\" name=\"server_select\" value=\"".$server_select."\" /></form>";
 					echo "<input type=\"button\" id=\"$server_select\" name=\"submit\" value=\"Save Config\" onclick=\"return validate('$server_select');\" /></form>";
 					echo "<br /><span id=\"$server_select-return_output\"></span>";
-					echo "<pre>";
-					echo json_encode($server_settings, JSON_PRETTY_PRINT);
-					echo "</pre>";
+					//echo "<pre>";
+					//echo json_encode($server_settings, JSON_PRETTY_PRINT);
+					//echo "</pre>";
 				}
 			}
 			die();
 		} elseif(isset($_REQUEST['server_select'])) {
-			echo "Start!<br />";
 			$verified_data = [];
 			$err_data["error"] = true;
 			$err = 0;
-			$total_array = array("name","description","tags","max_players","visibility-public","visibility-lan","game_password","require_user_verification","max_upload_in_kilobytes_per_second","ignore_player_limit_for_returning_players","allow_commands","autosave_interval","autosave_slots","afk_autokick_interval","auto_pause","only_admins_can_pause_the_game","admins");
+			$total_array = array();
 			$ignore_array = array("d","server_select");
+			$settype_string = array("name","description","game_password","allow_commands");
 			$settype_integers = array("max_players","max_upload_in_kilobytes_per_second","autosave_interval","autosave_slots","afk_autokick_interval");
 			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game");
+			$settype_array = array("tags","admins");
 			$check_array_admin = array("true","false","admins-only");
 			foreach($_REQUEST as $key => $value) {
 				$clean_key = preg_replace('/[^\da-z]_/i', '', $key);
 				$clean_value = preg_replace(array("/\</", "/\>/", "/\s+/"), array("", "", " "), $value);
-				if(in_array($clean_key, $total_array)) {
-					if(in_array($clean_key, $settype_integers)) {
-						if(is_numeric($clean_value)) {
-							settype($clean_value, "integer");
-						} else {
-							$err_data[$clean_key]=$clean_value;
-							$err++;
-							continue;
-						}
-					} elseif(in_array($clean_key, $settype_boolean)) {
-						if($clean_value == "true") {
-							$clean_value = true;
-						} elseif($clean_value == "false") {
-							$clean_value = false;
-						} else {
-							$err_data[$clean_key]=$clean_value;
-							$err++;
-							continue;
-						}
-					} elseif($clean_key == "allow_commands" && !in_array($clean_value, $check_array_admin)) {
+				if(in_array($clean_key, $settype_string) || ($clean_key == "allow_commands" && in_array($clean_value, $check_array_admin))) {
+					$verified_data[$clean_key] = $clean_value;
+					continue;
+				} elseif(in_array($clean_key, $settype_integers)) {
+					if(is_numeric($clean_value)) {
+						settype($clean_value, "integer");
+						$verified_data[$clean_key] = $clean_value;
+					} else {
+						$err_data[$clean_key]=$clean_value;
+						$err++;
+					}
+					continue;
+				} elseif(in_array($clean_key, $settype_array)) {
+					//work this
+					$raw_array = explode(',', $clean_value);
+					$trimmed_array=array_map('trim',$raw_array);
+					$verified_data[$clean_key] = $trimmed_array;
+					continue;
+				} elseif(in_array($clean_key, $settype_boolean)) {
+					if($clean_value == "true") {
+						$clean_value = true;
+					} elseif($clean_value == "false") {
+						$clean_value = false;
+					} else {
 						$err_data[$clean_key]=$clean_value;
 						$err++;
 						continue;
 					}
-					$verified_data[$clean_key] = $clean_value;
+					if($clean_key == "visibility-public" || $clean_key == "visibility-lan") {
+						$raw_value = explode('-', $clean_key);
+						$verified_data["visibility"][$raw_value[1]] = $clean_value;
+					} else {
+						$verified_data[$clean_key] = $clean_value;
+					}
+					continue;
 				} elseif(!in_array($clean_key, $ignore_array)) {
 					$err_data[$clean_key]=$clean_value;
 					$err++;
+					continue;
 				}
 			}
-			
-			/*if(isset($clean_request['admins'])) {
-				$verified_data['admins'] = $clean_request['admins'];
-			} else {
-				$clean_request['admins'] = "admins - Not Set!";
-				$err++;
-			}*/
+
 			if(isset($err) && $err > 0) {
 				echo json_encode($err_data, JSON_PRETTY_PRINT);
 			} else {
-				$json = json_encode($verified_data, JSON_PRETTY_PRINT);
-				echo "<pre>".$json."</pre>";
+				$date = date('Y-m-d');
+				$time = date('H:i:s');
+				$server_dir = $base_dir . $server_select . "/";
+				$server_settings_path = $server_dir . "server-settings.json";
+				$server_settings_run_path = $server_dir . "running-server-settings.json";
+				$server_log_loc = $server_dir . "logs/";
+				$server_log_path = $server_dir . "logs/server-settings-update-$date.log";
+				if(file_exists($server_settings_path)) {
+					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
+					foreach($verified_data as $key => $value) {
+						if($verified_data[$key] == "visibility") {
+							if(isset($verified_data[$key]["public"])) {
+								$server_settings[$key]["public"] = $verified_data[$key]["public"];
+							}
+							if(isset($verified_data[$key]["lan"])) {
+								$server_settings[$key]["lan"] = $verified_data[$key]["lan"];
+							}
+						} else {
+							$server_settings[$key] = $verified_data[$key];
+						}
+					}
+					$newJsonString = json_encode($server_settings, JSON_PRETTY_PRINT);
+					$newJsonStringUgly = json_encode($server_settings);
+					$newRawQuery = http_build_query($_REQUEST);
+					$log_record = "\xA$date-$time\t".$_SESSION['login']['user']."\xA$newJsonStringUgly\xA$newRawQuery\xA";
+					if($log_record != "") {
+						if (!is_dir($server_log_loc)) {
+							// dir doesn't exist, make it
+							mkdir($server_log_loc);
+						}
+						file_put_contents($server_log_path, $log_record, FILE_APPEND);
+					}
+					file_put_contents($server_settings_path, $newJsonString);
+					$output = json_encode("Settings Updated");
+					die($output);
+				} else {
+					$output = json_encode("No settings file found");
+					die($output);
+				}
 			}
 			die();
 		}
