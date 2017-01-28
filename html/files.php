@@ -261,7 +261,7 @@ if(isset($_REQUEST['archive'])) {
 						$session['login']['reload_report']='File "'.$filename.'" was replaced';
 					}
 				}
-				$file_list[$filename] = $session['login']['user'];
+				$file_list[$filename] = $user_name;
 				//if hash changes, a user over writ someones previous file, or a file has been aded
 				if($file_list_prehash !== md5(serialize($file_list))) {
 					$newJsonString = json_encode($file_list, JSON_PRETTY_PRINT);
