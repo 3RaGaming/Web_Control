@@ -11,12 +11,12 @@ if(!isset($_SESSION['login'])) {
 	}
 }
 if(isset($_SESSION['login']['level'])) {
-	$session['login']['level']
+	$user_level = $_SESSION['login']['level']
 } else {
 	die('Error with user permissions');
 }
 if(isset($_SESSION['login']['user'])) {
-	$session['login']['user']
+	$user_name = $_SESSION['login']['user']
 } else {
 	die('Error with user name');
 }
@@ -51,7 +51,7 @@ if(isset($_REQUEST['archive'])) {
 	}
 	die();
 } elseif(isset($_REQUEST['download'])) {
-	if($session['login']['level']=="viewonly") {
+	if($user_level=="viewonly") {
 		die('You have view only access.\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
 	} 
 	if(empty($_REQUEST['download']))
@@ -168,7 +168,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 } elseif(isset($_REQUEST['upload'])) {
-	if($session['login']['level']=="viewonly") {
+	if($user_level=="viewonly") {
 		die('You have read only access.');
 	} else {
 		//Valdidate name
@@ -241,12 +241,10 @@ if(isset($_REQUEST['archive'])) {
 			$file_list = json_decode($jsonString, true);
 			$file_list_prehash = md5(serialize($file_list));
 			if(isset($file_list[$filename])) {
-				session_start();
 				$session['login']['reload_report']='File "'.$filename.'" was replaced';
-				session_write_close();
 			}
 		}
-		$file_list[$filename] = $session['login']['user'];
+		$file_list[$filename] = $user_name;
 
 		if ($_FILES["file"]["error"] == UPLOAD_ERR_OK) {
 			$move_uploaded_file = move_uploaded_file($fileTmp, $full_file_path);
@@ -290,7 +288,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 }  elseif(isset($_REQUEST['delete'])) {
-	if($session['login']['level']=="viewonly") {
+	if($user_level=="viewonly") {
 		die('You have view only access.');
 	} else {
 		if(empty($_REQUEST['delete']))
@@ -326,7 +324,7 @@ if(isset($_REQUEST['archive'])) {
 							if(isset($file_list[$file])) {
 								unset($file_list[$file]);
 							}
-							$delete_record = $delete_record ."$date-$time\t".$session['login']['user']."\t$file\xA";
+							$delete_record = $delete_record ."$date-$time\t".$user_name."\t$file\xA";
 						}
 						//log the delete and the user
 					}
