@@ -76,7 +76,7 @@ if(isset($_GET['code'])) {
 	if ($memberobject == '{"code": 10007, "message": "Unknown Member"}') {
 		$error = "member";
 	}
-	if($error!="member" || isset($debug)) {
+	if((isset($error)&&$err0r !="member") || isset($debug)) {
 		$memberjson = json_decode($memberobject, true);
 		curl_close($curlrqst2);
 		
