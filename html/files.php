@@ -11,12 +11,12 @@ if(!isset($_SESSION['login'])) {
 	}
 }
 if(isset($_SESSION['login']['level'])) {
-	$user_level = $_SESSION['login']['level']
+	$user_level = $_SESSION['login']['level'];
 } else {
 	die('Error with user permissions');
 }
 if(isset($_SESSION['login']['user'])) {
-	$user_name = $_SESSION['login']['user']
+	$user_name = $_SESSION['login']['user'];
 } else {
 	die('Error with user name');
 }
