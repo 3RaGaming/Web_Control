@@ -1,12 +1,16 @@
 <?php
-if(!isset($_SESSION)) { session_start(); }
-if(isset($_SERVER["HTTPS"]) == false)
-{
-    header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-    exit();
-	die();
-}
+	if(!isset($_SESSION)) { session_start(); }
+	if(isset($_SERVER["HTTPS"]) == false)
+	{
+		die('Must use HTTPS');
+	}
 
+	/* DEBUG */if(isset($debug)) { echo "<pre>";
+		echo var_dump($_SESSION);
+		echo "login\nget";
+		echo var_dump($_GET);
+	}
+	session_write_close();
 if(isset($_GET['code'])) {
 	$code = $_GET['code'];
 	
@@ -18,11 +22,10 @@ if(isset($_GET['code'])) {
 	$guildid = $json_config["guildid"];
 	$level1role = $json_config["adminrole"];
 	$level2role = $json_config["modrole"];
-	echo "<pre>";
 	$botheader = array();
 	$botheader[] = 'Authorization: Bot '.$bottoken;
 	
-	$redirect_url = "https://factorio.3ragaming.com/beta-auth/handlelogin.php";
+	$redirect_url = "https://factorio.3ragaming.com/beta-auth/login.php";
 	$url = 'https://discordapp.com/api/oauth2/token?';
 	$postField = 'grant_type=authorization_code&client_id='.urlencode($client_id).'&client_secret='.urlencode($client_secret).'&redirect_uri='.urlencode($redirect_url).'&code='.urlencode($code);
 	//echo $postField;
@@ -37,25 +40,22 @@ if(isset($_GET['code'])) {
 	$tokenobject = curl_exec($curlrqst0);
 	$tokenjson = json_decode($tokenobject, true);
 	curl_close($curlrqst0);
-	
-	echo "tokenJson" . __LINE__ ."\n";
-	var_dump($tokenjson);
-	
+	/* DEBUG */if(isset($debug)) { echo "tokenJson" . __LINE__ ."\n";
+									var_dump($tokenjson); }
 	
 	if(isset($tokenjson['access_token'])) {
 		$token = $tokenjson['access_token'];
-		echo "TOKEN SET";
+		/* DEBUG */if(isset($debug)) { echo "TOKEN SET\n"; }
 	} else {
-		echo "TOKEN NOT SET";
+		/* DEBUG */if(isset($debug)) { echo "TOKEN NOT SET\n"; }
 	}
 	
 	$tokenheader = array();
 	$tokenheader[] = 'Content-Type application/json';
-	$tokenheader[] = 'Authorization : Bearer '.$token;
+	$tokenheader[] = 'Authorization: Bearer '.$token;
 	
-	echo "token header" . __LINE__ ."\n";
-	var_dump($tokenheader);
-	
+	/* DEBUG */if(isset($debug)) { echo "token header" . __LINE__ ."\n";
+									var_dump($tokenheader); }
 	
 	$curlrqst1 = curl_init('https://discordapp.com/api/users/@me');
 	curl_setopt($curlrqst1, CURLOPT_HTTPHEADER, $tokenheader);
@@ -65,8 +65,8 @@ if(isset($_GET['code'])) {
 	$userid = $userjson["id"];
 	curl_close($curlrqst1);
 			
-	echo "UserJson" . __LINE__ ."\n";
-	var_dump($userjson);
+	/* DEBUG */if(isset($debug)) { echo "UserJson" . __LINE__ ."\n";
+									var_dump($userjson); }
 	
 	
 	$curlrqst2 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/members/'.$userid);
@@ -74,66 +74,59 @@ if(isset($_GET['code'])) {
 	curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
 	$memberobject = curl_exec($curlrqst2);
 	if ($memberobject == '{"code": 10007, "message": "Unknown Member"}') {
-		//header("Location: ./altlogin.php?error=member");
-		//die();
+		$error = "member";
 	}
-	$memberjson = json_decode($memberobject, true);
-	curl_close($curlrqst2);
-	
-	echo "MemberJson" . __LINE__ ."\n";
-	var_dump($memberjson);
-	
-	
-	$curlrqst3 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/roles');
-	curl_setopt($curlrqst3, CURLOPT_HTTPHEADER, $botheader);
-	curl_setopt($curlrqst3, CURLOPT_RETURNTRANSFER, true);
-	$roleobject = curl_exec($curlrqst3);
-	$rolejson = json_decode($roleobject, true);
-	curl_close($curlrqst3);
-	
-	echo "RolesJson" . __LINE__ ."\n";
-	var_dump($rolejson);
-	
-	
-	$level1id = null;
-	$level2id = null;
-	foreach($rolejson as $key => $value) {
-		if($rolejson[$key]["name"] == $level1role) $level1id = $rolejson[$key]["id"];
-		if($rolejson[$key]["name"] == $level2role) $level2id = $rolejson[$key]["id"];
-		if($level1id !== null && $level2id !== null) break 1;
+	if($error!="member" || isset($debug)) {
+		$memberjson = json_decode($memberobject, true);
+		curl_close($curlrqst2);
+		
+		/* DEBUG */if(isset($debug)) { echo "MemberJson" . __LINE__ ."\n";
+										var_dump($memberjson); }
+		
+		$curlrqst3 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/roles');
+		curl_setopt($curlrqst3, CURLOPT_HTTPHEADER, $botheader);
+		curl_setopt($curlrqst3, CURLOPT_RETURNTRANSFER, true);
+		$roleobject = curl_exec($curlrqst3);
+		$rolejson = json_decode($roleobject, true);
+		curl_close($curlrqst3);
+		
+		/* DEBUG */if(isset($debug)) { echo "RolesJson" . __LINE__ ."\n";
+										var_dump($rolejson); }
+		
+		$level1id = null;
+		$level2id = null;
+		foreach($rolejson as $key => $value) {
+			if($rolejson[$key]["name"] == $level1role) $level1id = $rolejson[$key]["id"];
+			if($rolejson[$key]["name"] == $level2role) $level2id = $rolejson[$key]["id"];
+			if($level1id !== null && $level2id !== null) break 1;
+		}
+		
+		$level1 = false;
+		$level2 = false;
+		if(isset($memberjson["roles"])) {
+			foreach($memberjson["roles"] as $mkey => $mvalue) {
+				if($mvalue == $level1id) $level1 = true;
+				if($mvalue == $level2id) $level2 = true;
+				if($level1id && $level2id) break 1;
+			}
+		}
+		
+		if ($level1 || $userid == "129357924324605952") {
+			/* DEBUG */if(isset($debug)) { echo "admin login verified!"; }
+			$session['login']['user']=$memberjson["user"]["username"];
+			$session['login']['level']="admin";
+		} elseif ($level2) {
+			/* DEBUG */if(isset($debug)) { echo "mod login verified!"; }
+			$session['login']['user']=$memberjson["user"]["username"];
+			$session['login']['level']="mod";
+		} else {
+			$error = "guest";
+		}
 	}
-	
-	$level1 = false;
-	$level2 = false;
-	foreach($memberjson["roles"] as $mkey => $mvalue) {
-		if($mvalue == $level1id) $level1 = true;
-		if($mvalue == $level2id) $level2 = true;
-		if($level1id && $level2id) break 1;
+} elseif(isset($_GET['error'])) {	
+	if ($_GET['error'] == "access_denied") {
+		$error = "access";
 	}
-	
-	if ($level1 || $userid == "129357924324605952") {
-		//$_SESSION['login']['user']=$memberjson["user"]["username"];
-		echo "admin login verified!";
-		//$_SESSION['login']['level']="admin";
-		//header("Location: ./index.php?d=server1");
-	} elseif ($level2) {
-		//$_SESSION['login']['user']=$memberjson["user"]["username"];
-		echo "mod login verified!";
-		//$_SESSION['login']['level']="mod";
-		//header("Location: ./index.php?d=server1");
-	} else {
-		echo "guest login not allowed";
-		//header("Location: ./altlogin.php?error=guest");
-	}	
-} elseif(isset($_POST['error'])) {
-	$error = $_POST['error'];
-	
-	if ($error == "access_denied") {
-		//header("Location: ./altlogin.php?error=access");
-	} else {
-		//header("Location: ./altlogin.php?error=other");
-	}
-	die();
 }
-echo "</pre>";
+/* DEBUG */if(isset($debug)) { echo "</pre>"; }
 ?>

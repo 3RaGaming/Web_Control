@@ -1,9 +1,7 @@
 <?php
 if(!isset($_SESSION)) { session_start(); }
-if(isset($_SERVER["HTTPS"]) == false)
-{
+if(isset($_SERVER["HTTPS"]) == false) {
     header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-    exit();
 	die();
 }
 //If logged in, and requested to logout... log them out and show login screen
@@ -13,43 +11,56 @@ if(isset($_SESSION['login'])) {
 		$report = "<br />You have been logged out</br >";
 	} else {
 		//if not requesting to logout... Take back home
-		header("Location: ./?d=server1");
-		exit();
+		//header("Location: ./?d=server1");
 		die();
 	}
 }
-
-$userN="";
-$passW="";
-if(isset($_POST['uname'])) {
-	$userN = addslashes($_POST['uname']);
-}
-if(isset($_POST['passw'])) {
-	$passW = addslashes(md5(trim($_POST['passw'])));
-}
-if(!empty($userN) && !empty($passW)) {
-	$userlist = file ('/var/www/users.txt');
-	$success = false;
-	foreach ($userlist as $user) {
-		$user_details = explode('|', $user);
-		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
-			$userN = $user_details[0];
-			$userL = $user_details[2];
-			$success = true;
-			break;
-		}
-	}
-	if ($success) {
-		$_SESSION['login']['user']=$userN;
-		$_SESSION['login']['level']=$userL;
-		//Send home if logged in
-		header("Location: ./?d=server1");
-		die();
+if(isset($_REQUEST['debug'])) {
+	echo "requestDebug";
+	if($_REQUEST['debug']==true) {
+		$_SESSION['debug'] = true;
+		$debug = true;
+		
+	echo "sessionSetDebug";
 	} else {
-		$report =  "<br />You have entered the wrong username or password. Please try again.<br />";
+		unset($_SESSION['debug']);
+		
+	echo "sessionUnsetDebug";
 	}
-} elseif(isset($_POST['submit'])) {
-	$report = "<br />I don't like no input<br />";
+} elseif(isset($_SESSION['debug'])) {
+	$debug = true;
+	
+	echo "SessionFoundDebug";
+}
+	var_dump($_SESSION);
+
+include('./handlelogin.php');
+
+if(isset($error)) {
+	if ($error == "guest") { $report = "We do not have a guest page available at this time."; }
+	elseif ($error == "access") { $report = "You must agree to provide access to your account."; }
+	elseif ($error == "member") { $report = "You are not a member of the 3Ra Discord Server.";}
+	else{ $report = "Unknown Error Occurred - $error"; }
+} elseif(isset($session['login']['user'])&&isset($session['login']['level'])) {
+	//if(isset($debug)) {
+		//echo "With debug disabled, Session will be created here.";
+		var_dump($session);
+	//} else {
+		$_SESSION['login']['user'] = $session['login']['user'];
+		$_SESSION['login']['level'] = $session['login']['level'];
+		//header("Location: ./index.php?d=server1");
+		var_dump($_SESSION['login']['user']);
+		var_dump($_SESSION['login']['level']);
+		var_dump($session['login']['user']);
+		var_dump($session['login']['level']);
+	//}
+}
+//session_write_close();
+
+if(!isset($clientid)) {
+	$config_file = file_get_contents('/var/www/factorio/config.json');
+	$json_config = json_decode($config_file, true);
+	$clientid = $json_config['clientid'];
 }
 
 ?>
@@ -60,13 +71,14 @@ if(!empty($userN) && !empty($passW)) {
 <body>
 <div class="login-page">
   <div class="form">
-    <form class="login-form" name="login" method="post">
-		<input type="hidden" name="login" value="submit" />
-		<input type="text" name="uname" <?php echo (empty($userN)?'placeholder="username"':'value="'.$userN.'"'); ?> />
-		<input type="password" name="passw" placeholder="password"/>
-		<button onclick="document.login.submit();">login</button>
-    </form>
-	<?php if(isset($report)) { echo $report; } ?>
+	<?php
+	//TODO - Fix the styling issue here so that the button looks good
+	?>
+    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?PHP echo $clientid; ?>&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Flogin.php&response_type=code">
+	  <img style="width: 100%;" src="./3rabutton.png" alt="Login With Discord"/>
+	</a>
+	<?php 	if(isset($report)) { echo "<br />".$report; }
+			if(isset($debug)) { echo "<br />debug enabled";}?>
   </div>
 </div>
 </body>

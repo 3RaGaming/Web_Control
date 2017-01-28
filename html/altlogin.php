@@ -19,17 +19,38 @@ if(isset($_SESSION['login'])) {
 	}
 }
 
-if(isset($_REQUEST['error'])) {
-	$error = $_REQUEST['error'];
-	if ($error == "guest") $report = "We do not have a guest page available at this time.";
-	if ($error == "access") $report = "You must agree to provide access to your account.";
-	if ($error == "member") $report = "You are not a member of the 3Ra Discord Server.";
-	if ($error == "other") $report = "Unknown Error Occurred";
+$userN="";
+$passW="";
+if(isset($_POST['uname'])) {
+	$userN = addslashes($_POST['uname']);
 }
-
-$config_file = file_get_contents('/var/www/factorio/config.json');
-$json_config = json_decode($config_file, true);
-$clientid = $json_config['clientid'];
+if(isset($_POST['passw'])) {
+	$passW = addslashes(md5(trim($_POST['passw'])));
+}
+if(!empty($userN) && !empty($passW)) {
+	$userlist = file ('/var/www/users.txt');
+	$success = false;
+	foreach ($userlist as $user) {
+		$user_details = explode('|', $user);
+		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
+			$userN = $user_details[0];
+			$userL = $user_details[2];
+			$success = true;
+			break;
+		}
+	}
+	if ($success) {
+		$_SESSION['login']['user']=$userN;
+		$_SESSION['login']['level']=$userL;
+		//Send home if logged in
+		header("Location: ./?d=server1");
+		die();
+	} else {
+		$report =  "<br />You have entered the wrong username or password. Please try again.<br />";
+	}
+} elseif(isset($_POST['submit'])) {
+	$report = "<br />I don't like no input<br />";
+}
 
 ?>
 <html>
@@ -39,12 +60,12 @@ $clientid = $json_config['clientid'];
 <body>
 <div class="login-page">
   <div class="form">
-	<?php
-	//TODO - Fix the styling issue here so that the button looks good
-	?>
-    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?PHP echo $clientid; ?>&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Fhandlelogin.php&response_type=code">
-	  <img style="width: 100%;" src="./3rabutton.png" alt="Login With Discord"/>
-	</a>
+    <form class="login-form" name="login" method="post">
+		<input type="hidden" name="login" value="submit" />
+		<input type="text" name="uname" <?php echo (empty($userN)?'placeholder="username"':'value="'.$userN.'"'); ?> />
+		<input type="password" name="passw" placeholder="password"/>
+		<button onclick="document.login.submit();">login</button>
+    </form>
 	<?php if(isset($report)) { echo $report; } ?>
   </div>
 </div>
