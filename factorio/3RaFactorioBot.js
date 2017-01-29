@@ -161,8 +161,8 @@ function removeRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
 	if (!savedata.channels[server + "-" + force]) return;
 	let roleid = savedata.channels[server + "-" + force].role;
-	if (roleid && user.roles.has(roleid)) user.removeRole(bot.guilds.get(guildid).roles.get(roleid));
-	if (roleid && user.roles.has(roleid)) user.removeRole(roleid); //Redundancy to make sure it's removed
+	if (roleid && user.roles.has(roleid)) return user.removeRole(bot.guilds.get(guildid).roles.get(roleid));
+	return null;
 }
 
 //Replace any mentions with an actual tag
@@ -867,8 +867,12 @@ function handleInput(input) {
 				if (old_force && old_force != force_name) {
 					let userid = getPlayerID(player_name);
 					if (userid !== null) {
-						removeRole(channelid, old_force, userid);
-						assignRole(channelid, force_name, userid);
+						let deleted = removeRole(channelid, old_force, userid);
+						if (deleted !== null) {
+    							deleted.then(newobject => {assignRole(channelid, force_name, userid);});
+						} else {
+    							assignRole(channelid, force_name, userid);
+						}
 					}
 				}
 				updateDescription(channelid);
