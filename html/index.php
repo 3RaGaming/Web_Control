@@ -101,6 +101,7 @@
     <script type="text/javascript" language="javascript" src="assets/js/cpumeminfo.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<style type="text/css">@import "assets/css/base.css";</style>
+    <style type="text/css">@import "assets/css/customalerts.css";</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
@@ -126,6 +127,9 @@
                 <span id="cpu" style="padding: 6px;background-color: rgb(102, 255, 0);">00 %</span>
                 <span id="mem" style="padding: 6px;background-color: rgb(102, 255, 0);">0.00/0.00 GB</span>
             </div>
+
+            <div style="float: right; margin-right: 20px;"><button onclick="customAlerts.show();">Alert log</button></div>
+
 		</div>
 		<!-- console and chat windows -->
 		<div style="width: 52%; height: 99%; float: left;">
@@ -162,5 +166,17 @@
 			<iframe id="file_iframe" style="display:none;"></iframe>
 		</div>
 	</div>
+
+    <div id="alert_modal" class="modal">
+        <div id="content" class="modal-content">
+            <span id="close_modal" class="close">&times;</span>
+            <span id="reset_alerts" class="reset">Reset alerts</span>
+            <p>Log of alerts</p>
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript" language="javascript" src="assets/js/customalerts.js"></script>
+
 </body>
 </html>
