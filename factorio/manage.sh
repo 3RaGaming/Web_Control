@@ -30,7 +30,7 @@ function move_logs() {
 	fi
 	#Work in a chatlog archive here
 	if [ -s "$1/chatlog.0" ]; then
-		mv "$1/chatlog.0g" "$1/logs/chatlog-${datetime}.log"
+		mv "$1/chatlog.0g" "$1/logs/z-chatlog-${datetime}.log"
 	fi
 	#Work in a factorio-current archive here
 	if [ -s "$1/factorio-current.log" ]; then

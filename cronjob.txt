@@ -1,7 +1,7 @@
 */1 * * * * chown -R www-data:www-data /var/www/
-0 22  * * find /var/www/factorio/logs/* -mtime +10 -delete
-0 22  * * find /var/www/factorio/server*/logs/factorio-current-* -mtime +6 -delete
-1 22  * * find /var/www/factorio/server*/logs/screenlog-* -mtime +6 -delete
-2 22  * * find /var/www/factorio/server*/logs/chatlog-* -mtime +30 -delete
-3 22  * * find /var/www/factorio/server*/logs/file_deletion-* -mtime +10 -delete
-4 22  * * find /var/www/factorio/server*/logs/server-settings-update-* -mtime +10 -delete
+  0 22 * * * find /var/www/factorio/logs/* -mtime +10 -delete
+  1 22 * * * find /var/www/factorio/server*/logs/factorio-current-* -mtime +6 -delete
+  2 22 * * * find /var/www/factorio/server*/logs/screenlog-* -mtime +6 -delete
+  3 22 * * * find /var/www/factorio/server*/logs/z-chatlog-* -mtime +30 -delete
+  4 22 * * * find /var/www/factorio/server*/logs/file_deletion-* -mtime +10 -delete
+  5 22 * * * find /var/www/factorio/server*/logs/server-settings-update-* -mtime +10 -delete
