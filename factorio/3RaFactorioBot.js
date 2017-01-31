@@ -1072,24 +1072,24 @@ bot.on('message', (message) => {
 	//If message is a command, run the correct command. Else, forward to the proper server (if channel is registered)
 	if (message.content.startsWith(prefix)) {
 		let command = message.cleanContent.substring(2).split(" ");
-		if (publiccommands[command[0]]) {
-			publiccommands[command[0]](message, command);
+		if (publiccommands[command[0]].toLowerCase()) {
+			publiccommands[command[0].toLowerCase()](message, command);
 			return;
 		}
-		if (admincommands[command[0]] && !message.member.roles.has(message.guild.roles.find("name", modrole).id)) {
+		if (admincommands[command[0].toLowerCase()] && !message.member.roles.has(message.guild.roles.find("name", modrole).id)) {
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
 		}
-		if (admincommands[command[0]]) {
-			admincommands[command[0]](message, command);
+		if (admincommands[command[0]].toLowerCase()) {
+			admincommands[command[0].toLowerCase()](message, command);
 			return;
 		}
-		if (command[0] == "eval" && message.author.id != "129357924324605952" && !message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
+		if (command[0].toLowerCase() == "eval" && message.author.id != "129357924324605952" && !message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
 			//Not zackman0010 or an Admin
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
 		}
-		if (command[0] == "eval") {
+		if (command[0].toLowerCase() == "eval") {
 			try {
 				var code = command.splice(1).join(" ");
 				var evaled = eval(code);
