@@ -158,11 +158,11 @@ function assignRole(server, force, userid) {
 
 //Remove a player from any Role in a PvP Server, if he has one
 function removeRole(server, force, userid) {
-	let user = bot.guilds.get(guildid).members.get(userid);
-	if (!savedata.channels[server + "-" + force]) return;
-	let roleid = savedata.channels[server + "-" + force].role;
-	if (roleid && user.roles.has(roleid)) return user.removeRole(bot.guilds.get(guildid).roles.get(roleid));
-	return null;
+	if (savedata.channels[server + "-" + force]) {
+		let user = bot.guilds.get(guildid).members.get(userid);
+		let roleid = savedata.channels[server + "-" + force].role;
+		if (roleid && user.roles.has(roleid)) return user.removeRole(roleid);
+	} else return null;
 }
 
 //Replace any mentions with an actual tag
