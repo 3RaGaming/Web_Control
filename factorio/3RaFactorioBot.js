@@ -925,7 +925,8 @@ function handleInput(input) {
 				case "end":
 					let roundnum = data[1]; //Have to use a different name for some reason, not sure why
 					let winner = data[2];
-					message = "**[ROUND END] Round " + roundnum + " has ended! Winner: Team " + winner + "!**";
+					let time = data[3].replace(";", ",");
+					message = "**[ROUND END] Round " + roundnum + " has ended after " + time + "! Winner: Team " + winner + "!**";
 					break;
 			}
 			fs.unlinkSync("savedata.json");
