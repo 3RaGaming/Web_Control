@@ -1072,7 +1072,7 @@ bot.on('message', (message) => {
 	//If message is a command, run the correct command. Else, forward to the proper server (if channel is registered)
 	if (message.content.startsWith(prefix)) {
 		let command = message.cleanContent.substring(2).split(" ");
-		if (publiccommands[command[0]].toLowerCase()) {
+		if (publiccommands[command[0].toLowerCase()]) {
 			publiccommands[command[0].toLowerCase()](message, command);
 			return;
 		}
@@ -1080,7 +1080,7 @@ bot.on('message', (message) => {
 			message.channel.sendMessage("You do not have permission to use this command!");
 			return;
 		}
-		if (admincommands[command[0]].toLowerCase()) {
+		if (admincommands[command[0].toLowerCase()]) {
 			admincommands[command[0].toLowerCase()](message, command);
 			return;
 		}
