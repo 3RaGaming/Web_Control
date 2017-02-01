@@ -140,7 +140,7 @@
 		</div>
 		<!-- console and chat windows -->
 		<div style="width: 52%; height: 99%; float: left;">
-			<textarea id="console" style="width: 98%; height: 46%;"></textarea>
+            <?php echo ($user_level !== "admin")? "": "<textarea id='console' style='width: 98%; height: 46%;'></textarea>"; ?>
 			<textarea id="chat" style="width: 98%; height: 46%;"></textarea><br />
 			<input type="text" id="command" placeholder="" style="width: 98%;" />&nbsp;
 			<button id="command_button">Send</button>
