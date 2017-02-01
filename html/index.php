@@ -99,7 +99,7 @@
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
 ?>
-        // TODO remove this 
+        // TODO remove this
         // user lvl debug to js console.
         console.log(user_name + " : " + user_level);
 	</script>
@@ -120,11 +120,11 @@
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
-			<button onclick="update_web_control(user_level);">Update Web Control</button>
+			<button onclick="update_web_control(user_level);" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>Update Web Control</button>
 			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
 				<input type="hidden" id="update" name="update" value="yes" />
 			</form>
-			<button onclick="force_kill('forcekill')">force kill</button>
+			<button onclick="force_kill('forcekill')" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>force kill</button>
 			<a id="link_logs" href="./logs.php">Logs</a>
             <div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
