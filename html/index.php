@@ -43,6 +43,9 @@
 <?php
 		echo "\t\tvar user_level = \"$user_level\";\xA";
 		echo "\t\tvar user_name = \"$user_name\";\xA";
+
+
+
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
@@ -53,7 +56,8 @@
 		if(isset($session['login']['cmd_history'][$server_select])) {
 			echo "\t\t\this_array = ".json_encode($session['login']['cmd_history'][$server_select]).";\xA";
 		}
-		
+
+
 		// This is for displaying the server name & password in an input box
 		if(file_exists("$base_dir$server_select/server-settings.json")) {
 			// 
@@ -95,6 +99,9 @@
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
 ?>
+        // TODO remove this 
+        // user lvl debug to js console.
+        console.log(user_name + " : " + user_level);
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/js/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/js/console.js"></script>
@@ -107,9 +114,9 @@
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
 			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-			<button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
+			<button onclick="server_sss('start')" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>Start</button>&nbsp; &nbsp;
 			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
+			<button onclick="server_sss('stop')" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>Stop</button>&nbsp;-&nbsp;
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
