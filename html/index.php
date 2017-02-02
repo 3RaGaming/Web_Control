@@ -32,7 +32,6 @@
 	}
 	session_write_close();
 ?>
-</script>
 <html>
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
@@ -50,8 +49,6 @@
         // user debug to js console.
         console.log(user);
 <?php
-//		echo "\t\tvar user_level = \"$user_level\";\xA";
-//		echo "\t\tvar user_name = \"$user_name\";\xA";
 
 
 
@@ -112,71 +109,67 @@
 	<script type="text/javascript" language="javascript" src="assets/js/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/js/console.js"></script>
     <script type="text/javascript" language="javascript" src="assets/js/cpumeminfo.js"></script>
-	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
+    <script src="https://use.fontawesome.com/674cd09dad.js"></script>
+    <!-- stylesheets -->
 	<style type="text/css">@import "assets/css/base.css";</style>
-    <style type="text/css">@import "assets/css/main.css";</style>
     <style type="text/css">@import "assets/css/customalerts.css";</style>
+    <!-- fonts -->
+    <link href='//fonts.googleapis.com/css?family=Audiowide' rel='stylesheet'>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
-		<div style="float: left; width: 100%;">
-			Welcome, <span id="welcome_user"><?php echo $user_name; ?></span>&nbsp;-&nbsp;
-            <?php
-                if($user_level == "admin") {
-                    echo <<<ADMIN
-                    <button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
-                    <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
-                    <button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
-                    <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
-                    <span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
-                    <button onclick="update_web_control(user.level);">Update Web Control</button>
-                    <form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
-                        <input type="hidden" id="update" name="update" value="yes" />
-                    </form>
-                    <button onclick="force_kill('forcekill')">force kill</button>
-                    <a id="link_logs" href="./logs.php">Logs</a>
+        <div class="nav">
+            <ul>
+                <li><span class="welcome-msg">Welcome, <?php echo ($user_name)? $user_name: "guest"; ?>.</span></li>
+                <?php
+                    if($user_level == "admin") {
+                        echo <<<ADMIN
+                            <li><button onclick="server_sss('start')">Start</button></li>
+                            <li><button onclick="server_sss('status')">Status</button></li>
+                            <li><button onclick="server_sss('stop')">Stop</button></li>
+                            <li><input type="text" id="server_name" name="server_name" value="Name Here" /></li>
+                            <li><span id="link_config"><a href="./server-settings.php">config</a></span></li>
+                            <li>
+                                <button onclick="update_web_control(user.level);">Update Web Control</button>
+                                <form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
+                                    <input type="hidden" id="update" name="update" value="yes" />
+                                </form>
+                            </li>
+                            <li><button onclick="force_kill('forcekill')">force kill</button></li>
+                            <li><a id="link_logs" href="./logs.php">Logs</a></li>
 ADMIN;
-                } elseif ($user_level == "mod") {
-                    echo <<<MOD
-                    <button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
-                    <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
-                    <button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
-                    <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
-                    <span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
-                    <button onclick="update_web_control(user.level);"  disabled>Update Web Control</button>
-                    <form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
-                        <input type="hidden" id="update" name="update" value="yes" />
-                    </form>
-                    <button onclick="force_kill('forcekill')">force kill</button>
-                    <a id="link_logs" href="./logs.php">Logs</a>
+                    } elseif ($user_level == "mod") {
+                        echo <<<MOD
+                            <li><button onclick="server_sss('start')">Start</button></li>
+                            <li><button onclick="server_sss('status')">Status</button></li>
+                            <li><button onclick="server_sss('stop')">Stop</button></li>
+                            <li><input type="text" id="server_name" name="server_name" value="Name Here" /></li>
+                            <li><span id="link_config"><a href="./server-settings.php">config</a></span></li>
+                            <li><button onclick="force_kill('forcekill')">force kill</button></li>
+                            <li><a id="link_logs" href="./logs.php">Logs</a></li>
 MOD;
+                    } else {
+                        echo <<<QUEST
+                            <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
+                            <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 
-                } else {
-                    echo <<<QUEST
-                    <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
-                    <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 QUEST;
-                }
-            ?>
-            <div style="float: right;">
-				<select id="server_select"></select>&nbsp;-&nbsp;
-				<a href="login.php?logout">Logout</a>
-			</div>
-            <div id="serverload" style="float: right; margin-right: 20px;">
-                <span id="cpu" style="padding: 6px;background-color: rgb(102, 255, 0);">00 %</span>
-                <span id="mem" style="padding: 6px;background-color: rgb(102, 255, 0);">0.00/0.00 GB</span>
-            </div>
-            <div style="float: right; margin-right: 20px;"><button onclick="customAlerts.show();">Alert log</button></div>
-		</div>
+                    }
+                ?>
+
+                <li class="pull-right"><select id="server_select"></select></li>
+                <li class="pull-right"><a href="login.php?logout">Logout</a></li>
+                <li class="pull-right"><span id="mem" style="padding: 6px;background-color: rgb(102, 255, 0);">0.00/0.00 GB</span></li>
+                <li class="pull-right"><span id="cpu" style="padding: 6px;background-color: rgb(102, 255, 0);">00 %</span></li>
+                <li class="pull-right"><button onclick="customAlerts.show();">Alert log</button></li>
+
+            </ul>
+        </div>
         <div class="leftside">
             <!-- console window -->
             <?php
             if($user_level == "admin" || $user_level == "mod") {
-                echo <<<CONSOLE
-            <div class="console">
-                <textarea id='console'></textarea>
-            </div>
-CONSOLE;
+                echo '<div class="console"><textarea id="console"></textarea></div>';
             }
             ?>
             <!-- chat window -->
@@ -240,6 +233,7 @@ QUEST;
         </div>
 	</div>
 
+    <!-- modals -->
     <div id="alert_modal" class="modal">
         <div id="content" class="modal-content">
             <span id="close_modal" class="close">&times;</span>
@@ -249,6 +243,7 @@ QUEST;
         </div>
     </div>
 
+    <!-- scripts that need dom to be loaded before running them -->
     <script type="text/javascript" language="javascript" src="assets/js/customalerts.js"></script>
 
 </body>

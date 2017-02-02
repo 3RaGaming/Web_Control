@@ -1,5 +1,36 @@
 
+.nav {
+    width: 100%;
+    margin-bottom: 20px;
+}
+.nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+.nav li {
+    display: inline;
 
+    text-align: center;
+    padding: 4px 4px 0 0;
+    text-decoration: none;
+}
+
+.welcome-msg {
+    font-family: 'Audiowide';
+    font-size: 24px;
+
+    padding-right: 30px;
+
+    -webkit-animation: example 10s infinite;
+    animation: example 10s infinite;
+}
+@-webkit-keyframes example {
+    0%   { }
+    50%  { color: red; }
+    100% { color: black; }
+}
 
 a:visited{
   color:blue;
@@ -80,11 +111,11 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 
 @media only screen and (max-width: 1200px) {
     .leftside {
-        height: 90%;
+        height: 60%;
         width: 100%;
     }
     .rightside {
-        height: 90%;
+        height: 60%;
         width: 100%;
     }
     .files {
