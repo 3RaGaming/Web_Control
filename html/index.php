@@ -121,7 +121,7 @@
         <!-- nav bar -->
         <div class="nav">
             <ul>
-                <li><span class="welcome-msg">Welcome, <?php echo ($user_name)? $user_name: "guest"; ?>.</span></li>
+                <li><span class="welcome-msg">Welcome <?php echo ($user_name)? ucfirst(strtolower($user_name)): "Guest"; ?>.</span></li>
                 <?php
                     if($user_level == "admin") {
                         echo <<<ADMIN
