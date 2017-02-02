@@ -23,11 +23,11 @@
 
     padding-right: 30px;
 
-    -webkit-animation: example 10s infinite;
-    animation: example 10s infinite;
+    -webkit-animation: blink_blink 10s infinite;
+    animation: blink_blink 10s infinite;
 }
-@-webkit-keyframes example {
-    0%   { }
+@-webkit-keyframes blink_blink {
+    0%   { color: black; }
     50%  { color: red; }
     100% { color: black; }
 }
