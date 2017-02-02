@@ -40,9 +40,18 @@
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a viewonly account, why upload a file, just to be told you can't do that?
+
+        var user = {
+            name:  "<?php echo $user_name ?>",
+            level: "<?php echo $user_name ?>"
+        };
+
+        // TODO remove this
+        // user debug to js console.
+        console.log(user);
 <?php
-		echo "\t\tvar user_level = \"$user_level\";\xA";
-		echo "\t\tvar user_name = \"$user_name\";\xA";
+//		echo "\t\tvar user_level = \"$user_level\";\xA";
+//		echo "\t\tvar user_name = \"$user_name\";\xA";
 
 
 
@@ -99,9 +108,6 @@
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
 ?>
-        // TODO remove this
-        // user lvl debug to js console.
-        console.log(user_name + " : " + user_level);
 	</script>
 	<script type="text/javascript" language="javascript" src="assets/js/base.js"></script>
 	<script type="text/javascript" language="javascript" src="assets/js/console.js"></script>
@@ -120,7 +126,7 @@
 			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
 			<span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
 			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
-			<button onclick="update_web_control(user_level);" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>Update Web Control</button>
+			<button onclick="update_web_control(user.level);" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>Update Web Control</button>
 			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
 				<input type="hidden" id="update" name="update" value="yes" />
 			</form>
