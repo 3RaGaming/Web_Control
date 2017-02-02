@@ -79,7 +79,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 }
 
 .leftside {
-    height: 90%;
+    height: auto;
     width: 54%;
     float: left;
 }
@@ -90,7 +90,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 }
 .console {
     width: 100%;
-    height: 50%;
+    height: 300px;
 }
 .console textarea {
     width: 100%;
@@ -98,11 +98,11 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 }
 .chat {
     width: 100%;
-    height: 50%;
+    height: 500px;
 }
 .chat textarea {
     width: 100%;
-    height: 88%;
+    height: 400px;
 }
 .files {
     width: 100%;
@@ -111,7 +111,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 
 @media only screen and (max-width: 1200px) {
     .leftside {
-        height: 60%;
+        height: auto;
         width: 100%;
     }
     .rightside {
