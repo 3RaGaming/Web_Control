@@ -33,6 +33,7 @@ if(isset($_SESSION['login'])) {
 	}
 }
 session_write_close();
+$redirect_url = urlencode("https://" .$_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_NAME"]);
 
 	/* DEBUG */if(isset($debug)) {
 		$debug[] = print_r($_SESSION, true);
@@ -57,9 +58,8 @@ if(isset($_GET['code'])) {
 		$botheader = array();
 		$botheader[] = 'Authorization: Bot '.$bottoken;
 		
-		$redirect_url = "https://factorio.3ragaming.com/beta-auth/login.php";
 		$url = 'https://discordapp.com/api/oauth2/token?';
-		$postField = 'grant_type=authorization_code&client_id='.urlencode($client_id).'&client_secret='.urlencode($client_secret).'&redirect_uri='.urlencode($redirect_url).'&code='.urlencode($code);
+		$postField = 'grant_type=authorization_code&client_id='.urlencode($client_id).'&client_secret='.urlencode($client_secret).'&redirect_uri='.$redirect_url.'&code='.urlencode($code);
 		//echo $postField;
 		$options = array(CURLOPT_URL => $url,
 						CURLOPT_RETURNTRANSFER => 1,
@@ -81,7 +81,7 @@ if(isset($_GET['code'])) {
 			/* DEBUG */if(isset($debug)) { $debug[] = "TOKEN SET"; }
 		} else {
 			$error = "access_token";
-			/* DEBUG */if(isset($debug)) { $debug[] = "TOKEN NOT SEn"; }
+			/* DEBUG */if(isset($debug)) { $debug[] = "TOKEN NOT SET"; }
 		}
 		if(!isset($error)) {
 			$tokenheader = array();
@@ -209,7 +209,6 @@ if(!isset($clientid)) {
 }
 
 session_write_close();
-$current_url = urlencode($_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_NAME"]);
 
 ?>
 <html>
@@ -219,7 +218,7 @@ $current_url = urlencode($_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_NAME"]);
 <body>
 <div class="login-page">
   <div class="form">
-    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?php echo $clientid; ?>&scope=identify%20guilds&redirect_uri=https%3A%2F%2F<?php echo $current_url; ?>&response_type=code">
+    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?php echo $clientid; ?>&scope=identify%20guilds&redirect_uri=<?php echo $redirect_url; ?>&response_type=code">
 	  <img style="width: 100%;" src="./assets/img/3rabutton.png" alt="Login With Discord"/>
 	</a>
 	<?php 	if(isset($report)) { echo "<br /><br />".$report; }
