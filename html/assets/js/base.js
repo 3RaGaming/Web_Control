@@ -1035,12 +1035,12 @@
 
 
 function Download(url) {
-    if (user.level === "viewonly") { return; }
+    if (user.level === "viewonly" || user.level === "guest") { return; }
 	document.getElementById('file_iframe').src = url;
 }
 
 function server_sss(cmd) {
-    if(user.level == "viewonly" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
+    if((user.level === "viewonly" || user.level === "guest") && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
         customAlerts.add("You have view only access","warning",true);
         return;
     }
@@ -1063,7 +1063,7 @@ function server_sss(cmd) {
 	};
 }
 function force_kill(cmd) {
-	if(user.level == "viewonly") {
+	if(user.level === "viewonly" || user.level === "guest") {
         customAlerts.add("You have view only access",'warning',true);
         return;
     }
@@ -1086,7 +1086,7 @@ function force_kill(cmd) {
     }
 }
 function command() {
-    if(user.level == "viewonly") {
+    if(user.level === "viewonly" || user.level === "guest") {
         customAlerts.add("You have view only access","warning",true);
         return;
     }
@@ -1159,7 +1159,7 @@ function uploadCanceled() {
 }
 
 function upload() {
-	if ($('#upload_file').val == "" || user.level == "viewonly") {
+	if ($('#upload_file').val == "" || user.level === "viewonly" || user.level === "guest") {
 		return;
 	}
 	var the_file;
@@ -1293,7 +1293,7 @@ $(document).ready(function() {
 		upload();
 	});
     $('#delete_files').on('click', function() {
-        if(user.level == "viewonly") {
+        if(user.level === "viewonly" || user.level === "guest"){
             customAlerts.add("You have view only access","warning",true);
         	return;
         }
@@ -1320,7 +1320,7 @@ $(document).ready(function() {
 	});
 	//Upload button click event
 	$('#upload_button').on('click', function() {
-        if(user.level == "viewonly") {
+        if(user.level === "viewonly" || user.level === "guest") {
             customAlerts.add("You have view only access","warning",true);
         	return;
         }
@@ -1328,7 +1328,7 @@ $(document).ready(function() {
 	});
 	$('#command').keydown(function(event) {
 		if (event.keyCode == 13) command();
-        if (user.level == "viewonly") { return; }
+        if (user.level === "viewonly" || user.level === "guest") { return; }
 		if (event.keyCode == 38) command_history('up');
 		if (event.keyCode == 40) command_history('down');
 	});

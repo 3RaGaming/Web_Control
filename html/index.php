@@ -121,7 +121,7 @@
 		<div style="float: left; width: 100%;">
 			Welcome, <span id="welcome_user"><?php echo $user_name; ?></span>&nbsp;-&nbsp;
             <?php
-                if($user_level === "admin") {
+                if($user_level == "admin") {
                     echo <<<ADMIN
                     <button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
                     <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
@@ -165,7 +165,7 @@ QUEST;
 		<div style="width: 46%; height: 99%; float: left;">
 			<div>
                 <?php
-                if($user_level === "admin") {
+                if($user_level == "admin") {
                     echo <<<ADMIN
                         <input type="file" name="upload_file" id="upload_file" style="display: none;">
                         <button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
