@@ -226,9 +226,7 @@ if(!isset($clientid)) {
 <?php
 	if(isset($debug)) {
 		echo "<pre>";
-		foreach($debug as $value) {
-			print_r($value);
-		}
+		print_r($debug);
 		echo "</pre>";
 	}
 ?>
