@@ -119,19 +119,29 @@
 <body>
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
-			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-			<button onclick="server_sss('start')" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>Start</button>&nbsp; &nbsp;
-			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('stop')" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>Stop</button>&nbsp;-&nbsp;
-			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
-			<span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
-			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
-			<button onclick="update_web_control(user.level);" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>Update Web Control</button>
-			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
-				<input type="hidden" id="update" name="update" value="yes" />
-			</form>
-			<button onclick="force_kill('forcekill')" <?php echo ($user_level !== "admin")? "disabled": ""; ?>>force kill</button>
-			<a id="link_logs" href="./logs.php">Logs</a>
+			Welcome, <span id="welcome_user"><?php echo $user_name; ?></span>&nbsp;-&nbsp;
+            <?php
+                if($user_level === "admin") {
+                    echo <<<ADMIN
+                    <button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
+                    <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
+                    <button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
+                    <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
+                    <span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
+                    <button onclick="update_web_control(user.level);">Update Web Control</button>
+                    <form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
+                        <input type="hidden" id="update" name="update" value="yes" />
+                    </form>
+                    <button onclick="force_kill('forcekill')">force kill</button>
+                    <a id="link_logs" href="./logs.php">Logs</a>
+ADMIN;
+                } else {
+                    echo <<<QUEST
+                    <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
+                    <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
+QUEST;
+                }
+            ?>
             <div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
@@ -154,13 +164,25 @@
 		<!-- server files -->
 		<div style="width: 46%; height: 99%; float: left;">
 			<div>
-				<input type="file" name="upload_file" id="upload_file" style="display: none;">
-				<button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
-				<button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
-				<button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
-				<button id="delete_files" name="delete_files" style="background-color: #ffcccc;">Delete</button>
-				<a id="fileStatus"></a>
-				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
+                <?php
+                if($user_level === "admin") {
+                    echo <<<ADMIN
+                        <input type="file" name="upload_file" id="upload_file" style="display: none;">
+                        <button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
+                        <button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
+                        <button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
+                        <button id="delete_files" name="delete_files" style="background-color: #ffcccc;">Delete</button>
+                        <a id="fileStatus"></a>
+                        <progress id="prog" value="0" max="100.0" style="display: none;"></progress>
+ADMIN;
+                } else {
+                    // TODO no access to file transfer for guests?
+                    echo <<<QUEST
+
+QUEST;
+                }
+                ?>
+
 			</div>
 			<table id="fileTable" class="tablesorter">
 				<thead>
