@@ -16,7 +16,7 @@ if(isset($_SESSION['login'])) {
 	}
 }
 if(isset($_REQUEST['debug'])) {
-	if($_REQUEST['debug']==true) {
+	if($_REQUEST['debug']=="true") {
 		$_SESSION['debug'] = true;
 		$debug = true;
 	} else {
@@ -30,7 +30,7 @@ session_write_close();
 	/* DEBUG */if(isset($debug)) { echo "<pre>";
 		echo var_dump($_SESSION);
 		echo "login\nget";
-		echo var_dump($_GET);
+		echo var_dump($_REQUEST);
 	}
 	
 if(isset($_GET['code'])) {
@@ -98,7 +98,7 @@ if(isset($_GET['code'])) {
 	if ($memberobject == '{"code": 10007, "message": "Unknown Member"}') {
 		$error = "member";
 	}
-	if((isset($error)&&$err0r !="member") || isset($debug)) {
+	if(!isset($error)) {
 		$memberjson = json_decode($memberobject, true);
 		curl_close($curlrqst2);
 		
@@ -145,30 +145,28 @@ if(isset($_GET['code'])) {
 			$error = "guest";
 		}
 	}
-} elseif(isset($_GET['error'])) {	
-	if ($_GET['error'] == "access_denied") {
-		$error = "access";
-	}
 }
 /* DEBUG */if(isset($debug)) { echo "</pre>"; }
 
 if(isset($error)) {
+	echo "error";
 	if ($error == "guest") { $report = "We do not have a guest page available at this time."; }
 	elseif ($error == "access") { $report = "You must agree to provide access to your account."; }
 	elseif ($error == "member") { $report = "You are not a member of the 3Ra Discord Server.";}
 	else{ $report = "Unknown Error Occurred - $error"; }
 } elseif(isset($session['login']['user'])&&isset($session['login']['level'])) {
+	echo "attempted";
 	if(isset($debug)) {
-		echo "With debug disabled, Session will be created here.";
+		$report = "With debug disabled, Session will be created here.";
 		var_dump($session);
+		var_dump($_SESSION);
 	} else {
 		if(session_status()!=2) { session_start(); }
 		$report = "You should be logged in...";
 		$_SESSION['login']['user'] = $session['login']['user'];
 		$_SESSION['login']['level'] = $session['login']['level'];
-		$_SESSION['debug'] = "blue";
-		session_write_close();
-		//header("Location: ./index.php?d=server1");
+		header("Location: ./index.php?d=server1");
+		die();
 	}
 }
 //session_write_close();
@@ -199,9 +197,3 @@ if(!isset($clientid)) {
 </div>
 </body>
 </html>
-<?php
-//End login page
-		if(session_status()!=2) { session_start(); }
-		$_SESSION['debug'] = "blue";
-		session_write_close();
-?>
