@@ -118,6 +118,7 @@
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
+        <!-- nav bar -->
         <div class="nav">
             <ul>
                 <li><span class="welcome-msg">Welcome, <?php echo ($user_name)? $user_name: "guest"; ?>.</span></li>
@@ -165,6 +166,7 @@ QUEST;
 
             </ul>
         </div>
+        <!-- leftside -->
         <div class="leftside">
             <!-- console window -->
             <?php
@@ -179,6 +181,7 @@ QUEST;
                 <button id="command_button">Send</button>
             </div>
         </div>
+        <!-- rightside -->
         <div class="rightside">
             <!-- server files -->
             <div class="files">
