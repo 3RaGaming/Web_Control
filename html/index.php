@@ -40,9 +40,21 @@
 		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 		//you can try to change this if you really want. Validations are also done server side.
 		//This is just for a better graphical experience, ie: if you're a viewonly account, why upload a file, just to be told you can't do that?
+
+        var user = {
+            name:  "<?php echo $user_name ?>",
+            level: "<?php echo $user_name ?>"
+        };
+
+        // TODO remove this
+        // user debug to js console.
+        console.log(user);
 <?php
-		echo "\t\tvar user_level = \"$user_level\";\xA";
-		echo "\t\tvar user_name = \"$user_name\";\xA";
+//		echo "\t\tvar user_level = \"$user_level\";\xA";
+//		echo "\t\tvar user_name = \"$user_name\";\xA";
+
+
+
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
@@ -53,7 +65,8 @@
 		if(isset($session['login']['cmd_history'][$server_select])) {
 			echo "\t\t\this_array = ".json_encode($session['login']['cmd_history'][$server_select]).";\xA";
 		}
-		
+
+
 		// This is for displaying the server name & password in an input box
 		if(file_exists("$base_dir$server_select/server-settings.json")) {
 			// 
@@ -106,19 +119,29 @@
 <body>
 	<div style="width: 99%; height: 99%;">
 		<div style="float: left; width: 100%;">
-			Welcome, <span id="welcome_user">..guest..</span>&nbsp;-&nbsp;
-			<button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
-			<button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
-			<button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
-			<input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
-			<span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
-			<!--<input type="text" id="server_password" name="server_password" placeholder="server password" size="14" />-->
-			<button onclick="update_web_control(user_level);">Update Web Control</button>
-			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
-				<input type="hidden" id="update" name="update" value="yes" />
-			</form>
-			<button onclick="force_kill('forcekill')">force kill</button>
-			<a id="link_logs" href="./logs.php">Logs</a>
+			Welcome, <span id="welcome_user"><?php echo $user_name; ?></span>&nbsp;-&nbsp;
+            <?php
+                if($user_level == "admin") {
+                    echo <<<ADMIN
+                    <button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
+                    <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
+                    <button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
+                    <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
+                    <span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
+                    <button onclick="update_web_control(user.level);">Update Web Control</button>
+                    <form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
+                        <input type="hidden" id="update" name="update" value="yes" />
+                    </form>
+                    <button onclick="force_kill('forcekill')">force kill</button>
+                    <a id="link_logs" href="./logs.php">Logs</a>
+ADMIN;
+                } else {
+                    echo <<<QUEST
+                    <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
+                    <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
+QUEST;
+                }
+            ?>
             <div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
@@ -133,7 +156,7 @@
 		</div>
 		<!-- console and chat windows -->
 		<div style="width: 52%; height: 99%; float: left;">
-			<textarea id="console" style="width: 98%; height: 46%;"></textarea>
+            <?php echo ($user_level !== "admin")? "": "<textarea id='console' style='width: 98%; height: 46%;'></textarea>"; ?>
 			<textarea id="chat" style="width: 98%; height: 46%;"></textarea><br />
 			<input type="text" id="command" placeholder="" style="width: 98%;" />&nbsp;
 			<button id="command_button">Send</button>
@@ -141,13 +164,25 @@
 		<!-- server files -->
 		<div style="width: 46%; height: 99%; float: left;">
 			<div>
-				<input type="file" name="upload_file" id="upload_file" style="display: none;">
-				<button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
-				<button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
-				<button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
-				<button id="delete_files" name="delete_files" style="background-color: #ffcccc;">Delete</button>
-				<a id="fileStatus"></a>
-				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
+                <?php
+                if($user_level == "admin") {
+                    echo <<<ADMIN
+                        <input type="file" name="upload_file" id="upload_file" style="display: none;">
+                        <button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
+                        <button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
+                        <button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
+                        <button id="delete_files" name="delete_files" style="background-color: #ffcccc;">Delete</button>
+                        <a id="fileStatus"></a>
+                        <progress id="prog" value="0" max="100.0" style="display: none;"></progress>
+ADMIN;
+                } else {
+                    // TODO no access to file transfer for guests?
+                    echo <<<QUEST
+
+QUEST;
+                }
+                ?>
+
 			</div>
 			<table id="fileTable" class="tablesorter">
 				<thead>

@@ -40,8 +40,8 @@ if(!empty($userN) && !empty($passW)) {
 		}
 	}
 	if ($success) {
-		$_SESSION['login']['user']=$userN;
-		$_SESSION['login']['level']=$userL;
+		$_SESSION['login']['user']  = $userN;
+		$_SESSION['login']['level'] = $userL;
 		//Send home if logged in
 		header("Location: ./?d=server1");
 		die();

@@ -21,7 +21,7 @@
 	session_write_close();
 
 if(isset($_REQUEST['start'])) {
-	if($user_level=="viewonly") {
+    if($user_level == "viewonly" || $user_level == "guest") {
 		echo "You have read only access.";
 	} else {
 		if(file_exists("$base_dir$server_select/server-settings.json")) {
@@ -76,7 +76,7 @@ if(isset($_REQUEST['start'])) {
 	$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "status" "'.$user_name.'"');
 	echo $output;
 } elseif(isset($_REQUEST['stop'])) {
-	if($user_level=="viewonly") {
+    if($user_level == "viewonly" || $user_level == "guest") {
 		echo "You have view only access.";
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
@@ -84,7 +84,7 @@ if(isset($_REQUEST['start'])) {
 		echo $output;
 	}
 } elseif(isset($_REQUEST['forcekill'])) {
-	if($user_level=="viewonly") {
+    if($user_level == "viewonly" || $user_level == "guest") {
 		echo "You have view only access.";
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
@@ -97,7 +97,7 @@ if(isset($_REQUEST['start'])) {
 		echo "Servers killed. You monster.";
 	}
 } elseif(isset($_REQUEST['command'])) {
-	if($user_level=="viewonly") {
+    if($user_level == "viewonly" || $user_level == "guest") {
 		echo "You have view only access.";//".$_REQUEST['command'];
 	} else {
 		//screen -S factorio1 -X at 0 stuff 'hello\n'
