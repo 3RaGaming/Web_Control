@@ -1,24 +1,28 @@
 <?php
-if(!isset($_SESSION)) { session_start(); }
-if(!isset($_SESSION['login'])) {
-	header("Location: /login.php");
-	die();
-} else {
-	$current_user = $_SESSION['login']['user'];
-	if(isset($_SERVER["HTTPS"]) == false)
-	{
-		die('Must use HTTPS');
+	if(!isset($_SESSION)) { session_start(); }
+	if(!isset($_SESSION['login'])) {
+		header("Location: ./login.php");
+		die();
+	} else {
+		if(isset($_SERVER["HTTPS"]) == false)
+		{
+			die('Must use HTTPS');
+		}
 	}
-}
-$base_dir="/var/www/factorio/";
-include(getcwd().'/getserver.php');
-if(!isset($server_select)) {
-	die('Error in server selection process.php');
-}
+
+	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
+	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
+
+	$base_dir="/var/www/factorio/";
+	include(getcwd().'/getserver.php');
+	if(!isset($server_select)) {
+		die('Error s'.__LINE__.': In server selection files.php');
+	}
+	session_write_close();
 
 if(isset($_REQUEST['start'])) {
-	if($_SESSION['login']['user']=="guest") {
-		echo "Guests may not Start/Stop server";
+	if($user_level=="viewonly") {
+		echo "You have read only access.";
 	} else {
 		if(file_exists("$base_dir$server_select/server-settings.json")) {
 			$server_settings_path = "$base_dir$server_select/server-settings.json";
@@ -61,7 +65,7 @@ if(isset($_REQUEST['start'])) {
 					file_put_contents($server_settings_path, $newJsonString);
 				}
 			}
-			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "start" "'.$_SESSION['login']['user'].'"');
+			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "start" "'.$user_name.'"');
 			echo $output;
 		} else {
 			die('Missing server-settings.json');
@@ -69,19 +73,19 @@ if(isset($_REQUEST['start'])) {
 	}
 } elseif(isset($_REQUEST['status'])) {
 	echo "Requesting Status of Servers:\n\n";
-	$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "status" "'.$_SESSION['login']['user'].'"');
+	$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "status" "'.$user_name.'"');
 	echo $output;
 } elseif(isset($_REQUEST['stop'])) {
-	if($_SESSION['login']['user']=="guest") {
-		echo "Guests may not Start/Stop server";
+	if($user_level=="viewonly") {
+		echo "You have view only access.";
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
-		$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "stop" "'.$_SESSION['login']['user'].'"');
+		$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "stop" "'.$user_name.'"');
 		echo $output;
 	}
 } elseif(isset($_REQUEST['forcekill'])) {
-	if($_SESSION['login']['user']=="guest") {
-		echo "You really think we'd allow guests to force kill the server?";
+	if($user_level=="viewonly") {
+		echo "You have view only access.";
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
 		$output = shell_exec('pkill -9 factorio');
@@ -93,8 +97,8 @@ if(isset($_REQUEST['start'])) {
 		echo "Servers killed. You monster.";
 	}
 } elseif(isset($_REQUEST['command'])) {
-	if($_SESSION['login']['user']=="guest") {
-		echo "Guests can't send commands (yet) :( ";//".$_REQUEST['command'];
+	if($user_level=="viewonly") {
+		echo "You have view only access.";//".$_REQUEST['command'];
 	} else {
 		//screen -S factorio1 -X at 0 stuff 'hello\n'
 		$command_decode = trim ( $_REQUEST['command'] , " \t\n\r\0\x0B" );
@@ -109,13 +113,15 @@ if(isset($_REQUEST['start'])) {
 			}
 			if(substr($command_decode,0,1) != "/") {
 				$command = str_replace(array("\""), array('\\\"'), $command_decode);
-				$command = "/silent-command game.print(\"[WEB] ".$current_user.": ".$command."\")";
+				$command = "/silent-command game.print(\"[WEB] ".$user_name.": ".$command."\")";
 			}
 			$command = str_replace(array("'", "^"), array("'\"'\"'", "\^"), $command);
 			system("sudo -u www-data /usr/bin/screen -S manage -X at 0 stuff '".$server_select."\\\$".$command."\n'");
 
 			//used for up arrow history
 			$cmd_history = $command_decode;
+			
+			if(!isset($_SESSION)) { session_start(); }
 			if(isset($_SESSION['login']['cmd_history'][$server_select])) {
 				array_unshift($_SESSION['login']['cmd_history'][$server_select], $cmd_history);
 				if(count($_SESSION['login']['cmd_history'][$server_select])>25) {
@@ -124,6 +130,7 @@ if(isset($_REQUEST['start'])) {
 			} else {
 				$_SESSION['login']['cmd_history'][$server_select] = array($cmd_history);
 			}
+			session_write_close();
 		}
 	}
 }

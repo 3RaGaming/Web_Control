@@ -52,6 +52,8 @@ char * stop_server(char *);
 void stop_all_servers();
 void launch_bot();
 void server_crashed(struct ServerData *);
+void * bot_ready_watch(void *);
+void * heartbeat();
 
 //Find server with given name
 struct ServerData * find_server(char * name) {
@@ -163,6 +165,7 @@ char * get_server_status(char * name) {
 	struct ServerData * server = find_server(name);
 	if (server == NULL) return "Server Does Not Exist";
 	else if (strcmp(server->status, "Stopped") == 0) return "Server Stopped";
+	else if (strcmp(server->status, "Restarting") == 0) return "Bot Restarting";
 	else return "Server Running";
 }
 
@@ -208,7 +211,7 @@ void * input_monitoring(void * server_ptr) {
 			free(output);
 		}
 
-		if (strchr(data,'$') != NULL && strstr(data, " [CHAT] ") == NULL && strstr(data, " (shout):") == NULL) {
+		if (strchr(data,'$') != NULL && ((strstr(data, " [CHAT] ") == NULL && strstr(data, " (shout):") == NULL) || strcmp(server->name, "bot") == 0)) {
 			//Handles the rare occasion a chat message will have a '$' inside it
 			separator_index = strchr(data,'$') - data;
 			data[separator_index] = '\0';
@@ -227,12 +230,12 @@ void * input_monitoring(void * server_ptr) {
 				fclose(input);
 				close(server->input);
 				launch_bot();
-				input = fdopen(server->output, "a");
-				pthread_mutex_lock(&server->mutex);
+				input = fdopen(server->output, "r");
+				pthread_mutex_unlock(&server->mutex);
 			} else if (strcmp(servername, "ready") == 0 && strcmp(server->name, "bot") == 0) {
 				//Bot startup is complete, it is ready to continue
 				bot_ready = 1;
-			}  else if (strcmp(servername, "DEBUG") == 0) {
+			} else if (strcmp(servername, "DEBUG") == 0) {
 				//Handle debug messages
 				fprintf(stderr, "%s\n", new_data);
 			} else if (strcmp(servername, "chat") == 0) {
@@ -280,7 +283,7 @@ void * input_monitoring(void * server_ptr) {
 					sprintf(player_announcement, "[PUPDATE] %s was killed [%s]", player_args[2], player_args[3]);
 				} else if (strcmp(player_args[0], "respawn") == 0) {
 					sprintf(player_announcement, "[PUPDATE] %s has respawned [%s]", player_args[2], player_args[3]);
-				} else {
+				} else if (strcmp(player_args[0], "update") != 0) {
 					free(player_args);
 					free(player_announcement);
 					free(message);
@@ -321,8 +324,18 @@ void * input_monitoring(void * server_ptr) {
 					free(message);
 				}
 			} else if (strcmp(servername, "output") == 0) {
-				message = (char *) malloc((strlen("output$") + strlen(new_data) + 5)*sizeof(char));
-				sprintf(message, "output$%s\n", new_data);
+				message = (char *) malloc((strlen("output$()") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
+				sprintf(message, "output$(%s)%s\n", server->name, new_data);
+				send_threaded_chat("bot", message);
+				free(message);
+			} else if (strcmp(servername, "query") == 0) {
+				message = (char *) malloc((strlen("query$") + strlen(new_data) + 6)*sizeof(char));
+				sprintf(message, "query$%s\n", new_data);
+				send_threaded_chat("bot", message);
+				free(message);
+			} else if (strcmp(servername, "PVPROUND") == 0) {
+				message = (char *) malloc((strlen("PVPROUND$$") + strlen(server->name) + strlen(new_data) + 5)*sizeof(char));
+				sprintf(message, "PVPROUND$%s$%s\n", server->name, new_data);
 				send_threaded_chat("bot", message);
 				free(message);
 			} else if (strcmp(server->name, "bot") == 0){
@@ -342,8 +355,8 @@ void * input_monitoring(void * server_ptr) {
 
 					log_chat(actual_server_name, message_to_send);
 
-					message = (char *) malloc((strlen("/silent-command game.forces[''].print('')") + strlen(force_name) + strlen(message_to_send) + 4)*sizeof(char));
-					sprintf(message, "/silent-command game.forces['%s'].print('%s')\n", force_name, message_to_send);
+					message = (char *) malloc((strlen("/silent-command if game.forces[''] then game.forces[''].print('') end") + (2 * strlen(force_name)) + strlen(message_to_send) + 10)*sizeof(char));
+					sprintf(message, "/silent-command if game.forces['%s'] then game.forces['%s'].print('%s') end\n", force_name, force_name, message_to_send);
 					send_threaded_chat(actual_server_name, message);
 					free(actual_server_name);
 					free(message);
@@ -480,6 +493,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 
 		return "New Server Started";
 	} else {
+		free(name_copy);
 		struct ServerData *server = find_server(name);
 		server->pid = pid;
 		server->input = in_pipe[1];
@@ -487,6 +501,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		server->logfile = logfile;
 		server->chatlog = chatlog;
 		if (strcmp(server->status, "Restarting") != 0) pthread_create(&thread_list[server->serverid], &thread_attr, input_monitoring, (void *) server_list[server->serverid]);
+		else pthread_create(&thread_list[server->serverid], &thread_attr, bot_ready_watch, (void *) server_list[server->serverid]);
 		server->status = "Started";
 
 		return "Old Server Restarted";
@@ -587,6 +602,20 @@ void stop_all_servers() {
 	exit(0);
 }
 
+void * bot_ready_watch(void * vbot) {
+	struct  ServerData *bot = (struct ServerData *) vbot;
+	FILE *input = fdopen(dup(bot->output), "r");
+	char *data = (char *) malloc(2001*sizeof(char));
+	while (1) {
+		fgets(data, 2001, input);
+		if (strcmp(data, "ready$\n") == 0) break;
+	}
+	bot_ready = 1;
+	fclose(input);
+	free(data);
+	return (void *) NULL;
+}
+
 void launch_bot() {
 	char **botargs = (char **) malloc(3*sizeof(char *));
 	botargs[0] = "nodejs\0";
@@ -655,6 +684,19 @@ void server_crashed(struct ServerData * server) {
 	pthread_mutex_unlock(&server->mutex);
 }
 
+void * heartbeat() {
+	//Sends a heartbeat to every running server. This heartbeat doesn't actually do anything except force C to use the pipe, which triggers crash detection
+	while (1) {
+		send_threaded_chat("bot", "heartbeat$");
+		for (int i = 1; i < servers; i++) {
+			send_threaded_chat(server_list[i]->name, "/silent-command local heartbeat = true\n");
+		}
+		sleep(15);
+	}
+
+	return (void *) NULL;
+}
+
 int main() {
 	//Initial setup of variables
 	servers = 0;
@@ -668,10 +710,16 @@ int main() {
 	pthread_attr_init(&thread_attr);
 	pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_JOINABLE);
 
-	if (signal(SIGINT, stop_all_servers) == SIG_ERR) fprintf(stderr, "Failure to ignore interrupt signal.\n");
-	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) fprintf(stderr, "Failure to ignore broken pipe signal.\n");
+	//Redirect certain signals to perform other functions
+	if (signal(SIGINT, stop_all_servers) == SIG_ERR) fprintf(stderr, "Failure to ignore interrupt signal.\n"); //Safe shutdown of all servers
+	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) fprintf(stderr, "Failure to ignore broken pipe signal.\n"); //Crash detection
 
+	//Launch the bot
 	launch_bot();
+
+	//Create the heartbeat, also for improved crash detection
+	pthread_t heartbeat_thread;
+	pthread_create(&heartbeat_thread, &thread_attr, heartbeat, (void *) NULL);
 
 	//Declare variables used in input parsing
 	char *new_input;

@@ -1035,13 +1035,13 @@
 
 
 function Download(url) {
-    if (user_level == "guest") { return; }
+    if (user_level == "viewonly") { return; }
 	document.getElementById('file_iframe').src = url;
 }
 
 function server_sss(cmd) {
-    if(user_level == "guest" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
-        alert("Guest's may not start/stop the server");
+    if(user_level == "viewonly" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
+        customAlerts.add("You have view only access","warning",true);
         return;
     }
 	if(cmd == "forcekill") {
@@ -1054,18 +1054,40 @@ function server_sss(cmd) {
 	http.open("POST", "process.php?d=" + server_select, true);
 	http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	var server_name = $('#server_name').val();
-	var server_password = $('#server_password').val();
-	var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
+	var params = cmd + "&server_name=" + server_name;
 	http.send(params);
 	http.onload = function() {
 		if(http.responseText) {
-			alert(http.responseText);
+            customAlerts.add(http.responseText,"info",true);
 		}
 	};
 }
+function force_kill(cmd) {
+	if(user_level == "viewonly") {
+        customAlerts.add("You have view only access",'warning',true);
+        return;
+    }
+	if(cmd == "forcekill") {
+        var r = confirm("WARNING: This will force kill ALL servers.");
+        if (r == true) {
+            var http = new XMLHttpRequest();
+			http.open("POST", "process.php?d=" + server_select, true);
+			http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+			var server_name = $('#server_name').val();
+			var server_password = $('#server_password').val();
+			var params = cmd + "&server_name=" + server_name + "&server_password=" + server_password;
+			http.send(params);
+			http.onload = function() {
+				if(http.responseText) {
+                    customAlerts.add(http.responseText,"info",true);
+				}
+			};
+        }
+    }
+}
 function command() {
-    if(user_level == "guest") {
-        alert("Guests may not send commands :(");
+    if(user_level == "viewonly") {
+        customAlerts.add("You have view only access","warning",true);
         return;
     }
     var http = new XMLHttpRequest();
@@ -1078,7 +1100,7 @@ function command() {
     http.send(params);
     http.onload = function() {
         if(http.responseText) {
-            alert(http.responseText);
+            customAlerts.add(http.responseText, "info",true);
         }
     };
 }
@@ -1119,10 +1141,10 @@ function uploadProgress(evt) {
 
 function uploadComplete(evt) {
 	if(evt.target.readyState == 4 && evt.target.status == 200) {
-			document.getElementById('fileStatus').innerHTML = evt.target.responseText;
-			if(evt.target.responseText.includes("complete")) {
-				location.reload();
-			}
+		document.getElementById('fileStatus').innerHTML = evt.target.responseText;
+		if(evt.target.responseText.includes("complete")) {
+			location.reload();
+		}
 	}
 }
 
@@ -1137,7 +1159,7 @@ function uploadCanceled() {
 }
 
 function upload() {
-	if ($('#upload_file').val == "" || user_level == "guest") {
+	if ($('#upload_file').val == "" || user_level == "viewonly") {
 		return;
 	}
 	var the_file;
@@ -1219,8 +1241,48 @@ function update_web_control(user_name) {
             $("#update_web_control").submit();
         }
     } else {
-        alert('Must be a web admin to update gui :(');
+        customAlerts.add("Must be a web admin to update gui :(", "error",true);
     }
+}
+
+function hex2bin(hex) {
+    bytes = [];
+
+    for(var i=0; i< hex.length-1; i+=2){
+        bytes.push(parseInt(hex.substr(i, 2), 16));
+    }
+    
+    str = String.fromCharCode.apply(String, bytes);
+    return str;
+}
+
+function files_delete() {
+    var list = [];
+    $("input[id^=filesCheck]").each(function(){
+        var value = $(this).attr('id');
+        if ($(this).is(':checked')) {
+            var data = value.split("-");
+            if ( typeof data[1] !== 'undefined' && typeof data[2] !== 'undefined' ) {
+                list.push(hex2bin(data[2]));
+            }
+        }
+    });
+    console.log("sending");
+    var http = new XMLHttpRequest();
+    http.open("POST", "files.php?d=" + server_select, true);
+    http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    var params = "delete=" + encodeURIComponent(JSON.stringify(list));
+    http.send(params);
+    http.onload = function() {
+        if(http.responseText) {
+            if(http.responseText == "success") {
+                location.reload();
+            } else {
+                customAlerts.add(http.responseText,'info',true);
+            }
+        }
+    };
+    console.log(list);
 }
 
 //Things to only start doing after the page has finished loading
@@ -1230,12 +1292,19 @@ $(document).ready(function() {
 	$('#upload_file').on('change', function() {
 		upload();
 	});
+    $('#delete_files').on('click', function() {
+        if(user_level == "viewonly") {
+            customAlerts.add("You have view only access","warning",true);
+        	return;
+        }
+		files_delete();
+    });
 	$('#server_select').on('change', function() {
 		window.location = "./?d=" + this.value ; // or $(this).val()
 	});
 	$("#fileTable").tablesorter( );
 	//Get the files! Can use this in a function to update without page reload too.
-	$.get("assets/files_table.php?d=" + server_select, function(html) {
+	$.get("assets/api/files_table.php?d=" + server_select, function(html) {
 		// append the "ajax'd" data to the table body
 		$("#fileTable tbody").append(html);
 		// let the plugin know that we made a update
@@ -1251,15 +1320,15 @@ $(document).ready(function() {
 	});
 	//Upload button click event
 	$('#upload_button').on('click', function() {
-        if(user_level == "guest") {
-        	alert("guests may not upload files");
+        if(user_level == "viewonly") {
+            customAlerts.add("You have view only access","warning",true);
         	return;
         }
 		$('#upload_file').click();
 	});
 	$('#command').keydown(function(event) {
 		if (event.keyCode == 13) command();
-        if (user_level == "guest") { return; }
+        if (user_level == "viewonly") { return; }
 		if (event.keyCode == 38) command_history('up');
 		if (event.keyCode == 40) command_history('down');
 	});

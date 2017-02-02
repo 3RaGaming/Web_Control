@@ -1,9 +1,11 @@
 #!/bin/bash
 dir_base="$( dirname "${BASH_SOURCE[0]}" )";
+datetime=$(date +%F-%T)
 cd "$dir_base";
 #put all recieved arguments into an $args[index] array
 args=("$@");
 
+#used to clean certain variables
 function sanitize() {
 	# first, strip underscores
 	local work="$1"
@@ -15,6 +17,28 @@ function sanitize() {
 	# finally, lowercase with TR
 	clean=`echo -n $work | tr A-Z a-z`
 }
+
+#used to move server folder log files
+function move_logs() {
+	local work="$1"
+	if [ ! -d "$1/logs" ]; then
+		mkdir -p "$1/logs"
+	fi
+	#Work in a screenlog archive here
+	if [ -s "$1/screenlog.0" ]; then
+		mv "$1/screenlog.0" "$1/logs/screenlog-${datetime}.log"
+	fi
+	#Work in a chatlog archive here
+	if [ -s "$1/chatlog.0" ]; then
+		mv "$1/chatlog.0g" "$1/logs/z-chatlog-${datetime}.log"
+	fi
+	#Work in a factorio-current archive here
+	if [ -s "$1/factorio-current.log" ]; then
+		mv "$1/factorio-current.log" "$1/logs/factorio-current-${datetime}.log"
+	fi
+    
+}
+
 #global way to get status of server.
 function get_status() {
 	local work="$1"
@@ -90,9 +114,8 @@ else
 			elif [ "$check" == "Manage Stopped" ]; then
 				#Work in a screenlog archive here
 				if [ -s "screenlog.0" ]; then
-					mkdir -p log
-					datetime=$(date +%F-%T)
-					mv screenlog.0 log/screenlog.0-${datetime}
+					mkdir -p logs
+					mv screenlog.0 logs/screenlog-${datetime}.log
 				fi
 				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm
 				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M"
@@ -106,8 +129,9 @@ else
 				    #only set $server_file if the file appears to be valid.
 				    #$server_file="$clean";
 				fi
-				
+
 				#Load server_file if it's set. Or else just load latest
+                move_logs "$server"
 				if [ "$server_file" ]; then
 					echo -e "Starting Server. ${server_file}. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 					#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
@@ -120,16 +144,19 @@ else
 					echo "Cannot start server";
 				else
 					echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
-					if [ -e "$dir_server/screenlog.0" ]; then
-						LASTDATA=$(tail -n 50 $dir_server/screenlog.0)
-						echo "${LASTDATA}" > $dir_server/screenlog.0 ;
+					if [ -e "$dir_server/server-settings.json" ]; then
+						cp $dir_server/server-settings.json $dir_server/running-server-settings.json;
 					fi
-
-					#echo "Server under going Updates...";
-					#exit
-
-					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
-					
+					if [ -e "$dir_server/screenlog.0" ]; then
+						LASTSCREEN=$(tail -n 50 $dir_server/screenlog.0)
+                        move_logs "$server"
+						echo "${LASTSCREEN}" > $dir_server/screenlog.0 ;
+					fi
+					if [ -e "$dir_server/chatlog.0" ]; then
+						LASTCHAT=$(tail -n 50 $dir_server/chatlog.0)
+						echo "${LASTCHAT}" > $dir_server/chatlog.0 ;
+					fi
+					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"	
 				fi
 			fi
             ;;
@@ -139,12 +166,15 @@ else
 			if [ "$check" == "Server Running" ]; then 
 				#echo "Server Shutting Down" ;
 				echo -e "Server Shutting Down. Initiated by $cur_user\r\n" >> screenlog.0 ;
+				if [ -e "$dir_server/running-server-settings.json" ]; then
+					rm $dir_server/running-server-settings.json;
+				fi
 				sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$stop\n"
 			else
 				echo "Server is already Stopped.";
 			fi
             ;;
-         
+
         'status')
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
