@@ -1041,7 +1041,7 @@ function Download(url) {
 
 function server_sss(cmd) {
     if(user_level == "viewonly" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
-        alert("You have view only access.");
+        customAlerts.add("You have view only access","warning",true);
         return;
     }
 	if(cmd == "forcekill") {
@@ -1058,13 +1058,13 @@ function server_sss(cmd) {
 	http.send(params);
 	http.onload = function() {
 		if(http.responseText) {
-			alert(http.responseText);
+            customAlerts.add(http.responseText,"info",true);
 		}
 	};
 }
 function force_kill(cmd) {
 	if(user_level == "viewonly") {
-        alert("You have view only access");
+        customAlerts.add("You have view only access",'warning',true);
         return;
     }
 	if(cmd == "forcekill") {
@@ -1079,7 +1079,7 @@ function force_kill(cmd) {
 			http.send(params);
 			http.onload = function() {
 				if(http.responseText) {
-					alert(http.responseText);
+                    customAlerts.add(http.responseText,"info",true);
 				}
 			};
         }
@@ -1087,7 +1087,7 @@ function force_kill(cmd) {
 }
 function command() {
     if(user_level == "viewonly") {
-        alert("You have view only access");
+        customAlerts.add("You have view only access","warning",true);
         return;
     }
     var http = new XMLHttpRequest();
@@ -1100,7 +1100,7 @@ function command() {
     http.send(params);
     http.onload = function() {
         if(http.responseText) {
-            alert(http.responseText);
+            customAlerts.add(http.responseText, "info",true);
         }
     };
 }
@@ -1241,7 +1241,7 @@ function update_web_control(user_name) {
             $("#update_web_control").submit();
         }
     } else {
-        alert('Must be a web admin to update gui :(');
+        customAlerts.add("Must be a web admin to update gui :(", "error",true);
     }
 }
 
@@ -1278,7 +1278,7 @@ function files_delete() {
             if(http.responseText == "success") {
                 location.reload();
             } else {
-                alert(http.responseText);
+                customAlerts.add(http.responseText,'info',true);
             }
         }
     };
@@ -1294,7 +1294,7 @@ $(document).ready(function() {
 	});
     $('#delete_files').on('click', function() {
         if(user_level == "viewonly") {
-        	alert("You have view only access.");
+            customAlerts.add("You have view only access","warning",true);
         	return;
         }
 		files_delete();
@@ -1304,7 +1304,7 @@ $(document).ready(function() {
 	});
 	$("#fileTable").tablesorter( );
 	//Get the files! Can use this in a function to update without page reload too.
-	$.get("assets/files_table.php?d=" + server_select, function(html) {
+	$.get("assets/api/files_table.php?d=" + server_select, function(html) {
 		// append the "ajax'd" data to the table body
 		$("#fileTable tbody").append(html);
 		// let the plugin know that we made a update
@@ -1321,7 +1321,7 @@ $(document).ready(function() {
 	//Upload button click event
 	$('#upload_button').on('click', function() {
         if(user_level == "viewonly") {
-        	alert("You have view only access.");
+            customAlerts.add("You have view only access","warning",true);
         	return;
         }
 		$('#upload_file').click();

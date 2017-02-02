@@ -12,7 +12,10 @@
 	
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
-	
+	if(isset($_SESSION['login']['reload_report'])) {
+		$session['login']['reload_report'] = $_SESSION['login']['reload_report'];
+		unset($_SESSION['login']['reload_report']);
+	}
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
@@ -23,6 +26,10 @@
 			die('Error in server selection index.php');
 		}
 	}
+	if(isset($_SESSION['login']['cmd_history'][$server_select])) {
+		$session['login']['cmd_history'][$server_select] = $_SESSION['login']['cmd_history'][$server_select];
+	}
+	session_write_close();
 ?>
 </script>
 <html>
@@ -38,12 +45,12 @@
 		//his_array = ["/players", "/c print(\"hello\")"];
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
-		if(isset($_SESSION['login']['reload_report'])) {
-			echo "\t\t\t$('#fileStatus').html('".$_SESSION['login']['reload_report']."');\xA";
-			unset($_SESSION['login']['reload_report']);
+		if(isset($session['login']['reload_report'])) {
+			echo "\t\t\t$('#fileStatus').html('".$session['login']['reload_report']."');\xA";
+			unset($session['login']['reload_report']);
 		}
-		if(isset($_SESSION['login']['cmd_history'][$server_select])) {
-			echo "\t\t\this_array = ".json_encode($_SESSION['login']['cmd_history'][$server_select]).";\xA";
+		if(isset($session['login']['cmd_history'][$server_select])) {
+			echo "\t\t\this_array = ".json_encode($session['login']['cmd_history'][$server_select]).";\xA";
 		}
 		
 		// This is for displaying the server name & password in an input box
@@ -88,10 +95,12 @@
 		echo "\t\t})\xA";
 ?>
 	</script>
-	<script type="text/javascript" language="javascript" src="assets/base.js"></script>
-	<script type="text/javascript" language="javascript" src="assets/console.js"></script>
+	<script type="text/javascript" language="javascript" src="assets/js/base.js"></script>
+	<script type="text/javascript" language="javascript" src="assets/js/console.js"></script>
+    <script type="text/javascript" language="javascript" src="assets/js/cpumeminfo.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
-	<style type="text/css">@import "assets/base.css";</style>
+	<style type="text/css">@import "assets/css/base.css";</style>
+    <style type="text/css">@import "assets/css/customalerts.css";</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
@@ -109,10 +118,17 @@
 			</form>
 			<button onclick="force_kill('forcekill')">force kill</button>
 			<a id="link_logs" href="./logs.php">Logs</a>
-			<div style="float: right;">
+            <div style="float: right;">
 				<select id="server_select"></select>&nbsp;-&nbsp;
 				<a href="login.php?logout">Logout</a>
 			</div>
+            <div id="serverload" style="float: right; margin-right: 20px;">
+                <span id="cpu" style="padding: 6px;background-color: rgb(102, 255, 0);">00 %</span>
+                <span id="mem" style="padding: 6px;background-color: rgb(102, 255, 0);">0.00/0.00 GB</span>
+            </div>
+
+            <div style="float: right; margin-right: 20px;"><button onclick="customAlerts.show();">Alert log</button></div>
+
 		</div>
 		<!-- console and chat windows -->
 		<div style="width: 52%; height: 99%; float: left;">
@@ -149,5 +165,17 @@
 			<iframe id="file_iframe" style="display:none;"></iframe>
 		</div>
 	</div>
+
+    <div id="alert_modal" class="modal">
+        <div id="content" class="modal-content">
+            <span id="close_modal" class="close">&times;</span>
+            <span id="reset_alerts" class="reset">Reset alerts</span>
+            <p>Log of alerts</p>
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript" language="javascript" src="assets/js/customalerts.js"></script>
+
 </body>
 </html>

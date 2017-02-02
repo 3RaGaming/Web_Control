@@ -165,7 +165,6 @@ if(isset($_GET['code'])) {
 } /* DEBUG */elseif(isset($debug)) {
 	$debug[] = "no CODE parameter found.";
 }
-
 if(isset($error)) {
 	switch($error) {
 		case "unauthorized":
@@ -207,10 +206,12 @@ if(!isset($clientid)) {
 	$clientid = $json_config['clientid'];
 }
 
+session_write_close();
+
 ?>
 <html>
 <head>
-<link rel="stylesheet" media="all" href="assets/login.css" />
+<link rel="stylesheet" media="all" href="assets/css/login.css" />
 </head>
 <body>
 <div class="login-page">

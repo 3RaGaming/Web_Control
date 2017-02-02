@@ -20,15 +20,19 @@ function sanitize() {
 
 #used to move server folder log files
 function move_logs() {
-    local work="$1"
-    if [ ! -d "$1/logs" ]; then
-        mkdir -p "$1/logs"
-    fi
-    #Work in a screenlog archive here
+	local work="$1"
+	if [ ! -d "$1/logs" ]; then
+		mkdir -p "$1/logs"
+	fi
+	#Work in a screenlog archive here
 	if [ -s "$1/screenlog.0" ]; then
 		mv "$1/screenlog.0" "$1/logs/screenlog-${datetime}.log"
 	fi
-    #Work in a factorio-current archive here
+	#Work in a chatlog archive here
+	if [ -s "$1/chatlog.0" ]; then
+		mv "$1/chatlog.0g" "$1/logs/z-chatlog-${datetime}.log"
+	fi
+	#Work in a factorio-current archive here
 	if [ -s "$1/factorio-current.log" ]; then
 		mv "$1/factorio-current.log" "$1/logs/factorio-current-${datetime}.log"
 	fi

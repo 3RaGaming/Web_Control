@@ -10,15 +10,24 @@ if(!isset($_SESSION['login'])) {
 		die();
 	}
 }
-if(!isset($_SESSION['login']['level'])) {
+if(isset($_SESSION['login']['level'])) {
+	$user_level = $_SESSION['login']['level'];
+} else {
 	die('Error with user permissions');
 }
+if(isset($_SESSION['login']['user'])) {
+	$user_name = $_SESSION['login']['user'];
+} else {
+	die('Error with user name');
+}
+
 //Set the base directory the factorio servers will be stored
 $base_dir="/var/www/factorio/";
 include('./getserver.php');
 if(!isset($server_select)) {
 	die('Error s'.__LINE__.': In server selection files.php');
 }
+session_write_close();
 
 if(isset($_REQUEST['archive'])) {
 	die('this feature not ready yet.');
@@ -42,7 +51,7 @@ if(isset($_REQUEST['archive'])) {
 	}
 	die();
 } elseif(isset($_REQUEST['download'])) {
-	if($_SESSION['login']['level']=="viewonly") {
+	if($user_level=="viewonly") {
 		die('You have view only access.\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
 	} 
 	if(empty($_REQUEST['download']))
@@ -159,7 +168,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 } elseif(isset($_REQUEST['upload'])) {
-	if($_SESSION['login']['level']=="viewonly") {
+	if($user_level=="viewonly") {
 		die('You have read only access.');
 	} else {
 		//Valdidate name
@@ -232,10 +241,10 @@ if(isset($_REQUEST['archive'])) {
 			$file_list = json_decode($jsonString, true);
 			$file_list_prehash = md5(serialize($file_list));
 			if(isset($file_list[$filename])) {
-				$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
+				$session['login']['reload_report']='File "'.$filename.'" was replaced';
 			}
 		}
-		$file_list[$filename] = $_SESSION['login']['user'];
+		$file_list[$filename] = $user_name;
 
 		if ($_FILES["file"]["error"] == UPLOAD_ERR_OK) {
 			$move_uploaded_file = move_uploaded_file($fileTmp, $full_file_path);
@@ -249,10 +258,10 @@ if(isset($_REQUEST['archive'])) {
 					//md5 hash to check if it changes
 					$file_list_prehash = md5(serialize($file_list));
 					if(isset($file_list[$filename])) {
-						$_SESSION['login']['reload_report']='File "'.$filename.'" was replaced';
+						$session['login']['reload_report']='File "'.$filename.'" was replaced';
 					}
 				}
-				$file_list[$filename] = $_SESSION['login']['user'];
+				$file_list[$filename] = $user_name;
 				//if hash changes, a user over writ someones previous file, or a file has been aded
 				if($file_list_prehash !== md5(serialize($file_list))) {
 					$newJsonString = json_encode($file_list, JSON_PRETTY_PRINT);
@@ -261,10 +270,15 @@ if(isset($_REQUEST['archive'])) {
 				//does echo do anything here?
 				echo "complete";
 			} else {
-				$_SESSION['login']['reload_report']='Error u251: File failed to upload.';
+				$session['login']['reload_report']='Error u251: File failed to upload.';
 			}
 		} else {
-			$_SESSION['login']['reload_report']='Error u254: '.$_FILES["file"]["error"];
+			$session['login']['reload_report']='Error u254: '.$_FILES["file"]["error"];
+		}
+		if(isset($session['login']['reload_report'])) {
+			if(!isset($_SESSION)) { session_start(); }
+			$_SESSION['login']['reload_report'] = $session['login']['reload_report'];
+			session_write_close();
 		}
 		//$pre = file_put_contents($full_file_path, $fh);
 		//fwrite($fh, $pre);
@@ -274,7 +288,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 }  elseif(isset($_REQUEST['delete'])) {
-	if($_SESSION['login']['level']=="viewonly") {
+	if($user_level=="viewonly") {
 		die('You have view only access.');
 	} else {
 		if(empty($_REQUEST['delete']))
@@ -310,7 +324,7 @@ if(isset($_REQUEST['archive'])) {
 							if(isset($file_list[$file])) {
 								unset($file_list[$file]);
 							}
-							$delete_record = $delete_record ."$date-$time\t".$_SESSION['login']['user']."\t$file\xA";
+							$delete_record = $delete_record ."$date-$time\t".$user_name."\t$file\xA";
 						}
 						//log the delete and the user
 					}
@@ -326,7 +340,12 @@ if(isset($_REQUEST['archive'])) {
 						file_put_contents($file_users_path, $newJsonString);
 					}
 				}
-				$_SESSION['login']['reload_report'] = "Files Deleted";
+				$session['login']['reload_report'] = "Files Deleted";
+				if(isset($session['login']['reload_report'])) {
+					session_start();
+					$_SESSION['login']['reload_report'] = $session['login']['reload_report'];
+					session_write_close();
+				}
 				die('success');
 			} else {
 				die('Error p'.__LINE__.': with post information.');
@@ -337,7 +356,6 @@ if(isset($_REQUEST['archive'])) {
 	}
 	//no reason to carry on
 	die();
-	
 } else {
 	die('Error u'.__LINE__.': No action requested');
 }

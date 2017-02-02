@@ -14,7 +14,8 @@
 
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
-
+	session_write_close();
+	
 	if($user_level=="admin") {
 		if(isset($_POST['update'])) {
 			echo "<span id=\"result\"></span>";
