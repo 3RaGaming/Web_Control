@@ -2,6 +2,7 @@
 	if(!isset($_SESSION)) { session_start(); }
 	if(!isset($_SESSION['login'])) {
 		header("Location: ./login.php");
+		die();
 	} else {
 		if($_SERVER["HTTPS"] != "on")
 		{
