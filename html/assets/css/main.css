@@ -1,0 +1,44 @@
+.leftside {
+    height: 90%;
+    width: 54%;
+    float: left;
+}
+.rightside {
+    height: 90%;
+    width: 44%;
+    float: right;
+}
+.console {
+    width: 100%;
+    height: 50%;
+}
+.console textarea {
+    width: 100%;
+    height: 100%;
+}
+.chat {
+    width: 100%;
+    height: 50%;
+}
+.chat textarea {
+    width: 100%;
+    height: 88%;
+}
+.files {
+    width: 100%;
+    height: 99%;
+}
+
+@media only screen and (max-width: 1200px) {
+    .leftside {
+        height: 90%;
+        width: 100%;
+    }
+    .rightside {
+        height: 90%;
+        width: 100%;
+    }
+    .files {
+        width: 100%;
+    }
+}

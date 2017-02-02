@@ -114,6 +114,7 @@
     <script type="text/javascript" language="javascript" src="assets/js/cpumeminfo.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<style type="text/css">@import "assets/css/base.css";</style>
+    <style type="text/css">@import "assets/css/main.css";</style>
     <style type="text/css">@import "assets/css/customalerts.css";</style>
 </head>
 <body>
@@ -165,23 +166,33 @@ QUEST;
                 <span id="cpu" style="padding: 6px;background-color: rgb(102, 255, 0);">00 %</span>
                 <span id="mem" style="padding: 6px;background-color: rgb(102, 255, 0);">0.00/0.00 GB</span>
             </div>
-
             <div style="float: right; margin-right: 20px;"><button onclick="customAlerts.show();">Alert log</button></div>
-
 		</div>
-		<!-- console and chat windows -->
-		<div style="width: 52%; height: 99%; float: left;">
-            <?php echo ($user_level == "admin" || $user_level == "mod")? "<textarea id='console' style='width: 98%; height: 46%;'></textarea>": ""; ?>
-			<textarea id="chat" style="width: 98%; height: 46%;"></textarea><br />
-			<input type="text" id="command" placeholder="" style="width: 98%;" />&nbsp;
-			<button id="command_button">Send</button>
-		</div>
-		<!-- server files -->
-		<div style="width: 46%; height: 99%; float: left;">
-			<div>
-                <?php
-                if($user_level == "admin" || $user_level == "mod") {
-                    echo <<<ADMIN
+        <div class="leftside">
+            <!-- console window -->
+            <?php
+            if($user_level == "admin" || $user_level == "mod") {
+                echo <<<CONSOLE
+            <div class="console">
+                <textarea id='console'></textarea>
+            </div>
+CONSOLE;
+            }
+            ?>
+            <!-- chat window -->
+            <div class="chat">
+                <textarea id="chat"></textarea><br />
+                <input type="text" id="command" placeholder="" style="width: 98%;" />&nbsp;
+                <button id="command_button">Send</button>
+            </div>
+        </div>
+        <div class="rightside">
+            <!-- server files -->
+            <div class="files">
+                <div>
+                    <?php
+                    if($user_level == "admin" || $user_level == "mod") {
+                        echo <<<ADMIN
                         <input type="file" name="upload_file" id="upload_file" style="display: none;">
                         <button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
                         <button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
@@ -190,8 +201,8 @@ QUEST;
                         <a id="fileStatus"></a>
                         <progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 ADMIN;
-                } elseif ($user_level == "mod") {
-                    echo <<<MOD
+                    } elseif ($user_level == "mod") {
+                        echo <<<MOD
                         <input type="file" name="upload_file" id="upload_file" style="display: none;">
                         <button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
                         <button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
@@ -201,31 +212,32 @@ ADMIN;
                         <progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 MOD;
 
-                } else {
-                    // TODO no access to file transfer for guests?
-                    echo <<<QUEST
+                    } else {
+                        // TODO no access to file transfer for guests?
+                        echo <<<QUEST
 
 QUEST;
-                }
-                ?>
+                    }
+                    ?>
 
-			</div>
-			<table id="fileTable" class="tablesorter">
-				<thead>
-					<tr>
-						<th><input type="checkbox" style="margin: 0; padding: 0; height:13px;" checked="false" /></th>
-						<th>File</th>
-						<th>Size</th>
-						<th>Creation</th>
-						<th>Editor</th>
-					</tr>
-				</thead>
-				<tbody>
-					
-				</tbody>
-			</table>
-			<iframe id="file_iframe" style="display:none;"></iframe>
-		</div>
+                </div>
+                <table id="fileTable" class="tablesorter">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" style="margin: 0; padding: 0; height:13px;" checked="false" /></th>
+                        <th>File</th>
+                        <th>Size</th>
+                        <th>Creation</th>
+                        <th>Editor</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+                <iframe id="file_iframe" style="display:none;"></iframe>
+            </div>
+        </div>
 	</div>
 
     <div id="alert_modal" class="modal">
