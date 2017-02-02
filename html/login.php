@@ -8,12 +8,14 @@ if(isset($_SERVER["HTTPS"]) == false) {
 if(isset($_REQUEST['debug'])) {
 	if($_REQUEST['debug']=="true") {
 		$_SESSION['debug'] = true;
-		$debug = true;
+		$debug = array();
+		$debug[] = true;
 	} else {
 		unset($_SESSION['debug']);
 	}
 } elseif(isset($_SESSION['debug'])) {
-	$debug = true;
+	$debug = array();
+	$debug[] = true;
 }
 //If logged in, and requested to logout... log them out and show login screen
 if(isset($_SESSION['login'])) {
