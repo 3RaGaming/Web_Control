@@ -1,6 +1,6 @@
 var loc = window.location.pathname;
 var dir = loc.substring(0, loc.lastIndexOf('/'));
-var refreshtime=50000;
+var refreshtime=500;
 function tc_console()
 {
     if(user.level === "admin" || user.level === "mod"){
