@@ -19,29 +19,30 @@ if(isset($_SESSION['login'])) {
 	}
 }
 
-$userN="";
+$user_name="";
 $passW="";
 if(isset($_POST['uname'])) {
-	$userN = addslashes($_POST['uname']);
+	$user_name = addslashes($_POST['uname']);
 }
 if(isset($_POST['passw'])) {
 	$passW = addslashes(md5(trim($_POST['passw'])));
 }
-if(!empty($userN) && !empty($passW)) {
+if(!empty($user_name) && !empty($passW)) {
 	$userlist = file ('/var/www/users.txt');
 	$success = false;
 	foreach ($userlist as $user) {
 		$user_details = explode('|', $user);
-		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
-			$userN = trim($user_details[0]);
-			$userL = trim($user_details[2]);
+		if ((strtolower($user_details[0]) == strtolower($user_name)) && trim($user_details[1]) == $passW) {
+			var_dump($user_details);
+            $user_name  = trim($user_details[0]);
+			$user_level = trim($user_details[2]);
 			$success = true;
 			break;
 		}
 	}
 	if ($success) {
-		$_SESSION['login']['user']  = $userN;
-		$_SESSION['login']['level'] = $userL;
+		$_SESSION['login']['user']  = $user_name;
+		$_SESSION['login']['level'] = $user_level;
 		//Send home if logged in
 		header("Location: ./?d=server1");
 		die();
@@ -64,7 +65,7 @@ session_write_close();
   <div class="form">
     <form class="login-form" name="login" method="post">
 		<input type="hidden" name="login" value="submit" />
-		<input type="text" name="uname" <?php echo (empty($userN)?'placeholder="username"':'value="'.$userN.'"'); ?> />
+		<input type="text" name="uname" <?php echo (empty($user_name)?'placeholder="username"':'value="'.$user_name.'"'); ?> />
 		<input type="password" name="passw" placeholder="password"/>
 		<button onclick="document.login.submit();">login</button>
     </form>

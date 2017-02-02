@@ -10,9 +10,9 @@
 			die();
 		}
 	}
-	
-	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
-	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
+
+	if(isset($_SESSION['login']['user']))  { $user_name  = $_SESSION['login']['user']; }   else { $user_name = "guest"; }
+    if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['reload_report'])) {
 		$session['login']['reload_report'] = $_SESSION['login']['reload_report'];
 		unset($_SESSION['login']['reload_report']);
@@ -43,7 +43,7 @@
 
         var user = {
             name:  "<?php echo $user_name ?>",
-            level: "<?php echo $user_name ?>"
+            level: "<?php echo $user_level ?>"
         };
 
         // TODO remove this
@@ -135,6 +135,21 @@
                     <button onclick="force_kill('forcekill')">force kill</button>
                     <a id="link_logs" href="./logs.php">Logs</a>
 ADMIN;
+                } elseif ($user_level == "mod") {
+                    echo <<<MOD
+                    <button onclick="server_sss('start')">Start</button>&nbsp; &nbsp;
+                    <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
+                    <button onclick="server_sss('stop')">Stop</button>&nbsp;-&nbsp;
+                    <input type="text" id="server_name" name="server_name" value="Name Here" />&nbsp;-&nbsp;
+                    <span id="link_config"><a href="./server-settings.php">config</a></span>&nbsp;-&nbsp;
+                    <button onclick="update_web_control(user.level);"  disabled>Update Web Control</button>
+                    <form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
+                        <input type="hidden" id="update" name="update" value="yes" />
+                    </form>
+                    <button onclick="force_kill('forcekill')">force kill</button>
+                    <a id="link_logs" href="./logs.php">Logs</a>
+MOD;
+
                 } else {
                     echo <<<QUEST
                     <button onclick="server_sss('status')">Status</button>&nbsp;-&nbsp;
@@ -156,7 +171,7 @@ QUEST;
 		</div>
 		<!-- console and chat windows -->
 		<div style="width: 52%; height: 99%; float: left;">
-            <?php echo ($user_level !== "admin")? "": "<textarea id='console' style='width: 98%; height: 46%;'></textarea>"; ?>
+            <?php echo ($user_level == "admin" || $user_level == "mod")? "<textarea id='console' style='width: 98%; height: 46%;'></textarea>": ""; ?>
 			<textarea id="chat" style="width: 98%; height: 46%;"></textarea><br />
 			<input type="text" id="command" placeholder="" style="width: 98%;" />&nbsp;
 			<button id="command_button">Send</button>
@@ -165,7 +180,7 @@ QUEST;
 		<div style="width: 46%; height: 99%; float: left;">
 			<div>
                 <?php
-                if($user_level == "admin") {
+                if($user_level == "admin" || $user_level == "mod") {
                     echo <<<ADMIN
                         <input type="file" name="upload_file" id="upload_file" style="display: none;">
                         <button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
@@ -175,6 +190,17 @@ QUEST;
                         <a id="fileStatus"></a>
                         <progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 ADMIN;
+                } elseif ($user_level == "mod") {
+                    echo <<<MOD
+                        <input type="file" name="upload_file" id="upload_file" style="display: none;">
+                        <button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
+                        <button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
+                        <button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;
+                        <button id="delete_files" name="delete_files" style="background-color: #ffcccc;">Delete</button>
+                        <a id="fileStatus"></a>
+                        <progress id="prog" value="0" max="100.0" style="display: none;"></progress>
+MOD;
+
                 } else {
                     // TODO no access to file transfer for guests?
                     echo <<<QUEST
