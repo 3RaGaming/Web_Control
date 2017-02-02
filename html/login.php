@@ -51,7 +51,7 @@ if(isset($_GET['code'])) {
 		$level1role = $json_config["adminrole"] ?? $error="json_missing_value";
 		$level2role = $json_config["modrole"] ?? $error="json_missing_value";
 	}
-	if(!$error) {
+	if(!isset($error)) {
 		$botheader = array();
 		$botheader[] = 'Authorization: Bot '.$bottoken;
 		
@@ -81,7 +81,7 @@ if(isset($_GET['code'])) {
 			$error = "access_token";
 			/* DEBUG */if(isset($debug)) { $debug[] = "TOKEN NOT SEn"; }
 		}
-		if(!$error) {
+		if(!isset($error)) {
 			$tokenheader = array();
 			$tokenheader[] = 'Content-Type application/json';
 			$tokenheader[] = 'Authorization: Bearer '.$token;
