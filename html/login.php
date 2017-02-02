@@ -207,6 +207,7 @@ if(!isset($clientid)) {
 }
 
 session_write_close();
+$current_url = urlencode($_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_NAME"]);
 
 ?>
 <html>
@@ -216,7 +217,7 @@ session_write_close();
 <body>
 <div class="login-page">
   <div class="form">
-    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?PHP echo $clientid; ?>&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Flogin.php&response_type=code">
+    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?php echo $clientid; ?>&scope=identify%20guilds&redirect_uri=https%3A%2F%2F<?php echo $current_url; ?>&response_type=code">
 	  <img style="width: 100%;" src="./assets/img/3rabutton.png" alt="Login With Discord"/>
 	</a>
 	<?php 	if(isset($report)) { echo "<br /><br />".$report; }
