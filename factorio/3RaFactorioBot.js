@@ -135,7 +135,7 @@ function assignRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
 	if (!savedata.channels[server + "-" + force]) return;
 	let roleid = savedata.channels[server + "-" + force].role;
-	if (roleid === null && savedata.channels[server + "-" + force]) {
+	if (roleid === null) {
 		let created = bot.guilds.get(guildid).createRole({ name: server + "-" + force });
 		created.then((role) => {
 			savedata.channels[server + "-" + force].role = role.id;
@@ -150,9 +150,8 @@ function assignRole(server, force, userid) {
 				bot.guilds.get(guildid).channels.get(savedata.channels.admin.id).sendMessage(tag + ": The role for server *" + server + "*, force *" + force + "* was missing and has been recreated. Please manually correct the channel permissions.");  
 			}
 		});
-	} else if (roleid !== null && savedata.channels[server + "-" + force] && !user.roles.has(roleid)) {
+	} else if (roleid !== null && !user.roles.has(roleid)) {
 		user.addRole(roleid);
-		if (!user.roles.has(roleid)) user.addRole(bot.guilds.get(guildid).roles.get(roleid)); //Redundancy to make sure it's added
 	}
 }
 
@@ -161,8 +160,9 @@ function removeRole(server, force, userid) {
 	if (savedata.channels[server + "-" + force]) {
 		let user = bot.guilds.get(guildid).members.get(userid);
 		let roleid = savedata.channels[server + "-" + force].role;
-		if (roleid && user.roles.has(roleid)) return user.removeRole(roleid);
-	} else return null;
+		if (roleid !== null && user.roles.has(roleid)) return user.removeRole(roleid);
+	}
+	return null;
 }
 
 //Replace any mentions with an actual tag
@@ -869,7 +869,7 @@ function handleInput(input) {
 					if (userid !== null) {
 						let deleted = removeRole(channelid, old_force, userid);
 						if (deleted !== null) {
-    							deleted.then(newobject => {assignRole(channelid, force_name, userid);});
+    							deleted.then(deletedplayer => {assignRole(channelid, force_name, deletedplayer.id);});
 						} else {
     							assignRole(channelid, force_name, userid);
 						}
@@ -925,8 +925,12 @@ function handleInput(input) {
 				case "end":
 					let roundnum = data[1]; //Have to use a different name for some reason, not sure why
 					let winner = data[2];
-					let time = data[3].replace(";", ",");
-					message = "**[ROUND END] Round " + roundnum + " has ended after " + time + "! Winner: Team " + winner + "!**";
+					if (data.length > 3) {
+						let time = data[3].replace(";", ",");
+						message = "**[ROUND END] Round " + roundnum + " has ended after " + time + "! Winner: Team " + winner + "!**";
+					} else {
+						message = "**[ROUND END] Round " + roundnum + " has ended! Winner: Team " + winner + "!**";
+					}
 					break;
 			}
 			fs.unlinkSync("savedata.json");
@@ -1132,7 +1136,6 @@ bot.on('message', (message) => {
 
 //Leaves any server that isn't 3Ra
 bot.on('ready', () => {
-	safeWrite("ready$\n");
 	bot.user.setGame("3Ra - Factorio | ::help");
 	//bot.guilds.forEach((guildobj, guildid, collection) => {
 	bot.guilds.forEach((guildobj, lguildid) => {
@@ -1144,6 +1147,8 @@ bot.on('ready', () => {
 	}
 	fs.unlinkSync("savedata.json");
 	fs.writeFileSync("savedata.json", JSON.stringify(savedata));
+	let getOfflineMembers = bot.guilds.get(guildid).fetchMembers();
+	getOfflineMembers.then(newguild => {safeWrite("ready$\n");});
 });
 
 //If the bot joins a server that isn't 3Ra, immediately leave it
