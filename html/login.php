@@ -216,7 +216,7 @@ if(!isset($clientid)) {
 <div class="login-page">
   <div class="form">
     <a href = "https://discordapp.com/oauth2/authorize?client_id=<?PHP echo $clientid; ?>&scope=identify%20guilds&redirect_uri=https%3A%2F%2Ffactorio.3ragaming.com%2Fbeta-auth%2Flogin.php&response_type=code">
-	  <img style="width: 100%;" src="./3rabutton.png" alt="Login With Discord"/>
+	  <img style="width: 100%;" src="./assets/img/3rabutton.png" alt="Login With Discord"/>
 	</a>
 	<?php 	if(isset($report)) { echo "<br /><br />".$report; }
 			if(isset($debug)) { echo "<br />debug enabled";}?>
