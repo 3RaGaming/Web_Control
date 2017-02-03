@@ -172,7 +172,8 @@ function replaceMentions(message) {
 	let moderators = message.replace(/@moderators/ig, tag);
 	let zackman = moderators.replace(/@zackman0010/ig, "<@129357924324605952>");
 	let arty = zackman.replace(/@articulating/ig, "<@180898179502309376>");
-	return arty;
+	let juicy = arty.replace(/@juicyjuuce/ig, "<@143539331615817729>");
+	return juicy;
 }
 
 function handleNewForce(serverid, forcename) {
