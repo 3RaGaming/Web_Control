@@ -181,7 +181,7 @@ function handleNewForce(serverid, forcename) {
 	let pvpid = serverid + "-" + forcename;
 	//Get the name to tag the server as
 	let servername = savedata.channels[serverid].name;
-	let pvpname = servername + "-" + forcename;
+	let pvpname = servername + "-" + forcename.replace(/ /g, "-");
 	//Create the new channels, text then voice
 	let create_text = guild.createChannel("factorio-" + pvpname, "text");
 	let create_voice = guild.createChannel("Factorio " + servername + " " + forcename, "voice");
@@ -194,12 +194,12 @@ function handleNewForce(serverid, forcename) {
 		savedata.channels[serverid].forceids.push(pvpid);
 		savedata.channels[serverid].forcenames.push(forcename);
 		textchannel.setTopic("Server registered");
-		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position + savedata.channels[serverid].forceids.length);
+		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
 		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
 		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
 		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
-		voicechannel.setPosition(savedata.channels[serverid].forceids.length + 2);
+		voicechannel.setPosition(2);
 		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
 		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'CONNECT': true }); //Allow Moderators to connect
 		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }); //Allow force to connect
