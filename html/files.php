@@ -51,7 +51,7 @@ if(isset($_REQUEST['archive'])) {
 	}
 	die();
 } elseif(isset($_REQUEST['download'])) {
-	if($user_level=="viewonly") {
+	if($user_level == "viewonly" || $user_level == "guest") {
 		die('You have view only access.\nVisit our archive for file downloads\nwww.3ragaming.com/archive/factorio');
 	} 
 	if(empty($_REQUEST['download']))
@@ -168,7 +168,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 } elseif(isset($_REQUEST['upload'])) {
-	if($user_level=="viewonly") {
+	if($user_level == "viewonly" || $user_level == "guest") {
 		die('You have read only access.');
 	} else {
 		//Valdidate name
@@ -288,7 +288,7 @@ if(isset($_REQUEST['archive'])) {
 	die();
 	
 }  elseif(isset($_REQUEST['delete'])) {
-	if($user_level=="viewonly") {
+	if($user_level == "viewonly" || $user_level == "guest") {
 		die('You have view only access.');
 	} else {
 		if(empty($_REQUEST['delete']))
