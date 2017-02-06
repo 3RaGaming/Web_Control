@@ -865,14 +865,16 @@ function handleInput(input) {
 			fs.unlinkSync("savedata.json");
 			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			if (savedata.channels[channelid].type == "pvp-main") {
-				if (old_force && old_force != force_name) {
-					let userid = getPlayerID(player_name);
-					if (userid !== null) {
+				let userid = getPlayerID(player_name);
+				if (userid !== null) {
+					if (action == "join") assignRole(channelid, force_name, userid);
+					else if (action == "leave") removeRole(channelid, old_force, userid);
+					else if (old_force && old_force != force_name) {
 						let deleted = removeRole(channelid, old_force, userid);
 						if (deleted !== null) {
-    							deleted.then(deletedplayer => {assignRole(channelid, force_name, deletedplayer.id);});
+							deleted.then(deletedplayer => { assignRole(channelid, force_name, deletedplayer.id); });
 						} else {
-    							assignRole(channelid, force_name, userid);
+							assignRole(channelid, force_name, userid);
 						}
 					}
 				}
@@ -894,11 +896,12 @@ function handleInput(input) {
 			var message;
 			switch (action) {
 				case "begin":
+				case "ongoing":
 					let roundno = data[1];
 					let forces = data.splice(2);
 					let forcestring = forces.join(", ");
 					let forceno = forces.length;
-					message = "**[ROUND START] Round " + roundno + "; " + forceno + " Teams: " + forcestring + "**";
+					message = "**[ROUND " + action.toUpperCase() + "] Round " + roundno + "; " + forceno + " Teams: " + forcestring + "**";
 					//Create any forces that did not previously exist while deleting any old forces that no longer exist
 					//Also set any forces that still exist to be alive again so messages can be sent
 					let previousforces = savedata.channels[channelid].forcenames;
