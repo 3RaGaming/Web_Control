@@ -23,19 +23,6 @@
     overflow-x: hidden;
     max-height:70%;
 }
-
-@media only screen and (max-width: 1200px) {
-    .modal-content {
-        background-color: #fefefe;
-        margin: 5% auto 5% auto; /* 15% from the top and centered */
-        padding: 20px;
-        border: 1px solid #888;
-        width: 90%;
-        overflow: scroll;
-        overflow-x: hidden;
-        max-height:70%;
-    }
-}
 .msg-col {
     display: inline-block;
     width: 70%;
