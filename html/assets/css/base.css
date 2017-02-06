@@ -98,11 +98,11 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 }
 .chat {
     width: 100%;
-    height: 500px;
+    height: 400px;
 }
 .chat textarea {
     width: 100%;
-    height: 400px;
+    height: 300px;
 }
 .files {
     width: 100%;
