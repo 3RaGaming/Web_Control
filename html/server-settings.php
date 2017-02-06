@@ -19,7 +19,7 @@
 	}
 	session_write_close();
 	
-	if($user_level == "viewonly" || $user_level == "guest") {
+	if($user_level=="viewonly") {
 		die('Not allowed for view only');
 	}
 	

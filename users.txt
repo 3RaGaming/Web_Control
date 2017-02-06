@@ -1,4 +1,4 @@
 admin1|5f4dcc3b5aa765d61d8327deb882cf99|admin
 admin2|5f4dcc3b5aa765d61d8327deb882cf99|admin
-mod1|5f4dcc3b5aa765d61d8327deb882cf99|mod
+mod1|5f4dcc3b5aa765d61d8327deb882cf99|admin
 guest|5f4dcc3b5aa765d61d8327deb882cf99|guest

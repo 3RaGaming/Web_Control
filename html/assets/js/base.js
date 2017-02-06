@@ -1035,12 +1035,12 @@
 
 
 function Download(url) {
-    if (user.level === "viewonly" || user.level === "guest") { return; }
+    if (user_level == "viewonly") { return; }
 	document.getElementById('file_iframe').src = url;
 }
 
 function server_sss(cmd) {
-    if((user.level === "viewonly" || user.level === "guest") && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
+    if(user_level == "viewonly" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
         customAlerts.add("You have view only access","warning",true);
         return;
     }
@@ -1063,7 +1063,7 @@ function server_sss(cmd) {
 	};
 }
 function force_kill(cmd) {
-	if(user.level === "viewonly" || user.level === "guest") {
+	if(user_level == "viewonly") {
         customAlerts.add("You have view only access",'warning',true);
         return;
     }
@@ -1086,7 +1086,7 @@ function force_kill(cmd) {
     }
 }
 function command() {
-    if(user.level === "viewonly" || user.level === "guest") {
+    if(user_level == "viewonly") {
         customAlerts.add("You have view only access","warning",true);
         return;
     }
@@ -1159,7 +1159,7 @@ function uploadCanceled() {
 }
 
 function upload() {
-	if ($('#upload_file').val == "" || user.level === "viewonly" || user.level === "guest") {
+	if ($('#upload_file').val == "" || user_level == "viewonly") {
 		return;
 	}
 	var the_file;
@@ -1235,7 +1235,7 @@ function command_history(args) {
 }
 
 function update_web_control(user_name) {
-    if(user_name === "admin") {
+    if(user_name=="admin") {
         var r = confirm("Update webgui and server control files?");
         if (r == true) {
             $("#update_web_control").submit();
@@ -1287,13 +1287,13 @@ function files_delete() {
 
 //Things to only start doing after the page has finished loading
 $(document).ready(function() {
-	$('#welcome_user').text(user.name);
+	$('#welcome_user').text(user_name);
 	tc_console();
 	$('#upload_file').on('change', function() {
 		upload();
 	});
     $('#delete_files').on('click', function() {
-        if(user.level === "viewonly" || user.level === "guest"){
+        if(user_level == "viewonly") {
             customAlerts.add("You have view only access","warning",true);
         	return;
         }
@@ -1320,7 +1320,7 @@ $(document).ready(function() {
 	});
 	//Upload button click event
 	$('#upload_button').on('click', function() {
-        if(user.level === "viewonly" || user.level === "guest") {
+        if(user_level == "viewonly") {
             customAlerts.add("You have view only access","warning",true);
         	return;
         }
@@ -1328,7 +1328,7 @@ $(document).ready(function() {
 	});
 	$('#command').keydown(function(event) {
 		if (event.keyCode == 13) command();
-        if (user.level === "viewonly" || user.level === "guest") { return; }
+        if (user_level == "viewonly") { return; }
 		if (event.keyCode == 38) command_history('up');
 		if (event.keyCode == 40) command_history('down');
 	});

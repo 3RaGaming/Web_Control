@@ -3,12 +3,8 @@ var dir = loc.substring(0, loc.lastIndexOf('/'));
 var refreshtime=500;
 function tc_console()
 {
-    if(user.level === "admin" || user.level === "mod"){
-        asyncAjax("GET",dir + "/assets/api/console.php?d=" + server_select + "&s=console",Math.random(),display,{},"console");
-    }
-
+	asyncAjax("GET",dir + "/assets/api/console.php?d=" + server_select + "&s=console",Math.random(),display,{},"console");
 	asyncAjax("GET",dir + "/assets/api/console.php?d=" + server_select + "&s=chat",Math.random(),display,{},"chat");
-
 	setTimeout(tc_console,refreshtime);
 }
 
