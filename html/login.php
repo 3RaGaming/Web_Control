@@ -158,6 +158,9 @@ if(isset($_GET['code'])) {
 					/* DEBUG */if(isset($debug)) { $debug[] = "mod login verified!"; }
 					$session['login']['user']=$memberjson["user"]["username"];
 					$session['login']['level']="mod";
+				} elseif($userid == "264805254758006801" ) {
+					$session['login']['user']=$memberjson["user"]["username"];
+					$session['login']['level']="guest";
 				} else {
 					$error = "unauthorized";
 				}
@@ -174,6 +177,9 @@ if(isset($error)) {
 			break;
 		case "access":
 			$report = "You must agree to provide access to your account";
+			break;
+		case "access_token":
+			$report = "Error with discord API";
 			break;
 		case "member":
 			$report = "You are not a member of the 3Ra Discord Server";
