@@ -158,11 +158,9 @@ if(isset($_GET['code'])) {
 					/* DEBUG */if(isset($debug)) { $debug[] = "mod login verified!"; }
 					$session['login']['user']=$memberjson["user"]["username"];
 					$session['login']['level']="mod";
-				} elseif($userid == "264805254758006801" ) {
+				} else {
 					$session['login']['user']=$memberjson["user"]["username"];
 					$session['login']['level']="guest";
-				} else {
-					$error = "unauthorized";
 				}
 			}
 		}

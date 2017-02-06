@@ -16,7 +16,7 @@
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 	session_write_close();
 	
-	if($user_level=="admin") {
+	if($user_level == "admin") {
 		if(isset($_POST['update'])) {
 			echo "<span id=\"result\"></span>";
 			if($_POST['update']=="yes") {
