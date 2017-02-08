@@ -156,7 +156,7 @@
 						<th>File</th>
 						<th>Size</th>
 						<th>Creation</th>
-						<th>Editor</th>
+						<th>Originator</th>
 					</tr>
 				</thead>
 				<tbody>
