@@ -133,6 +133,7 @@ function serverQuery(server, query) {
 //Assign a player to a PvP Role
 function assignRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
+	if (!user) return; //Should not happen, except maybe in rare cases involving invisible members
 	if (!savedata.channels[server + "-" + force]) return;
 	let roleid = savedata.channels[server + "-" + force].role;
 	if (roleid === null) {
@@ -159,6 +160,7 @@ function assignRole(server, force, userid) {
 function removeRole(server, force, userid) {
 	if (savedata.channels[server + "-" + force]) {
 		let user = bot.guilds.get(guildid).members.get(userid);
+		if (!user) return null;
 		let roleid = savedata.channels[server + "-" + force].role;
 		if (roleid !== null && user.roles.has(roleid)) return user.removeRole(roleid);
 	}
@@ -1151,8 +1153,7 @@ bot.on('ready', () => {
 	}
 	fs.unlinkSync("savedata.json");
 	fs.writeFileSync("savedata.json", JSON.stringify(savedata));
-	let getOfflineMembers = bot.guilds.get(guildid).fetchMembers();
-	getOfflineMembers.then(newguild => {safeWrite("ready$\n");});
+	safeWrite("ready$\n");
 });
 
 //If the bot joins a server that isn't 3Ra, immediately leave it
