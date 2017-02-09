@@ -133,6 +133,7 @@ function serverQuery(server, query) {
 //Assign a player to a PvP Role
 function assignRole(server, force, userid) {
 	let user = bot.guilds.get(guildid).members.get(userid);
+	if (!user) return; //Should not happen, except maybe in rare cases involving invisible members
 	if (!savedata.channels[server + "-" + force]) return;
 	let roleid = savedata.channels[server + "-" + force].role;
 	if (roleid === null) {
@@ -159,6 +160,7 @@ function assignRole(server, force, userid) {
 function removeRole(server, force, userid) {
 	if (savedata.channels[server + "-" + force]) {
 		let user = bot.guilds.get(guildid).members.get(userid);
+		if (!user) return null;
 		let roleid = savedata.channels[server + "-" + force].role;
 		if (roleid !== null && user.roles.has(roleid)) return user.removeRole(roleid);
 	}
@@ -172,7 +174,8 @@ function replaceMentions(message) {
 	let moderators = message.replace(/@moderators/ig, tag);
 	let zackman = moderators.replace(/@zackman0010/ig, "<@129357924324605952>");
 	let arty = zackman.replace(/@articulating/ig, "<@180898179502309376>");
-	return arty;
+	let juicy = arty.replace(/@juicyjuuce/ig, "<@143539331615817729>");
+	return juicy;
 }
 
 function handleNewForce(serverid, forcename) {
@@ -180,7 +183,7 @@ function handleNewForce(serverid, forcename) {
 	let pvpid = serverid + "-" + forcename;
 	//Get the name to tag the server as
 	let servername = savedata.channels[serverid].name;
-	let pvpname = servername + "-" + forcename;
+	let pvpname = servername + "-" + forcename.replace(/ /g, "-");
 	//Create the new channels, text then voice
 	let create_text = guild.createChannel("factorio-" + pvpname, "text");
 	let create_voice = guild.createChannel("Factorio " + servername + " " + forcename, "voice");
@@ -193,12 +196,12 @@ function handleNewForce(serverid, forcename) {
 		savedata.channels[serverid].forceids.push(pvpid);
 		savedata.channels[serverid].forcenames.push(forcename);
 		textchannel.setTopic("Server registered");
-		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position + savedata.channels[serverid].forceids.length);
+		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
 		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
 		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
 		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
-		voicechannel.setPosition(savedata.channels[serverid].forceids.length + 2);
+		voicechannel.setPosition(2);
 		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
 		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'CONNECT': true }); //Allow Moderators to connect
 		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }); //Allow force to connect
@@ -864,14 +867,16 @@ function handleInput(input) {
 			fs.unlinkSync("savedata.json");
 			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			if (savedata.channels[channelid].type == "pvp-main") {
-				if (old_force && old_force != force_name) {
-					let userid = getPlayerID(player_name);
-					if (userid !== null) {
+				let userid = getPlayerID(player_name);
+				if (userid !== null) {
+					if (action == "join") assignRole(channelid, force_name, userid);
+					else if (action == "leave") removeRole(channelid, old_force, userid);
+					else if (old_force && old_force != force_name) {
 						let deleted = removeRole(channelid, old_force, userid);
 						if (deleted !== null) {
-    							deleted.then(deletedplayer => {assignRole(channelid, force_name, deletedplayer.id);});
+							deleted.then(deletedplayer => { assignRole(channelid, force_name, deletedplayer.id); });
 						} else {
-    							assignRole(channelid, force_name, userid);
+							assignRole(channelid, force_name, userid);
 						}
 					}
 				}
@@ -893,11 +898,12 @@ function handleInput(input) {
 			var message;
 			switch (action) {
 				case "begin":
+				case "ongoing":
 					let roundno = data[1];
 					let forces = data.splice(2);
 					let forcestring = forces.join(", ");
 					let forceno = forces.length;
-					message = "**[ROUND START] Round " + roundno + "; " + forceno + " Teams: " + forcestring + "**";
+					message = "**[ROUND " + action.toUpperCase() + "] Round " + roundno + "; " + forceno + " Teams: " + forcestring + "**";
 					//Create any forces that did not previously exist while deleting any old forces that no longer exist
 					//Also set any forces that still exist to be alive again so messages can be sent
 					let previousforces = savedata.channels[channelid].forcenames;
@@ -1099,7 +1105,7 @@ bot.on('message', (message) => {
 				var code = command.splice(1).join(" ");
 				var evaled = eval(code);
 				if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
-				if (evaled != "undefined") message.channel.sendCode("javascript", evaled);
+				if (evaled != "undefined") message.channel.sendCode("javascript", evaled.replace(new RegExp(token, 'g'), "TOKEN").replace(new RegExp(config.clientsecret, 'g'), "CLIENT_SECRET"));
 			} catch (err) {
 				message.channel.sendMessage(`\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
 			}
@@ -1147,8 +1153,7 @@ bot.on('ready', () => {
 	}
 	fs.unlinkSync("savedata.json");
 	fs.writeFileSync("savedata.json", JSON.stringify(savedata));
-	let getOfflineMembers = bot.guilds.get(guildid).fetchMembers();
-	getOfflineMembers.then(newguild => {safeWrite("ready$\n");});
+	safeWrite("ready$\n");
 });
 
 //If the bot joins a server that isn't 3Ra, immediately leave it
