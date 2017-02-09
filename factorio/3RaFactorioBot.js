@@ -1105,7 +1105,7 @@ bot.on('message', (message) => {
 				var code = command.splice(1).join(" ");
 				var evaled = eval(code);
 				if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
-				if (evaled != "undefined") message.channel.sendCode("javascript", evaled.replace(new RegExp(token, 'g'), "TOKEN"));
+				if (evaled != "undefined") message.channel.sendCode("javascript", evaled.replace(new RegExp(token, 'g'), "TOKEN").replace(new RegExp(config.clientsecret, 'g'), "CLIENT_SECRET"));
 			} catch (err) {
 				message.channel.sendMessage(`\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
 			}
