@@ -675,7 +675,7 @@ void * bot_ready_watch(void * vbot) {
 
 void launch_bot() {
 	char **botargs = (char **) malloc(3*sizeof(char *));
-	botargs[0] = "nodejs\0";
+	botargs[0] = "node\0";
 	botargs[1] = "./3RaFactorioBot.js\0";
 	botargs[2] = (char *) NULL;
 	launch_server("bot", botargs, "bot");
