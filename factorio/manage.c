@@ -518,7 +518,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 					fprintf(stderr, "ETXTBSY\n");
 					break;
 				default:
-					fprintf(stderr, "UNKNOWN\n");
+					fprintf(stderr, "UNKNOWN - %d\n", errsv);
 					break;
 			}
 			exit(1);
