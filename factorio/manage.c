@@ -462,10 +462,67 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		dup2(out_pipe[1], STDOUT_FILENO);
 		close(out_pipe[1]);
 		close(out_pipe[0]);
-		execvp(args[0], args);
-		//If execvp fails
-		fprintf(stderr, "Failure to launch server.");
-		exit(1);
+		if (execvp(args[0], args) == -1) {
+			int errsv = errno;
+			fprintf(stderr, "Failure to launch server. Error Code: ");
+			switch (errsv) {
+				case E2BIG:
+					fprintf(stderr, "E2BIG\n");
+					break;
+				case EACCES:
+					fprintf(stderr, "EACCES\n");
+					break;
+				case EFAULT:
+					fprintf(stderr, "EFAULT\n");
+					break;
+				case EINVAL:
+					fprintf(stderr, "EINVAL\n");
+					break;
+				case EIO:
+					fprintf(stderr, "EIO\n");
+					break;
+				case EISDIR:
+					fprintf(stderr, "EISDIR\n");
+					break;
+				case ELIBBAD:
+					fprintf(stderr, "ELIBBAD\n");
+					break;
+				case ELOOP:
+					fprintf(stderr, "ELOOP\n");
+					break;
+				case EMFILE:
+					fprintf(stderr, "EMFILE\n");
+					break;
+				case ENAMETOOLONG:
+					fprintf(stderr, "ENAMETOOLONG\n");
+					break;
+				case ENFILE:
+					fprintf(stderr, "ENFILE\n");
+					break;
+				case ENOENT:
+					fprintf(stderr, "ENOENT\n");
+					break;
+				case ENOEXEC:
+					fprintf(stderr, "ENOEXEC\n");
+					break;
+				case ENOMEM:
+					fprintf(stderr, "ENOMEM\n");
+					break;
+				case ENOTDIR:
+					fprintf(stderr, "ENOTDIR\n");
+					break;
+				case EPERM:
+					fprintf(stderr, "EPERM\n");
+					break;
+				case ETXTBSY:
+					fprintf(stderr, "ETXTBSY\n");
+					break;
+				default:
+					fprintf(stderr, "UNKNOWN\n");
+					break;
+			}
+			exit(1);
+		}
 	}
 	//Only parent process reaches this point
 	//Closes unneeded pipe ends, adds server to server_list, and creates new thread for monitoring
