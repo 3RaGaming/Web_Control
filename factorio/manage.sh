@@ -131,7 +131,7 @@ else
 				fi
 
 				#Load server_file if it's set. Or else just load latest
-                move_logs "$server"
+				move_logs "$server"
 				if [ "$server_file" ]; then
 					echo -e "Starting Server. ${server_file}. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 					#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
@@ -165,7 +165,7 @@ else
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
 				#echo "Server Shutting Down" ;
-				echo -e "Server Shutting Down. Initiated by $cur_user\r\n" >> screenlog.0 ;
+				echo -e "Server Shutting Down. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 				if [ -e "$dir_server/running-server-settings.json" ]; then
 					rm $dir_server/running-server-settings.json;
 				fi
