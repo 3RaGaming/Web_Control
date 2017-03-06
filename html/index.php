@@ -101,7 +101,7 @@
     <script type="text/javascript" language="javascript" src="assets/js/cpumeminfo.js"></script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
 	<style type="text/css">@import "assets/css/base.css";</style>
-    <style type="text/css">@import "assets/css/customalerts.css";</style>
+    <!--<style type="text/css">@import "assets/css/customalerts.css";</style>-->
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">
@@ -128,7 +128,7 @@
                 <span id="mem" style="padding: 6px;background-color: rgb(102, 255, 0);">0.00/0.00 GB</span>
             </div>
 
-            <div style="float: right; margin-right: 20px;"><button onclick="customAlerts.show();">Alert log</button></div>
+            <!--<div style="float: right; margin-right: 20px;"><button onclick="customAlerts.show();">Alert log</button></div>-->
 
 		</div>
 		<!-- console and chat windows -->
@@ -166,7 +166,7 @@
 			<iframe id="file_iframe" style="display:none;"></iframe>
 		</div>
 	</div>
-
+	<!--
     <div id="alert_modal" class="modal">
         <div id="content" class="modal-content">
             <span id="close_modal" class="close">&times;</span>
@@ -175,8 +175,8 @@
             <div id="messages"></div>
         </div>
     </div>
-
     <script type="text/javascript" language="javascript" src="assets/js/customalerts.js"></script>
+	-->
 
 </body>
 </html>
