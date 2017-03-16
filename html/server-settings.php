@@ -232,7 +232,7 @@
 					$('[name="'+Form[i].name+'"]').css("background-color", "red");
 					err++;
 				} else {
-					if(Form[i].name == "max_players" || Form[i].name == "max_upload_in_kilobytes_per_second" || Form[i].name == "autosave_interval" || Form[i].name == "autosave_slots" || Form[i].name == "afk_autokick_interval") {
+					if(Form[i].name == "max_players" || Form[i].name == "max_upload_in_kilobytes_per_second" || Form[i].name == "autosave_interval" || Form[i].name == "autosave_slots" || Form[i].name == "afk_autokick_interval" || Form[i].name == "minimum_latency_in_ticks") {
 						if(Form[i].value >= 0 ) {
 							console.log('Correct int! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 							rdy++;
@@ -247,7 +247,7 @@
 						}
 						console.log('Correct str! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
-					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game") && (Form[i].value == "true" || Form[i].value == "false")) {
+					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game" || Form[i].name == "autosave_only_on_server") && (Form[i].value == "true" || Form[i].value == "false")) {
 						console.log('Correct bln! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
 					} else if((Form[i].name == "allow_commands") && (Form[i].value == "true" || Form[i].value == "false" || Form[i].value == "admins-only")) {
