@@ -1,4 +1,8 @@
 echo "Please insure you have all the dependencies installed as described on the GitHub README\n"
+if [ "$EUID" -ne 0 ]
+	then echo "Please run as root"
+	exit
+fi
 echo "Press Enter to continue\n"
 read
 echo "Checking for Factorio install\n"
