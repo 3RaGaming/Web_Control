@@ -1,4 +1,4 @@
-admin1|5f4dcc3b5aa765d61d8327deb882cf99|admin
-admin2|5f4dcc3b5aa765d61d8327deb882cf99|admin
-mod1|5f4dcc3b5aa765d61d8327deb882cf99|mod
-guest|5f4dcc3b5aa765d61d8327deb882cf99|guest
+admin1|MD5_HASH_HERE|admin
+admin2|MD5_HASH_HERE|admin
+mod1|MD5_HASH_HERE|mod
+guest|MD5_HASH_HERE|guest
