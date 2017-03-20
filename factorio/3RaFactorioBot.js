@@ -32,7 +32,7 @@ var token = config.token;
 var guildid = config.guildid;
 var modrole = config.modrole;
 var adminrole = config.adminrole;
-var message = config.gamemessage;
+var gamemessage = config.gamemessage;
 
 //Load the persistent save data
 var savedata;
