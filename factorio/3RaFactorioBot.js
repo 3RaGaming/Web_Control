@@ -18,7 +18,7 @@ try {
 } catch (err) {
 	failure = true;
 }
-if (failure || !config.token || !config.guildid || !config.modrole || !config.adminrole) {
+if (failure || !config.token || !config.guildid || !config.modrole || !config.adminrole || !config.gamemessage) {
 	console.log("DEBUG$Critical failure! Config file was not able to load successfully!");
 	process.exit(1);
 }
@@ -32,6 +32,7 @@ var token = config.token;
 var guildid = config.guildid;
 var modrole = config.modrole;
 var adminrole = config.adminrole;
+var message = config.gamemessage;
 
 //Load the persistent save data
 var savedata;
@@ -1001,6 +1002,7 @@ function handleInput(input) {
 					message = replaceMentions(message);
 					separator = message.indexOf(":");
 					let username = message.substring(0, separator);
+					message = message.replace(/_/g, "\\_");
 					if (message.charAt(0) == '[') {
 						//If message is from web, send it to main channel
 						bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
@@ -1050,6 +1052,7 @@ function handleInput(input) {
 				fs.unlinkSync("savedata.json");
 				fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			} else {
+				message = message.replace(/_/g, "\\_");
 				if (message.charAt(0) == '[') bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
 				else bot.channels.get(savedata.channels[channelid].id).sendMessage("[" + savedata.channels[channelid].name + "] " + message);
 			}
@@ -1142,7 +1145,7 @@ bot.on('message', (message) => {
 
 //Leaves any server that isn't 3Ra
 bot.on('ready', () => {
-	bot.user.setGame("3Ra - Factorio | ::help");
+	bot.user.setGame(gamemessage);
 	//bot.guilds.forEach((guildobj, guildid, collection) => {
 	bot.guilds.forEach((guildobj, lguildid) => {
 		if (lguildid != guildid) guildobj.leave();
