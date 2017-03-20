@@ -703,7 +703,7 @@ void server_crashed(struct ServerData * server) {
 		time_t current_time = time(NULL);
 		struct tm *time_data = localtime(&current_time);
 		char *timestamp = (char *) malloc((strlen("YYYY-MM-DD HH:MM:SS") + 3) * sizeof(char));
-		sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
+		sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon + 1, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
 		char *output_message = (char *) malloc((strlen(timestamp) + strlen("emergency$") + 4)*sizeof(char));
 		sprintf(output_message, "emergency$%s\n", timestamp);
 		free(timestamp);
