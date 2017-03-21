@@ -191,7 +191,7 @@ if(isset($_REQUEST['archive'])) {
 		
 		if(isset($_FILES['file']['type'])) {
 			$fileType = $_FILES['file']['type'];
-			if( $fileType == "application/zip" || $fileType == "application/x-zip-compressed" ) {
+			if( $fileType == "application/zip" || $fileType == "application/x-zip-compressed" || ($fileType == "application/octet-stream" && pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION) == "zip") ) {
 				//we good
 			} else {
 				die($fileType.'Invalid File Type');
