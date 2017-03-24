@@ -89,13 +89,13 @@ if(isset($_REQUEST['start'])) {
 	} else {
 		//echo "Sending Stop Server Command:\n\n";
 		$output = shell_exec('pkill -9 factorio');
-		echo $output;
+		echo "Factorio killed. " + $output;
 		$output = shell_exec('pkill -9 nodejs');
-		echo $output;
+		echo "NodeJS killed. " + $output;
 		$output = shell_exec('pkill -9 managepgm');
-		echo $output;
+		echo "Management Program killed. " + $output;
 		$output = shell_exec('screen -wipe');
-		echo $output;
+		echo "Screens Wiped. " + $output;
 		echo "Servers killed. You monster.";
 	}
 } elseif(isset($_REQUEST['command'])) {
