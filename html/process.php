@@ -94,6 +94,8 @@ if(isset($_REQUEST['start'])) {
 		echo $output;
 		$output = shell_exec('pkill -9 managepgm');
 		echo $output;
+		$output = shell_exec('screen -wipe');
+		echo $output;
 		echo "Servers killed. You monster.";
 	}
 } elseif(isset($_REQUEST['command'])) {
