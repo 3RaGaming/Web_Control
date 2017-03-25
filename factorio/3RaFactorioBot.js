@@ -1185,6 +1185,6 @@ bot.on('disconnect', (event) => {
 	else sendstring = sendstring + "Disconnect was not clean.";
 	//Write the string to the log
 	safeWrite(sendstring);
-}
+});
 
 bot.login(token);
