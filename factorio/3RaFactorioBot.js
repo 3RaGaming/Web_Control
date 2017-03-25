@@ -179,6 +179,7 @@ function replaceMentions(message) {
 	return juicy;
 }
 
+//Creates a new force for a PvP server
 function handleNewForce(serverid, forcename) {
 	let guild = bot.guilds.get(guildid);
 	let pvpid = serverid + "-" + forcename;
@@ -188,7 +189,9 @@ function handleNewForce(serverid, forcename) {
 	//Create the new channels, text then voice
 	let create_text = guild.createChannel("factorio-" + pvpname, "text");
 	let create_voice = guild.createChannel("Factorio " + servername + " " + forcename, "voice");
+	//Create the role
 	let create_role = guild.createRole({ name: pvpid });
+	//Wait for all to be created
 	Promise.all([create_text, create_voice, create_role]).then((values) => {
 		let textchannel = values[0];
 		let voicechannel = values[1];
@@ -196,12 +199,14 @@ function handleNewForce(serverid, forcename) {
 		textchannel.sendMessage("Messages from force *" + forcename + "* on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
 		savedata.channels[serverid].forceids.push(pvpid);
 		savedata.channels[serverid].forcenames.push(forcename);
+		//Set up text channel
 		textchannel.setTopic("Server registered");
 		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
 		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
 		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
 		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
+		//Set up voice channel
 		voicechannel.setPosition(2);
 		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
 		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'CONNECT': true }); //Allow Moderators to connect
@@ -213,6 +218,7 @@ function handleNewForce(serverid, forcename) {
 	});
 }
 
+//Delete a force from a PvP server
 function deleteForce(pvpid) {
 	let guild = bot.guilds.get(guildid);
 	guild.channels.get(savedata.channels[pvpid].id).delete();
@@ -1163,5 +1169,22 @@ bot.on('ready', () => {
 bot.on('guildCreate', (guild) => {
 	if (guild.id != guildid) guild.leave();
 });
+
+//Bot disconnect detection
+bot.on('disconnect', (event) => {
+	//Start the error string
+	let sendstring = "DEBUG$Disconnect detected. ";
+	//Check for error code
+	if (event.code) sendstring = sendstring + "Error Code: " + event.code + ". ";
+	else sendstring = sendstring + "No Error Code provided. ";
+	//Check for error reason
+	if (event.reason) sendstring = sendstring + "Reason: " + event.reason + ". ";
+	else sendstring = sendstring + "No Reason provided. ";
+	//Check if disconnect was clean
+	if (event.wasClean) sendstring = sendstring + "Disconnect was clean.";
+	else sendstring = sendstring + "Disconnect was not clean.";
+	//Write the string to the log
+	safeWrite(sendstring);
+}
 
 bot.login(token);
