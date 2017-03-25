@@ -46,7 +46,7 @@ function get_status() {
 	if [ "$firstcheck" ]; then
 		sudo -u www-data screen -S manage -X at 0 stuff "${work}\\\$status\n"
 		secondcheck=$(tail -1 screenlog.0);
-        sanitize "$secondcheck"
+		sanitize "$secondcheck"
 		if [ "$clean" == "server_running" ]; then
 			check="Server Running"
 		else
@@ -83,7 +83,7 @@ else
 		if [ -z "$port" ]; then
 			port="0";
 		fi
-                port="3429$port"
+		port="3429$port"
 	fi
 	#server_settings.ini
 	if [ ! -e "$dir_server/server-settings.json" ]; then echo "Missing server-settings.json"; var_cont=false; fi
@@ -98,7 +98,7 @@ else
 	sanitize "${args[1]}"
 	#cd $dir_server #This may need to be changed to the location of managepgm, not sure
 	case "$clean" in
-	    'prestart')
+		'prestart')
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
 				#echo -e "${check}"
@@ -106,8 +106,8 @@ else
 			else
 				echo "stopped";
 			fi
-            ;;
-        'start')
+		;;
+		'start')
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
 				echo -e "Attempted Start by $cur_user: Server is already running\r\n" >> $dir_server/screenlog.0 ;
@@ -125,9 +125,9 @@ else
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M"
 				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M"
 				if [ "${args[3]}" ]; then
-				    sanitize "${args[3]}";
-				    #only set $server_file if the file appears to be valid.
-				    #$server_file="$clean";
+					sanitize "${args[3]}";
+					    #only set $server_file if the file appears to be valid.
+					    #$server_file="$clean";
 				fi
 
 				#Load server_file if it's set. Or else just load latest
@@ -143,25 +143,30 @@ else
 				if [ "$var_cont" == false ] ; then
 					echo "Cannot start server";
 				else
-					echo -e "Starting Server. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
 					if [ -e "$dir_server/server-settings.json" ]; then
 						cp $dir_server/server-settings.json $dir_server/running-server-settings.json;
 					fi
 					if [ -e "$dir_server/screenlog.0" ]; then
 						LASTSCREEN=$(tail -n 50 $dir_server/screenlog.0)
-                        move_logs "$server"
+						move_logs "$server"
 						echo "${LASTSCREEN}" > $dir_server/screenlog.0 ;
 					fi
 					if [ -e "$dir_server/chatlog.0" ]; then
 						LASTCHAT=$(tail -n 50 $dir_server/chatlog.0)
 						echo "${LASTCHAT}" > $dir_server/chatlog.0 ;
 					fi
-					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"	
+					if [ "$server_file" ]; then
+						echo -e "Starting Server. ${server_file}. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
+						#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
+					else
+						echo -e "Starting Server. Load Latest. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
+						sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
+					fi
 				fi
 			fi
-            ;;
-         
-        'stop')
+		;;
+
+		'stop')
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
 				#echo "Server Shutting Down" ;
@@ -173,9 +178,9 @@ else
 			else
 				echo "Server is already Stopped.";
 			fi
-            ;;
+		;;
 
-        'status')
+		'status')
 			get_status "$server"
 			if [ "$check" == "Server Running" ]; then 
 				#echo -e "${check}"
@@ -183,10 +188,10 @@ else
 			else
 				echo "Server is Stopped";
 			fi
-            ;;
+		;;
 
-        *)
-            echo $"Usage: $0 server_select {start|stop|status} user"
-            exit 1
-	esac
+		*)
+			echo $"Usage: $0 server_select {start|stop|status} user"
+			exit 1
+		esac
 fi
