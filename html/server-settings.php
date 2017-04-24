@@ -288,7 +288,7 @@
 							$('[name="'+Form[i].name+'"]').css("background-color", "red");
 							err++;
 						}
-					} else if(Form[i].name == "name" || Form[i].name == "description" || Form[i].name == "tags" || Form[i].name == "admins" || Form[i].name == "game_password" || Form[i].name == "server_select") {
+					} else if(Form[i].name == "name" || Form[i].name == "description" || Form[i].name == "tags" || Form[i].name == "admins" || Form[i].name == "game_password" || Form[i].name == "server_select" || Form[i].name == "s_version") {
 						if(Form[i].name == "server_select") {
 							var server_select = Form[i].value;
 						}
