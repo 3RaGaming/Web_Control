@@ -30,15 +30,31 @@
 		$server_select = "servertest";
 	}
 	
+	//available exe versions
+	$program_dir = "/usr/share/factorio/";
+	foreach(glob("$program_dir*", GLOB_ONLYDIR) as $dir) {
+		$dir = str_replace($program_dir, '', $dir);
+		$server_available_versions[$dir] = "$program_dir$dir";
+	}
+	
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
 				$server_dir = $base_dir . $server_select . "/";
 
 				$server_settings_path = $server_dir . "server-settings.json";
+				$server_settings_web_path = $server_dir . "server-settings-web.json";
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
+				if(file_exists($server_settings_web_path)) {
+					$server_settings_web = json_decode(file_get_contents($server_settings_web_path), true);
+				} else {
+					//create the file with default settings if it does not exist.
+					$server_settings_web['version']="00.14.00";
+					$newJsonString = json_encode($default_server_settings_web, JSON_PRETTY_PRINT);
+					file_put_contents($server_settings_web_path, $newJsonString);
+				}
 				if(file_exists($server_settings_path)) {
-					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
+					$server_settings = json_decode(file_get_contents($server_settings_path), true);
 					$disabled = array('token', 'username', 'password');
 					$replace_this = array('require_user_verification', 'max_upload_in_kilobytes_per_second', 'ignore_player_limit_for_returning_players', 'only_admins_can_pause_the_game', 'afk_autokick_interval', '_');
 					$replace_with_that = array('verify users', 'upload kbps', 'ignore player limit', 'admin pause only', 'afk autokick', ' ');
@@ -60,13 +76,27 @@
 							if(is_string($value)||is_int($value)) {
 								if($key=="allow_commands") {
 									if($value=="true") {
-										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true selected>True</option><option value=false>False</option></select><br />";
+										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true selected>True</option><option value=false>False</option></select>";
 									} elseif($value=="false")  {
-										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true>True</option><option value=false selected>False</option></select><br />";
+										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true>True</option><option value=false selected>False</option></select>";
 									} else {
-										echo "$display:$col<select name=\"$key\"><option value=admins-only selected>Admins Only</option><option value=true>True</option><option value=false>False</option></select><br />";
+										echo "$display:$col<select name=\"$key\"><option value=admins-only selected>Admins Only</option><option value=true>True</option><option value=false>False</option></select>";
 									}
 								} else {
+									//ghetto way to add version selection to this page
+									if($key == "max_players") {
+										echo "Server Version:$col<select name=\"s_versions\">";
+										foreach($server_available_versions as $version => $path) {
+											if($server_settings_web['version'] == $version) {
+												echo "<option value=\"$version\" selected>$version</option>";
+											} else {
+												echo "<option value=\"$version\">$version</option>";
+											}
+										}
+										echo "</select>";
+										echo "</td></tr>";
+										echo "<tr><td>";
+									}
 									echo "$display:$col<input type=text name=\"$key\" value=\"$value\" size=\"".strlen($value)."\" /><br />";
 								}
 							} elseif(is_array($value)) {
@@ -100,7 +130,7 @@
 								var_dump($value);
 								echo "<br />";
 							}
-							echo "</td>";
+							echo "</td></tr>";
 						}
 					}
 					echo "</table>";
@@ -163,6 +193,10 @@
 					}
 					continue;
 				} elseif(!in_array($clean_key, $ignore_array)) {
+					if($clean_key == "s_version") {
+						$s_version = $clean_value;
+						continue;
+					}
 					$err_data[$clean_key]=$clean_value;
 					$err++;
 					continue;
@@ -176,9 +210,22 @@
 				$time = date('H:i:s');
 				$server_dir = $base_dir . $server_select . "/";
 				$server_settings_path = $server_dir . "server-settings.json";
+				$server_settings_web_path = $server_dir . "server-settings-web.json";
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
 				$server_log_loc = $server_dir . "logs/";
 				$server_log_path = $server_dir . "logs/server-settings-update-$date.log";
+				if(isset($s_version)) {
+					if(isset($server_available_versions[$s_version])) {
+						$server_settings_web['version']=$s_version;
+						if(file_exists($server_settings_web_path)) {
+							$newJsonString = json_encode($server_settings_web, JSON_PRETTY_PRINT);
+							file_put_contents($server_settings_web_path, $newJsonString);
+						} else {
+							$output = json_encode("No server-settings-web.json file found");
+							die($output);
+						}
+					}
+				}
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
 					foreach($verified_data as $key => $value) {
