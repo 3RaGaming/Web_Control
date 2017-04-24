@@ -83,7 +83,7 @@ if(isset($_REQUEST['start'])) {
 					file_put_contents($server_settings_path, $newJsonString);
 				}
 			}
-			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "start" "'.$user_name.'"' "'.$server_available_versions[$s_version].'");
+			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "start" "'.$user_name.'" "'.$server_available_versions[$s_version].'"');
 			echo $output;
 		} else {
 			die('Missing server-settings.json');
