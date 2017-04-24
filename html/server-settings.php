@@ -35,6 +35,9 @@
 	foreach(glob("$program_dir*", GLOB_ONLYDIR) as $dir) {
 		$dir = str_replace($program_dir, '', $dir);
 		$server_available_versions[$dir] = "$program_dir$dir";
+		if(!isset($server_default_version)) {
+			$server_default_version = $dir;
+		}
 	}
 	
 	if(isset($_REQUEST)) {
@@ -49,7 +52,7 @@
 					$server_settings_web = json_decode(file_get_contents($server_settings_web_path), true);
 				} else {
 					//create the file with default settings if it does not exist.
-					$server_settings_web['version']="00.14.00";
+					$server_settings_web['version']=$server_default_version;
 					$newJsonString = json_encode($server_settings_web_path, JSON_PRETTY_PRINT);
 					file_put_contents($server_settings_web_path, $newJsonString);
 				}
