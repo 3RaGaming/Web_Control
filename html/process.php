@@ -41,6 +41,7 @@ if(isset($_REQUEST['start'])) {
 					if(!isset($server_available_versions[$s_version])) {
 						die('server-settings-web version '.$s_version.'  does not exist.');
 					}
+				}
 			} else {
 				die('Missing server-settings-web.json. Click "config" to attempt to generate one.');
 			}
