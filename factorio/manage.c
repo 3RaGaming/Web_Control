@@ -569,7 +569,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 char * start_server(char * name, char * input) {
 	char *token;
 	char *delim = ",\n\t";
-	char **args = (char **) malloc(5*sizeof(char *));
+	char **args = (char **) malloc(6*sizeof(char *));
 	char **launchargs = (char **) malloc(10*sizeof(char *));
 	int i = 0;
 	int j = 0;
@@ -584,7 +584,7 @@ char * start_server(char * name, char * input) {
 	i = 0;
 
 	//Process of setting up the arguments for the execvp() call
-	launchargs[i++] = "/usr/share/factorio/bin/x64/factorio";
+	launchargs[i++] = "TEMP";
 	if (strcmp(args[j++],"true") == 0) {
 		launchargs[i++] = "--start-server-load-latest";
 	} else {
@@ -604,6 +604,7 @@ char * start_server(char * name, char * input) {
 	strcat(launchargs[i], "/server-settings.json\0");
 	i++;
 	launchargs[i] = (char *) NULL;
+	launchargs[0] = args[j + 1];
 
 	char * result = launch_server(name, launchargs, args[j]);
 
