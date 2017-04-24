@@ -50,7 +50,7 @@
 				} else {
 					//create the file with default settings if it does not exist.
 					$server_settings_web['version']="00.14.00";
-					$newJsonString = json_encode($default_server_settings_web, JSON_PRETTY_PRINT);
+					$newJsonString = json_encode($server_settings_web_path, JSON_PRETTY_PRINT);
 					file_put_contents($server_settings_web_path, $newJsonString);
 				}
 				if(file_exists($server_settings_path)) {
@@ -85,7 +85,7 @@
 								} else {
 									//ghetto way to add version selection to this page
 									if($key == "max_players") {
-										echo "Server Version:$col<select name=\"s_versions\">";
+										echo "Server Version:$col<select name=\"s_version\">";
 										foreach($server_available_versions as $version => $path) {
 											if($server_settings_web['version'] == $version) {
 												echo "<option value=\"$version\" selected>$version</option>";
