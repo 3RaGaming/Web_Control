@@ -63,8 +63,9 @@
 						// http://php.net/manual/en/function.parse-ini-file.php
 						$data = parse_ini_file($server_config_path);
 						// Array of values to replace.
+						$to_set = $server_available_versions[$s_version]."/data"
 						$replace_with = array(
-							'read-data' => $server_available_versions[$s_version];
+							'read-data' => $to_set;
 						);
 						// Open the file for writing.
 						$fh = fopen($server_config_path, 'w');
@@ -255,8 +256,9 @@
 							// http://php.net/manual/en/function.parse-ini-file.php
 							$data = parse_ini_file($server_config_path);
 							// Array of values to replace.
+							$to_set = $server_available_versions[$s_version]."/data"
 							$replace_with = array(
-								'read-data' => $server_available_versions[$s_version];
+								'read-data' => $to_set;
 							);
 							// Open the file for writing.
 							$fh = fopen($server_config_path, 'w');
