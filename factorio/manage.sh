@@ -66,9 +66,7 @@ done
 
 #accept the file path and string length here
 sanitize "${args[3]}";
-program_path="$clean";
-sanitize "${args[4]}";
-program_strlen="$clean";
+program_path="$clean""/bin/x64/factorio";
 
 if [ -z "$server" ]; then
 	echo "Error in input";
@@ -140,10 +138,10 @@ else
 				move_logs "$server";
 				if [ "$server_file" ]; then
 					echo -e "Starting Server. ${server_file}. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
-					#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
+					#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server},${program_path}\n"
 				else
 					echo -e "Starting Server. Load Latest. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
-					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
+					sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server},${program_path}\n"
 				fi
 			else
 				if [ "$var_cont" == false ] ; then
@@ -163,12 +161,10 @@ else
 					fi
 					if [ "$server_file" ]; then
 						echo -e "Starting Server. ${server_file}. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
-						#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
+						#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server},${program_path}\n"
 					else
 						echo -e "Starting Server. Load Latest. Initiated by $cur_user\r\n" >> $dir_server/screenlog.0 ;
-						#uncomment next line, and comment line after when ready
 						sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server},${program_path}\n"
-						#sudo -u www-data screen -S manage -X at 0 stuff "${server}\\\$start\\\$true,${port},${dir_server}\n"
 					fi
 				fi
 			fi

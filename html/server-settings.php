@@ -44,7 +44,8 @@
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
 				$server_dir = $base_dir . $server_select . "/";
-
+				
+				$server_config_path = $server_dir . "config/config.ini";
 				$server_settings_path = $server_dir . "server-settings.json";
 				$server_settings_web_path = $server_dir . "server-settings-web.json";
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
@@ -53,8 +54,32 @@
 				} else {
 					//create the file with default settings if it does not exist.
 					$server_settings_web['version']=$server_default_version;
+					$s_version = $server_settings_web['version'];
 					$newJsonString = json_encode($server_settings_web_path, JSON_PRETTY_PRINT);
 					file_put_contents($server_settings_web_path, $newJsonString);
+					//also want to update the config.ini file
+					if(file_exists($server_config_path)) {
+						// Parse the file assuming it's structured as an INI file.
+						// http://php.net/manual/en/function.parse-ini-file.php
+						$data = parse_ini_file($server_config_path);
+						// Array of values to replace.
+						$replace_with = array(
+							'read-data' => $server_available_versions[$s_version];
+						);
+						// Open the file for writing.
+						$fh = fopen($server_config_path, 'w');
+						// Loop through the data.
+						foreach ( $data as $key => $value )
+						{
+						// If a value exists that should replace the current one, use it.
+						if ( ! empty($replace_with[$key]) )
+							$value = $replace_with[$key];
+						// Write to the file.
+						fwrite($fh, "{$key}={$value}" . PHP_EOL);
+						}
+						// Close the file handle.
+						fclose($fh);
+					}
 				}
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents($server_settings_path), true);
@@ -212,20 +237,40 @@
 				$date = date('Y-m-d');
 				$time = date('H:i:s');
 				$server_dir = $base_dir . $server_select . "/";
+				$server_config_path = $server_dir . "config/config.ini";
 				$server_settings_path = $server_dir . "server-settings.json";
 				$server_settings_web_path = $server_dir . "server-settings-web.json";
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
 				$server_log_loc = $server_dir . "logs/";
 				$server_log_path = $server_dir . "logs/server-settings-update-$date.log";
+				
 				if(isset($s_version)) {
 					if(isset($server_available_versions[$s_version])) {
 						$server_settings_web['version']=$s_version;
-						if(file_exists($server_settings_web_path)) {
-							$newJsonString = json_encode($server_settings_web, JSON_PRETTY_PRINT);
-							file_put_contents($server_settings_web_path, $newJsonString);
-						} else {
-							$output = json_encode("No server-settings-web.json file found");
-							die($output);
+						$newJsonString = json_encode($server_settings_web, JSON_PRETTY_PRINT);
+						file_put_contents($server_settings_web_path, $newJsonString);
+						//also want to update the config.ini file
+						if(file_exists($server_config_path)) {
+							// Parse the file assuming it's structured as an INI file.
+							// http://php.net/manual/en/function.parse-ini-file.php
+							$data = parse_ini_file($server_config_path);
+							// Array of values to replace.
+							$replace_with = array(
+								'read-data' => $server_available_versions[$s_version];
+							);
+							// Open the file for writing.
+							$fh = fopen($server_config_path, 'w');
+							// Loop through the data.
+							foreach ( $data as $key => $value )
+							{
+							// If a value exists that should replace the current one, use it.
+							if ( ! empty($replace_with[$key]) )
+								$value = $replace_with[$key];
+							// Write to the file.
+							fwrite($fh, "{$key}={$value}" . PHP_EOL);
+							}
+							// Close the file handle.
+							fclose($fh);
 						}
 					}
 				}
