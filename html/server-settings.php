@@ -59,27 +59,17 @@
 					file_put_contents($server_settings_web_path, $newJsonString);
 					//also want to update the config.ini file
 					if(file_exists($server_config_path)) {
-						// Parse the file assuming it's structured as an INI file.
-						// http://php.net/manual/en/function.parse-ini-file.php
-						$data = parse_ini_file($server_config_path);
-						// Array of values to replace.
-						$to_set = $server_available_versions[$s_version]."/data"
-						$replace_with = array(
-							'read-data' => $to_set;
-						);
-						// Open the file for writing.
-						$fh = fopen($server_config_path, 'w');
-						// Loop through the data.
-						foreach ( $data as $key => $value )
-						{
-						// If a value exists that should replace the current one, use it.
-						if ( ! empty($replace_with[$key]) )
-							$value = $replace_with[$key];
-						// Write to the file.
-						fwrite($fh, "{$key}={$value}" . PHP_EOL);
+						$p_ini = parse_ini_file($server_config_path, true);
+						foreach($p_ini as $namespace => $properties){
+							$new_config[]="[$namespace]\n";
+							foreach($properties as $prop => $val) {
+								if($prop=="read-data") {
+									$val=$server_available_versions[$s_version]."/data";
+								}
+								$new_config[]="$prop=$val\n";
+							}
 						}
-						// Close the file handle.
-						fclose($fh);
+						file_put_contents($server_config_path, $new_config);
 					}
 				}
 				if(file_exists($server_settings_path)) {
@@ -252,27 +242,17 @@
 						file_put_contents($server_settings_web_path, $newJsonString);
 						//also want to update the config.ini file
 						if(file_exists($server_config_path)) {
-							// Parse the file assuming it's structured as an INI file.
-							// http://php.net/manual/en/function.parse-ini-file.php
-							$data = parse_ini_file($server_config_path);
-							// Array of values to replace.
-							$to_set = $server_available_versions[$s_version]."/data"
-							$replace_with = array(
-								'read-data' => $to_set;
-							);
-							// Open the file for writing.
-							$fh = fopen($server_config_path, 'w');
-							// Loop through the data.
-							foreach ( $data as $key => $value )
-							{
-							// If a value exists that should replace the current one, use it.
-							if ( ! empty($replace_with[$key]) )
-								$value = $replace_with[$key];
-							// Write to the file.
-							fwrite($fh, "{$key}={$value}" . PHP_EOL);
+							$p_ini = parse_ini_file($server_config_path, true);
+							foreach($p_ini as $namespace => $properties){
+								$new_config[]="[$namespace]\n";
+								foreach($properties as $prop => $val) {
+									if($prop=="read-data") {
+										$val=$server_available_versions[$s_version]."/data";
+									}
+									$new_config[]="$prop=$val\n";
+								}
 							}
-							// Close the file handle.
-							fclose($fh);
+							file_put_contents($server_config_path, $new_config);
 						}
 					}
 				}
