@@ -59,14 +59,13 @@
 					file_put_contents($server_settings_web_path, $newJsonString);
 					//also want to update the config.ini file
 					if(file_exists($server_config_path)) {
-						$p_ini = parse_ini_file($server_config_path, true);
-						foreach($p_ini as $namespace => $properties){
-							$new_config[]="[$namespace]\n";
-							foreach($properties as $prop => $val) {
-								if($prop=="read-data") {
-									$val=$server_available_versions[$s_version]."/data";
-								}
-								$new_config[]="$prop=$val\n";
+						$lines = file($server_config_path);
+						$new_config = array();
+						foreach($lines as $line) {
+							if(substr($line, 0, 10) == 'read-data=') {
+								$new_config[] = "read-data=".$server_available_versions[$s_version]."/data\n";
+							} else {
+								$new_config[] = $line;
 							}
 						}
 						file_put_contents($server_config_path, $new_config);
@@ -242,14 +241,13 @@
 						file_put_contents($server_settings_web_path, $newJsonString);
 						//also want to update the config.ini file
 						if(file_exists($server_config_path)) {
-							$p_ini = parse_ini_file($server_config_path, true);
-							foreach($p_ini as $namespace => $properties){
-								$new_config[]="[$namespace]\n";
-								foreach($properties as $prop => $val) {
-									if($prop=="read-data") {
-										$val=$server_available_versions[$s_version]."/data";
-									}
-									$new_config[]="$prop=$val\n";
+							$lines = file($server_config_path);
+							$new_config = array();
+							foreach($lines as $line) {
+								if(substr($line, 0, 10) == 'read-data=') {
+									$new_config[] = "read-data=".$server_available_versions[$s_version]."/data\n";
+								} else {
+									$new_config[] = $line;
 								}
 							}
 							file_put_contents($server_config_path, $new_config);
