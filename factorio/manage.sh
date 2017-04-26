@@ -121,13 +121,49 @@ else
 					mkdir -p logs;
 					mv screenlog.0 logs/screenlog-${datetime}.log;
 				fi
-				sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm;
-				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M";
-				sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M";
-				sudo -u www-data /usr/bin/screen -r manage -X colon "logfile flush 0^M";
-				sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M";
-				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M";
-				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M";
+				#this is to check screen version to ensure compatability with newer version.
+				#although... we don't know the exact version we need to be compatible with...
+				screen_version=`screen -v | awk '{ print $NF }' | tr '-' ' '`
+				sanitize "$screen_version"
+				screen_version_yer=`echo "$clean" | tr '_' ' ' | awk '{ print $3 }'`
+				screen_version_mon=`echo "$clean" | tr '_' ' ' | awk '{ print $2 }'`
+				screen_version_day=`echo "$clean" | tr '_' ' ' | awk '{ print $1 }'`
+				#messy, but the best I've got for now
+				case "$screen_version_mon" in
+						jan) screen_version_mon=01 ;;
+						feb) screen_version_mon=02 ;;
+						mar) screen_version_mon=03 ;;
+						apr) screen_version_mon=04 ;;
+						may) screen_version_mon=05 ;;
+						jun) screen_version_mon=06 ;;
+						jul) screen_version_mon=07 ;;
+						aug) screen_version_mon=08 ;;
+						sep) screen_version_mon=09 ;;
+						oct) screen_version_mon=10 ;;
+						nov) screen_version_mon=11 ;;
+						dec) screen_version_mon=12 ;;
+				esac
+				screen_version="$screen_version_yer$screen_version_mon$screen_version_day";
+				if [ "$screen_version" -gt 150628 ]; then
+					#new screen code
+					sudo -u www-data /usr/bin/screen -d -m -L screenlog.0 -S manage ./managepgm;
+					sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "logfile flush 0^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M";
+				else
+					#legacy screen code
+					sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm;
+					sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "logfile flush 0^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M";
+					sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M";
+				fi
+
 				if [ "${args[3]}" ]; then
 					sanitize "${args[3]}";
 					    #only set $server_file if the file appears to be valid.

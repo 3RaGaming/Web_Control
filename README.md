@@ -18,6 +18,13 @@ php7
 Node.js (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
 
 # Installation
+Easy Install!
+`wget https://raw.githubusercontent.com/3RaGaming/Web_Control/master/install.sh`
+`sudo bash install.sh`
+
+This will run you through the entire setup process. Once the program is installed on the server, you'll be instructed on how to access the web gui to continue the rest of the configuration.
+
+Or if you prefer to do it manually, here are the steps.
 Right now the file path dependancies are as follows:  
 /var/www/html for the web files  
 /var/www/factorio for the server save locations.  
