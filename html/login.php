@@ -146,7 +146,7 @@ if(isset($_GET['code'])) {
 					foreach($memberjson["roles"] as $mkey => $mvalue) {
 						if($mvalue == $level1id) $level1 = true;
 						if($mvalue == $level2id) $level2 = true;
-						if($level1id && $level2id) break 1;
+						if($level1 && $level2) break 1;
 					}
 				}
 				
