@@ -34,7 +34,7 @@
 	$program_dir = "/usr/share/factorio/";
 	foreach(glob("$program_dir*", GLOB_ONLYDIR) as $dir) {
 		$dir = str_replace($program_dir, '', $dir);
-		$server_available_versions[$dir] = "$program_dir$dir";
+		$server_installed_versions[$dir] = "$program_dir$dir";
 		if(!isset($server_default_version)) {
 			$server_default_version = $dir;
 		}
@@ -63,7 +63,7 @@
 						$new_config = array();
 						foreach($lines as $line) {
 							if(substr($line, 0, 10) == 'read-data=') {
-								$new_config[] = "read-data=".$server_available_versions[$s_version]."/data\n";
+								$new_config[] = "read-data=".$server_installed_versions[$s_version]."/data\n";
 							} else {
 								$new_config[] = $line;
 							}
@@ -104,14 +104,14 @@
 									//ghetto way to add version selection to this page
 									if($key == "max_players") {
 										echo "Server Version:$col<select name=\"s_version\">";
-										foreach($server_available_versions as $version => $path) {
+										foreach($server_installed_versions as $version => $path) {
 											if($server_settings_web['version'] == $version) {
 												echo "<option value=\"$version\" selected>$version</option>";
 											} else {
 												echo "<option value=\"$version\">$version</option>";
 											}
 										}
-										echo "</select>";
+										echo "</select> <a href=\"./version_manager.php\" target=\"version_manager\">Version Manager</a>";
 										echo "</td></tr>";
 										echo "<tr><td>";
 									}
