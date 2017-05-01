@@ -1,8 +1,7 @@
 <?php
 	if(!isset($_SESSION)) { session_start(); }
 	if(!isset($_SESSION['login'])) {
-		header("Location: ./login.php");
-		die();
+		die('Error: Login required');
 	} else {
 		if(isset($_SERVER["HTTPS"]) == false)
 		{
@@ -32,14 +31,18 @@
 
 	//available exe versions
 	$program_dir = "/usr/share/factorio/";
+	//directory of installed
 	foreach(glob("$program_dir*", GLOB_ONLYDIR) as $dir) {
 		$dir = str_replace($program_dir, '', $dir);
 		$server_installed_versions[$dir] = "$program_dir$dir";
+		//total versions variable needed for comparing against available versions
 		$total_versions[]=$dir;
 		if(!isset($server_default_version)) {
 			$server_default_version = $dir;
 		}
 	}
+	//function used to get source of the download web pages for iteration.
+	//regex will search for the download link for use following function call.
 	function get_url($url) {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -53,35 +56,71 @@
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
-				echo "<pre>";
-				print_r($server_installed_versions);
-				echo "\n\n\n";
+				//print_r($server_installed_versions);
+				echo "<br /><br />";
 				$urls = array(
 					"https://www.factorio.com/download-headless/stable",
 					"https://www.factorio.com/download-headless/experimental"
 				);
 				foreach($urls as $url) {
+					//run this script on each url in the array
 					$server_matched_versions = get_url($url);
 					//var_dump($server_available_versions);
+					//if a download link is found, iterate the results
 					if(isset($server_matched_versions[0])) {
 						foreach($server_matched_versions[0] as $key => $value) {
+							//find the verion number in the link
 							preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
 							//var_dump($output[1]);
+							//get the experimental or stable tag from the url
 							$branch = substr($url, strrpos($url, '/') + 1);
+							//create array to work with later
 							$server_available_versions[$output[1]] = array(0=>$value,1=>$branch);
-							$os = array("Mac", "NT", "Irix", "Linux");
+							//add to total versions to compare against installed versions
 							if(!in_array($output[1], $total_versions)) {
 								$total_versions[]=$output[1];
 							}
 						}
 					}
 				}
-				var_dump($server_available_versions);
-				var_dump($total_versions);
+				//sort the verion numbers with a fancy smart sorting function built in to php
+				natsort($total_versions);
+				//var_dump($server_available_versions);
+				//var_dump($total_versions);
+				//display the table for installed and available versions
+				echo "<table><tr><td>Version</td><td></td><td>Control</td>\xA";
+				foreach($total_versions as $value) {
+					echo "<tr><td>$value</td><td>";
+					if(isset($server_available_versions[$value])) {
+						//display different colors for versions
+						if($server_available_versions[$value][1]=="stable") {
+							echo "<font color=green>";
+						} elseif($server_available_versions[$value][1]=="experimental") {
+							echo "<font color=orange>";
+						}
+						echo $server_available_versions[$value][1]."</td><td>";
+					} else {
+						echo "<font color=red>depreciated</font></td><td>";
+					}
+					//if the server is working on installing a version, this file will exist and hold the status of the install
+					$tmp_file = "/tmp/$value.install";
+					if(file_exists($tmp_file)) {
+						$tmp_status[$value] = file_get_contents($tmp_file);
+					}
+					if(isset($tmp_status[$value])) {
+						echo "<span id=\"$value-span\">$tmp_status[$value]</span>";
+					} else {
+						//if tmp_file doesn't exist, general rules for if it's installed or not can be displayed
+						if(isset($server_installed_versions[$value])) {
+							echo "<span id=\"$value-span\"><button name=\"$value-delete\" onclick=\"return form_action(\'install\')\">delete</button> - installed</span>";
+						} else {
+							echo "<span id=\"$value-span\"><button name=\"$value-install\" onclick=\"return form_action(\'install\')\">install</button> - not found</span>";
+						}
+					}
+					echo "</td></tr>\xA";
+				}
+				echo "</table>\xA";
 			}
-			echo "</pre>";
-			
-			
 			die();
 		}
 	}
@@ -122,8 +161,6 @@
 ?>
 	</script>
 	<script src="https://use.fontawesome.com/674cd09dad.js"></script>
-	<script type="text/javascript" language="javascript" src="assets/js/log-ui.js"></script>
-	<style type="text/css">@import "assets/css/log-ui.css";</style>
 </head>
 <body>
 	<div style="width: 99%; height: 99%;">

@@ -111,7 +111,7 @@
 												echo "<option value=\"$version\">$version</option>";
 											}
 										}
-										echo "</select> <a href=\"./version_manager.php\" target=\"version_manager\">Version Manager</a>";
+										echo "</select> <a href=\"./version_manager.php?d=".$server_select."\">Version Manager</a>";
 										echo "</td></tr>";
 										echo "<tr><td>";
 									}
