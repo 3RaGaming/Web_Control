@@ -1,4 +1,73 @@
 <?php
+	//background script work in cli only
+	if (php_sapi_name() == "cli") {
+		//argv[1] = version argv[2] = action argv[3] = username
+		//log directory for managepgm. we'll store data for user installs and deletes here.
+		if(isset($argv[1])) { $version = preg_replace('/[^0-9.]+/', '', $argv[1]); } else { die('No version'); }
+		if(isset($argv[2])) { $action = preg_replace("/[^a-zA-Z]+/", "", $argv[2]); } else { die('No action'); }
+		if(isset($argv[3])) { $user_name = preg_replace("/[^a-zA-Z0-9]+/", "", $argv[3]); } else { $user_name = "UNKNOWN"; }
+		$date = date('Y-m-d');
+		$time = date('H:i:s');
+		$log_dir = "/var/www/factorio/logs";
+		$log_path = "$log_dir/version-manager-$date.log";
+		//available exe versions
+		$program_dir = "/usr/share/factorio/$version";
+		$log_record = "\xA$date-$time\t".$user_name."\xA Attempting to \"$action\" version \"$version\"\xA";
+		if (!is_dir($log_dir)) {
+			// dir doesn't exist, make it
+			mkdir($log_dir);
+		}
+		$tmp_file = "/tmp/$version.install";
+		function delete() {
+			
+		}
+		function install() {
+			
+		}
+		echo "$program_dir - $tmp_file";
+		sys_get_temp_dir();
+		if($action=="delete") {
+			if(is_dir($program_dir)) {
+				if(file_exists($tmp_file)) {
+					die('tmp file exists');
+				} else {
+					echo "delete-ing\xA";
+					file_put_contents($tmp_file, "delete-ing");
+					sleep(2);
+					echo "pretend delete\xA";
+					//delete
+					sleep (2);
+					if(is_dir($program_dir)) {
+						echo "delete-failed\xA";
+						file_put_contents($tmp_file, "delete-failed");
+						sleep(10);
+						unlink($tmp_file);
+					} else {
+						echo "delete-success\xA";
+						file_put_contents($tmp_file, "delete-success");
+						sleep(10);
+						unlink($tmp_file);
+					}
+				}
+				$log_record = $log_record." deleted\xA";
+			} else {
+				echo "no folder to delete";
+				$log_record = $log_record." no folder to delete\xA";
+			}
+		}
+		if($action=="install") {
+			if(is_dir($program_dir)) {
+				echo "already installed";
+				$log_record = $log_record." already installed\xA";
+			} else {
+				echo "can install";
+				$log_record = $log_record." installed\xA";
+			}
+		}
+		file_put_contents($log_path, $log_record, FILE_APPEND);
+		die();
+	}
+	
 	if(!isset($_SESSION)) { session_start(); }
 	if(!isset($_SESSION['login'])) {
 		die('Error: Login required');
