@@ -235,7 +235,7 @@
 				$server_log_path = $server_dir . "logs/server-settings-update-$date.log";
 				
 				if(isset($s_version)) {
-					if(isset($server_available_versions[$s_version])) {
+					if(isset($server_installed_versions[$s_version])) {
 						$server_settings_web['version']=$s_version;
 						$newJsonString = json_encode($server_settings_web, JSON_PRETTY_PRINT);
 						file_put_contents($server_settings_web_path, $newJsonString);
@@ -245,7 +245,7 @@
 							$new_config = array();
 							foreach($lines as $line) {
 								if(substr($line, 0, 10) == 'read-data=') {
-									$new_config[] = "read-data=".$server_available_versions[$s_version]."/data\n";
+									$new_config[] = "read-data=".$server_installed_versions[$s_version]."/data\n";
 								} else {
 									$new_config[] = $line;
 								}
