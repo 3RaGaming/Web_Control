@@ -91,6 +91,25 @@
 			echo "\t\t\t$('#link_config').html('<i class=\"fa fa-exclamation\" aria-hidden=\"true\"></i> <a href=\"./server-settings.php?d=".$server_select."#server_list-".$server_select."\">config</a>');\xA";
 			echo "\t\t\t$('#server_name').attr('size',40);\xA";
 		}
+		//Get the max upload size in megabytes and bytes for use later on
+		function return_bytes($val) {
+			$val = trim($val);
+			$last = strtolower($val[strlen($val)-1]);
+			switch($last)
+			{
+				case 'g':
+				$val *= 1024;
+				case 'm':
+				$val *= 1024;
+				case 'k':
+				$val *= 1024;
+			}
+			return $val;
+		}
+		$upload_max_filesize_m = ini_get('upload_max_filesize');
+		$upload_max_filesize_b = return_bytes($upload_max_filesize_m);
+		echo "\t\t\t$('#upload_max_filesize_m').attr('value',\"".addslashes($upload_max_filesize_m)."\");\xA";
+		echo "\t\t\t$('#upload_max_filesize_b').attr('value',\"".addslashes($upload_max_filesize_b)."\");\xA";
 		echo "\t\t\t$('#link_logs').attr('href',\"logs.php?d=".$server_select."#server_list-".$server_select."\");\xA";
 		if(isset($server_select_dropdown)) { echo $server_select_dropdown; } 
 		echo "\t\t})\xA";
@@ -142,6 +161,8 @@
 		<div style="width: 46%; height: 99%; float: left;">
 			<div>
 				<input type="file" name="upload_file" id="upload_file" style="display: none;">
+				<input type="hidden" name="upload_max_filesize_m" id="upload_max_filesize_m" />
+				<input type="hidden" name="upload_max_filesize_b" id="upload_max_filesize_b" />
 				<button id="upload_button" name="upload_button" style="background-color: #ffffff;">Upload</button>
 				<button id="Transfer" style="background-color: #ffffff;">Transfer</button>&nbsp;:&nbsp;
 				<button id="archive" style="background-color: #ffffff;">Archive</button>&nbsp;:&nbsp;

@@ -1162,13 +1162,23 @@ function upload() {
 	if ($('#upload_file').val == "" || user_level == "viewonly") {
 		return;
 	}
+    if ($('#upload_max_filesize_m').val()) {
+		upload_max_filesize_m = $('#upload_max_filesize_m').val();
+	} else {
+        upload_max_filesize_m = "30M";
+    }
+    if ($('#upload_max_filesize_b').val()) {
+		upload_max_filesize_b = $('#upload_max_filesize_b').val();
+	} else {
+        upload_max_filesize_b = 31457280;
+    }
 	var the_file;
 	$('#fileStatus').html("");
 	if ($('#upload_file')[0].files[0]) {
 		the_file = $('#upload_file')[0].files[0];
-		if ( the_file.size > 31457280 ) {
+		if ( the_file.size > upload_max_filesize_b ) {
 			//This is also a server set limitation
-			$('#fileStatus').html("File is too big. Must be less than 30M");
+			$('#fileStatus').html("File is too big. Must be less than " + upload_max_filesize_m);
 			return;
 		}
 	} else {
