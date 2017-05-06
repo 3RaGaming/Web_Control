@@ -35,7 +35,7 @@ var adminrole = config.adminrole;
 var gamemessage = config.gamemessage;
 
 //Temporary Global Variable to disable channel updates
-var update_descriptions = False;
+var update_descriptions = false;
 
 //Load the persistent save data
 var savedata;
