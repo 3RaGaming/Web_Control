@@ -34,6 +34,9 @@ var modrole = config.modrole;
 var adminrole = config.adminrole;
 var gamemessage = config.gamemessage;
 
+//Temporary Global Variable to disable channel updates
+var update_descriptions = False;
+
 //Load the persistent save data
 var savedata;
 try {
@@ -200,7 +203,7 @@ function handleNewForce(serverid, forcename) {
 		savedata.channels[serverid].forceids.push(pvpid);
 		savedata.channels[serverid].forcenames.push(forcename);
 		//Set up text channel
-		textchannel.setTopic("Server registered");
+		if (update_descriptions) textchannel.setTopic("Server registered");
 		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
 		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
@@ -388,7 +391,7 @@ var admincommands = {
 		savedata.channels[serverid] = { id: message.channel.id, name: servername, type: "server", status: "unknown" };
 		let name_changed = message.channel.setName("factorio-" + servername);
 		name_changed.then(() => {
-			message.channel.setTopic("Server registered");
+			if (update_descriptions) message.channel.setTopic("Server registered");
 		});
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
@@ -443,7 +446,7 @@ var admincommands = {
 		if (!savedata.playerlists[serverid]) savedata.playerlists[serverid] = {};
 		let name_changed = message.channel.setName("factorio-" + servername);
 		name_changed.then(() => {
-			message.channel.setTopic("Server registered");
+			if (update_descriptions) message.channel.setTopic("Server registered");
 		});
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
@@ -501,7 +504,7 @@ var admincommands = {
 		message.channel.sendMessage("Successfully unregistered.\n");
 		let name_changed = message.channel.setName("factorio-unset");
 		name_changed.then(() => {
-			message.channel.setTopic("::unset was used here");
+			if (update_descriptions) message.channel.setTopic("::unset was used here");
 		});
 	},
 	"setadmin": function (message, command) {
@@ -729,6 +732,7 @@ var admincommands = {
 
 //Update channel description with current list of players
 function updateDescription(channelid) {
+	if (!update_descriptions) return;
 	var playerliststring;
 	let serverid;
 	let force_name;
@@ -963,7 +967,7 @@ function handleInput(input) {
 				open_server.then(() => {
 					bot.channels.get(savedata.channels[mainserver].id).sendMessage(message);
 				});
-				bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
+				if (update_descriptions) bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
 				let forceids = savedata.channels[channelid].forceids;
 				for (let i = 0; i < forceids.length; i++) {
 					let insideid = forceids[i];
@@ -972,7 +976,7 @@ function handleInput(input) {
 						bot.channels.get(savedata.channels[insideid].id).sendMessage(message);
 					});
 					let force_name = insideid.substring(insideid.indexOf("-") + 1);
-					bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
+					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
 				}
 				savedata.channels[mainserver].status = "started";
 				if (savedata.playerlists[mainserver]) delete savedata.playerlists[mainserver];
@@ -993,7 +997,7 @@ function handleInput(input) {
 					message_sent.then((message) => {
 						//message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 					});
-					bot.channels.get(savedata.channels[insideid].id).setTopic("Server offline");
+					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server offline");
 				}
 				savedata.channels[mainserver].status = "stopped";
 				delete savedata.playerlists[mainserver];
@@ -1041,7 +1045,7 @@ function handleInput(input) {
 					bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
 				});
 				savedata.channels[channelid].status = "started";
-				bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
+				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
 				if (savedata.playerlists[channelid]) delete savedata.playerlists[channelid];
 				savedata.playerlists[channelid] = {};
 				fs.unlinkSync("savedata.json");
@@ -1053,7 +1057,7 @@ function handleInput(input) {
 					//bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 				});
 				savedata.channels[channelid].status = "stopped";
-				bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
+				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
 				delete savedata.playerlists[channelid];
 				fs.unlinkSync("savedata.json");
 				fs.writeFileSync("savedata.json", JSON.stringify(savedata));
