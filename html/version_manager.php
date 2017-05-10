@@ -5,6 +5,7 @@
 		//log directory for managepgm. we'll store data for user installs and deletes here.
 		if(isset($argv[1])) { $version = preg_replace('/[^0-9.]+/', '', $argv[1]); } else { die('No version'); }
 		if(isset($argv[2])) { $action = preg_replace("/[^a-zA-Z]+/", "", $argv[2]); } else { die('No action'); }
+		if ( !in_array($action, array('install','delete')) ) { die("Invalid Action $action"); }
 		if(isset($argv[3])) { $user_name = preg_replace("/[^a-zA-Z0-9]+/", "", $argv[3]); } else { $user_name = "UNKNOWN"; }
 		$date = date('Y-m-d');
 		$time = date('H:i:s');
@@ -18,13 +19,17 @@
 			mkdir($log_dir);
 		}
 		$tmp_file = "/tmp/$version.install";
-		function delete() {
-			
+		function rrmdir($dir) {
+			foreach(glob($dir . '/*') as $file) { 
+				if(is_dir($file)) rrmdir($file); else unlink($file); 
+			} rmdir($dir); 
 		}
 		function install() {
 			
 		}
-		echo "$program_dir - $tmp_file";
+		echo "\xA$program_dir - $tmp_file - ";
+		ini_get('upload_tmp_dir');
+		echo "\xA";
 		sys_get_temp_dir();
 		if($action=="delete") {
 			if(is_dir($program_dir)) {
@@ -32,19 +37,25 @@
 					die('tmp file exists');
 				} else {
 					echo "delete-ing\xA";
-					file_put_contents($tmp_file, "delete-ing");
-					sleep(2);
-					echo "pretend delete\xA";
-					//delete
-					sleep (2);
+					file_put_contents($tmp_file, json_encode(array("delete","deleting $program_dir")));
+					sleep(10);
+					echo "delete\xA";
+					$file_c=0;
+					$objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($program_dir), RecursiveIteratorIterator::SELF_FIRST);
+					foreach($objects as $name => $object){
+						$file_c++;
+					}
+					printf("There were $file_c Files\xA");
+					//rrmdir($program_dir));
+					sleep (10);
 					if(is_dir($program_dir)) {
 						echo "delete-failed\xA";
-						file_put_contents($tmp_file, "delete-failed");
+						file_put_contents($tmp_file, json_encode(array("delete","failed")));
 						sleep(10);
 						unlink($tmp_file);
 					} else {
 						echo "delete-success\xA";
-						file_put_contents($tmp_file, "delete-success");
+						file_put_contents($tmp_file, json_encode(array("delete","success")));
 						sleep(10);
 						unlink($tmp_file);
 					}
@@ -54,8 +65,7 @@
 				echo "no folder to delete";
 				$log_record = $log_record." no folder to delete\xA";
 			}
-		}
-		if($action=="install") {
+		} elseif($action=="install") {
 			if(is_dir($program_dir)) {
 				echo "already installed";
 				$log_record = $log_record." already installed\xA";
