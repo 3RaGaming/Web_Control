@@ -22,11 +22,11 @@ if(isset($_REQUEST['d'])&&isset($_REQUEST['s'])) {
 			$chatlog = '/var/www/factorio/'.$server_select.'/chatlog.0';
 			$find=array("<", ">", "\\");
 			$repl=array("&lt;", "&gt;", "");
-			if($screen=="chat") {
+			if($screen=="chat"&&file_exists($chatlog)) {
 				$output = shell_exec('cat '.$chatlog.' | tail -n 75');
 				$output = str_replace($find, $repl, $output);
 				echo str_replace(PHP_EOL, '', $output);         //add newlines
-			} elseif($screen=="console") {
+			} elseif($screen=="console"&&file_exists($screenlog)) {
 				$output = shell_exec('cat '.$screenlog.' | tail -n 75');
 				$output = str_replace($find, $repl, $output);
 				echo str_replace(PHP_EOL, '', $output);         //add newlines

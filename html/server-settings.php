@@ -30,15 +30,49 @@
 		$server_select = "servertest";
 	}
 	
+	//available exe versions
+	$program_dir = "/usr/share/factorio/";
+	foreach(glob("$program_dir*", GLOB_ONLYDIR) as $dir) {
+		$dir = str_replace($program_dir, '', $dir);
+		$server_installed_versions[$dir] = "$program_dir$dir";
+		if(!isset($server_default_version)) {
+			$server_default_version = $dir;
+		}
+	}
+	
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
 				$server_dir = $base_dir . $server_select . "/";
-
+				
+				$server_config_path = $server_dir . "config/config.ini";
 				$server_settings_path = $server_dir . "server-settings.json";
+				$server_settings_web_path = $server_dir . "server-settings-web.json";
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
+				if(file_exists($server_settings_web_path)) {
+					$server_settings_web = json_decode(file_get_contents($server_settings_web_path), true);
+				} else {
+					//create the file with default settings if it does not exist.
+					$server_settings_web['version']=$server_default_version;
+					$s_version = $server_settings_web['version'];
+					$newJsonString = json_encode($server_settings_web_path, JSON_PRETTY_PRINT);
+					file_put_contents($server_settings_web_path, $newJsonString);
+					//also want to update the config.ini file
+					if(file_exists($server_config_path)) {
+						$lines = file($server_config_path);
+						$new_config = array();
+						foreach($lines as $line) {
+							if(substr($line, 0, 10) == 'read-data=') {
+								$new_config[] = "read-data=".$server_installed_versions[$s_version]."/data\n";
+							} else {
+								$new_config[] = $line;
+							}
+						}
+						file_put_contents($server_config_path, $new_config);
+					}
+				}
 				if(file_exists($server_settings_path)) {
-					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
+					$server_settings = json_decode(file_get_contents($server_settings_path), true);
 					$disabled = array('token', 'username', 'password');
 					$replace_this = array('require_user_verification', 'max_upload_in_kilobytes_per_second', 'ignore_player_limit_for_returning_players', 'only_admins_can_pause_the_game', 'afk_autokick_interval', '_');
 					$replace_with_that = array('verify users', 'upload kbps', 'ignore player limit', 'admin pause only', 'afk autokick', ' ');
@@ -60,13 +94,27 @@
 							if(is_string($value)||is_int($value)) {
 								if($key=="allow_commands") {
 									if($value=="true") {
-										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true selected>True</option><option value=false>False</option></select><br />";
+										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true selected>True</option><option value=false>False</option></select>";
 									} elseif($value=="false")  {
-										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true>True</option><option value=false selected>False</option></select><br />";
+										echo "$display:$col<select name=\"$key\"><option value=admins-only>Admins Only</option><option value=true>True</option><option value=false selected>False</option></select>";
 									} else {
-										echo "$display:$col<select name=\"$key\"><option value=admins-only selected>Admins Only</option><option value=true>True</option><option value=false>False</option></select><br />";
+										echo "$display:$col<select name=\"$key\"><option value=admins-only selected>Admins Only</option><option value=true>True</option><option value=false>False</option></select>";
 									}
 								} else {
+									//ghetto way to add version selection to this page
+									if($key == "max_players") {
+										echo "Server Version:$col<select name=\"s_version\">";
+										foreach($server_installed_versions as $version => $path) {
+											if($server_settings_web['version'] == $version) {
+												echo "<option value=\"$version\" selected>$version</option>";
+											} else {
+												echo "<option value=\"$version\">$version</option>";
+											}
+										}
+										echo "</select> <a href=\"./version_manager.php?d=".$server_select."\">Version Manager</a>";
+										echo "</td></tr>";
+										echo "<tr><td>";
+									}
 									echo "$display:$col<input type=text name=\"$key\" value=\"$value\" size=\"".strlen($value)."\" /><br />";
 								}
 							} elseif(is_array($value)) {
@@ -100,7 +148,7 @@
 								var_dump($value);
 								echo "<br />";
 							}
-							echo "</td>";
+							echo "</td></tr>";
 						}
 					}
 					echo "</table>";
@@ -120,8 +168,8 @@
 			$total_array = array();
 			$ignore_array = array("d","server_select");
 			$settype_string = array("name","description","game_password","allow_commands");
-			$settype_integers = array("max_players","max_upload_in_kilobytes_per_second","autosave_interval","autosave_slots","afk_autokick_interval");
-			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game");
+			$settype_integers = array("max_players","max_upload_in_kilobytes_per_second","autosave_interval","autosave_slots","afk_autokick_interval","minimum_latency_in_ticks");
+			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game","autosave_only_on_server");
 			$settype_array = array("tags","admins");
 			$check_array_admin = array("true","false","admins-only");
 			foreach($_REQUEST as $key => $value) {
@@ -163,6 +211,10 @@
 					}
 					continue;
 				} elseif(!in_array($clean_key, $ignore_array)) {
+					if($clean_key == "s_version") {
+						$s_version = $clean_value;
+						continue;
+					}
 					$err_data[$clean_key]=$clean_value;
 					$err++;
 					continue;
@@ -175,10 +227,33 @@
 				$date = date('Y-m-d');
 				$time = date('H:i:s');
 				$server_dir = $base_dir . $server_select . "/";
+				$server_config_path = $server_dir . "config/config.ini";
 				$server_settings_path = $server_dir . "server-settings.json";
+				$server_settings_web_path = $server_dir . "server-settings-web.json";
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
 				$server_log_loc = $server_dir . "logs/";
 				$server_log_path = $server_dir . "logs/server-settings-update-$date.log";
+				
+				if(isset($s_version)) {
+					if(isset($server_installed_versions[$s_version])) {
+						$server_settings_web['version']=$s_version;
+						$newJsonString = json_encode($server_settings_web, JSON_PRETTY_PRINT);
+						file_put_contents($server_settings_web_path, $newJsonString);
+						//also want to update the config.ini file
+						if(file_exists($server_config_path)) {
+							$lines = file($server_config_path);
+							$new_config = array();
+							foreach($lines as $line) {
+								if(substr($line, 0, 10) == 'read-data=') {
+									$new_config[] = "read-data=".$server_installed_versions[$s_version]."/data\n";
+								} else {
+									$new_config[] = $line;
+								}
+							}
+							file_put_contents($server_config_path, $new_config);
+						}
+					}
+				}
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
 					foreach($verified_data as $key => $value) {
@@ -232,7 +307,7 @@
 					$('[name="'+Form[i].name+'"]').css("background-color", "red");
 					err++;
 				} else {
-					if(Form[i].name == "max_players" || Form[i].name == "max_upload_in_kilobytes_per_second" || Form[i].name == "autosave_interval" || Form[i].name == "autosave_slots" || Form[i].name == "afk_autokick_interval") {
+					if(Form[i].name == "max_players" || Form[i].name == "max_upload_in_kilobytes_per_second" || Form[i].name == "autosave_interval" || Form[i].name == "autosave_slots" || Form[i].name == "afk_autokick_interval" || Form[i].name == "minimum_latency_in_ticks") {
 						if(Form[i].value >= 0 ) {
 							console.log('Correct int! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 							rdy++;
@@ -241,13 +316,13 @@
 							$('[name="'+Form[i].name+'"]').css("background-color", "red");
 							err++;
 						}
-					} else if(Form[i].name == "name" || Form[i].name == "description" || Form[i].name == "tags" || Form[i].name == "admins" || Form[i].name == "game_password" || Form[i].name == "server_select") {
+					} else if(Form[i].name == "name" || Form[i].name == "description" || Form[i].name == "tags" || Form[i].name == "admins" || Form[i].name == "game_password" || Form[i].name == "server_select" || Form[i].name == "s_version") {
 						if(Form[i].name == "server_select") {
 							var server_select = Form[i].value;
 						}
 						console.log('Correct str! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
-					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game") && (Form[i].value == "true" || Form[i].value == "false")) {
+					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game" || Form[i].name == "autosave_only_on_server") && (Form[i].value == "true" || Form[i].value == "false")) {
 						console.log('Correct bln! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
 					} else if((Form[i].name == "allow_commands") && (Form[i].value == "true" || Form[i].value == "false" || Form[i].value == "admins-only")) {

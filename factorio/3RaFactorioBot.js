@@ -1,6 +1,6 @@
 //Set up the Discord bot interface
 var Discord = require("discord.js");
-var bot = new Discord.Client();
+var bot = new Discord.Client({fetchAllMembers: true});
 
 //Set up code to get line number of Promise Rejections
 process.on("unhandledRejection", (err) => {
@@ -18,7 +18,7 @@ try {
 } catch (err) {
 	failure = true;
 }
-if (failure || !config.token || !config.guildid || !config.modrole || !config.adminrole) {
+if (failure || !config.token || !config.guildid || !config.modrole || !config.adminrole || !config.gamemessage) {
 	console.log("DEBUG$Critical failure! Config file was not able to load successfully!");
 	process.exit(1);
 }
@@ -32,6 +32,10 @@ var token = config.token;
 var guildid = config.guildid;
 var modrole = config.modrole;
 var adminrole = config.adminrole;
+var gamemessage = config.gamemessage;
+
+//Temporary Global Variable to disable channel updates
+var update_descriptions = false;
 
 //Load the persistent save data
 var savedata;
@@ -178,6 +182,7 @@ function replaceMentions(message) {
 	return juicy;
 }
 
+//Creates a new force for a PvP server
 function handleNewForce(serverid, forcename) {
 	let guild = bot.guilds.get(guildid);
 	let pvpid = serverid + "-" + forcename;
@@ -187,7 +192,9 @@ function handleNewForce(serverid, forcename) {
 	//Create the new channels, text then voice
 	let create_text = guild.createChannel("factorio-" + pvpname, "text");
 	let create_voice = guild.createChannel("Factorio " + servername + " " + forcename, "voice");
+	//Create the role
 	let create_role = guild.createRole({ name: pvpid });
+	//Wait for all to be created
 	Promise.all([create_text, create_voice, create_role]).then((values) => {
 		let textchannel = values[0];
 		let voicechannel = values[1];
@@ -195,12 +202,14 @@ function handleNewForce(serverid, forcename) {
 		textchannel.sendMessage("Messages from force *" + forcename + "* on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
 		savedata.channels[serverid].forceids.push(pvpid);
 		savedata.channels[serverid].forcenames.push(forcename);
-		textchannel.setTopic("Server registered");
+		//Set up text channel
+		if (update_descriptions) textchannel.setTopic("Server registered");
 		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
 		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
 		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
 		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
+		//Set up voice channel
 		voicechannel.setPosition(2);
 		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
 		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'CONNECT': true }); //Allow Moderators to connect
@@ -212,6 +221,7 @@ function handleNewForce(serverid, forcename) {
 	});
 }
 
+//Delete a force from a PvP server
 function deleteForce(pvpid) {
 	let guild = bot.guilds.get(guildid);
 	guild.channels.get(savedata.channels[pvpid].id).delete();
@@ -381,7 +391,7 @@ var admincommands = {
 		savedata.channels[serverid] = { id: message.channel.id, name: servername, type: "server", status: "unknown" };
 		let name_changed = message.channel.setName("factorio-" + servername);
 		name_changed.then(() => {
-			message.channel.setTopic("Server registered");
+			if (update_descriptions) message.channel.setTopic("Server registered");
 		});
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
@@ -436,7 +446,7 @@ var admincommands = {
 		if (!savedata.playerlists[serverid]) savedata.playerlists[serverid] = {};
 		let name_changed = message.channel.setName("factorio-" + servername);
 		name_changed.then(() => {
-			message.channel.setTopic("Server registered");
+			if (update_descriptions) message.channel.setTopic("Server registered");
 		});
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
@@ -494,7 +504,7 @@ var admincommands = {
 		message.channel.sendMessage("Successfully unregistered.\n");
 		let name_changed = message.channel.setName("factorio-unset");
 		name_changed.then(() => {
-			message.channel.setTopic("::unset was used here");
+			if (update_descriptions) message.channel.setTopic("::unset was used here");
 		});
 	},
 	"setadmin": function (message, command) {
@@ -722,6 +732,7 @@ var admincommands = {
 
 //Update channel description with current list of players
 function updateDescription(channelid) {
+	if (!update_descriptions) return;
 	var playerliststring;
 	let serverid;
 	let force_name;
@@ -956,7 +967,7 @@ function handleInput(input) {
 				open_server.then(() => {
 					bot.channels.get(savedata.channels[mainserver].id).sendMessage(message);
 				});
-				bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
+				if (update_descriptions) bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
 				let forceids = savedata.channels[channelid].forceids;
 				for (let i = 0; i < forceids.length; i++) {
 					let insideid = forceids[i];
@@ -965,7 +976,7 @@ function handleInput(input) {
 						bot.channels.get(savedata.channels[insideid].id).sendMessage(message);
 					});
 					let force_name = insideid.substring(insideid.indexOf("-") + 1);
-					bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
+					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
 				}
 				savedata.channels[mainserver].status = "started";
 				if (savedata.playerlists[mainserver]) delete savedata.playerlists[mainserver];
@@ -986,7 +997,7 @@ function handleInput(input) {
 					message_sent.then((message) => {
 						//message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 					});
-					bot.channels.get(savedata.channels[insideid].id).setTopic("Server offline");
+					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server offline");
 				}
 				savedata.channels[mainserver].status = "stopped";
 				delete savedata.playerlists[mainserver];
@@ -1001,6 +1012,7 @@ function handleInput(input) {
 					message = replaceMentions(message);
 					separator = message.indexOf(":");
 					let username = message.substring(0, separator);
+					message = message.replace(/_/g, "\\_");
 					if (message.charAt(0) == '[') {
 						//If message is from web, send it to main channel
 						bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
@@ -1033,7 +1045,7 @@ function handleInput(input) {
 					bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
 				});
 				savedata.channels[channelid].status = "started";
-				bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
+				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
 				if (savedata.playerlists[channelid]) delete savedata.playerlists[channelid];
 				savedata.playerlists[channelid] = {};
 				fs.unlinkSync("savedata.json");
@@ -1045,11 +1057,12 @@ function handleInput(input) {
 					//bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 				});
 				savedata.channels[channelid].status = "stopped";
-				bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
+				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
 				delete savedata.playerlists[channelid];
 				fs.unlinkSync("savedata.json");
 				fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			} else {
+				message = message.replace(/_/g, "\\_");
 				if (message.charAt(0) == '[') bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
 				else bot.channels.get(savedata.channels[channelid].id).sendMessage("[" + savedata.channels[channelid].name + "] " + message);
 			}
@@ -1142,7 +1155,7 @@ bot.on('message', (message) => {
 
 //Leaves any server that isn't 3Ra
 bot.on('ready', () => {
-	bot.user.setGame("3Ra - Factorio | ::help");
+	bot.user.setGame(gamemessage);
 	//bot.guilds.forEach((guildobj, guildid, collection) => {
 	bot.guilds.forEach((guildobj, lguildid) => {
 		if (lguildid != guildid) guildobj.leave();
@@ -1159,6 +1172,23 @@ bot.on('ready', () => {
 //If the bot joins a server that isn't 3Ra, immediately leave it
 bot.on('guildCreate', (guild) => {
 	if (guild.id != guildid) guild.leave();
+});
+
+//Bot disconnect detection
+bot.on('disconnect', (event) => {
+	//Start the error string
+	let sendstring = "DEBUG$Disconnect detected. ";
+	//Check for error code
+	if (event.code) sendstring = sendstring + "Error Code: " + event.code + ". ";
+	else sendstring = sendstring + "No Error Code provided. ";
+	//Check for error reason
+	if (event.reason) sendstring = sendstring + "Reason: " + event.reason + ". ";
+	else sendstring = sendstring + "No Reason provided. ";
+	//Check if disconnect was clean
+	if (event.wasClean) sendstring = sendstring + "Disconnect was clean.";
+	else sendstring = sendstring + "Disconnect was not clean.";
+	//Write the string to the log
+	safeWrite(sendstring);
 });
 
 bot.login(token);

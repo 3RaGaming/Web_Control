@@ -119,7 +119,7 @@ char * log_chat(char * name, char * message) {
 	time_t current_time = time(NULL);
 	struct tm *time_data = localtime(&current_time);
 	char *timestamp = (char *) malloc((strlen("YYYY-MM-DD HH:MM:SS") + 3) * sizeof(char));
-	sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
+	sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon + 1, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
 
 	//Set up timestamped message, also prefixes chats coming in from servers with [CHAT]
 	char *output_message = (char *) malloc((strlen(timestamp) + strlen(message) + 13)*sizeof(char));
@@ -462,10 +462,67 @@ char * launch_server(char * name, char ** args, char * logpath) {
 		dup2(out_pipe[1], STDOUT_FILENO);
 		close(out_pipe[1]);
 		close(out_pipe[0]);
-		execvp(args[0], args);
-		//If execvp fails
-		fprintf(stderr, "Failure to launch server.");
-		exit(1);
+		if (execvp(args[0], args) == -1) {
+			int errsv = errno;
+			fprintf(stderr, "Failure to launch server. Error Code: ");
+			switch (errsv) {
+				case E2BIG:
+					fprintf(stderr, "E2BIG\n");
+					break;
+				case EACCES:
+					fprintf(stderr, "EACCES\n");
+					break;
+				case EFAULT:
+					fprintf(stderr, "EFAULT\n");
+					break;
+				case EINVAL:
+					fprintf(stderr, "EINVAL\n");
+					break;
+				case EIO:
+					fprintf(stderr, "EIO\n");
+					break;
+				case EISDIR:
+					fprintf(stderr, "EISDIR\n");
+					break;
+				case ELIBBAD:
+					fprintf(stderr, "ELIBBAD\n");
+					break;
+				case ELOOP:
+					fprintf(stderr, "ELOOP\n");
+					break;
+				case EMFILE:
+					fprintf(stderr, "EMFILE\n");
+					break;
+				case ENAMETOOLONG:
+					fprintf(stderr, "ENAMETOOLONG\n");
+					break;
+				case ENFILE:
+					fprintf(stderr, "ENFILE\n");
+					break;
+				case ENOENT:
+					fprintf(stderr, "ENOENT\n");
+					break;
+				case ENOEXEC:
+					fprintf(stderr, "ENOEXEC\n");
+					break;
+				case ENOMEM:
+					fprintf(stderr, "ENOMEM\n");
+					break;
+				case ENOTDIR:
+					fprintf(stderr, "ENOTDIR\n");
+					break;
+				case EPERM:
+					fprintf(stderr, "EPERM\n");
+					break;
+				case ETXTBSY:
+					fprintf(stderr, "ETXTBSY\n");
+					break;
+				default:
+					fprintf(stderr, "UNKNOWN - %d\n", errsv);
+					break;
+			}
+			exit(1);
+		}
 	}
 	//Only parent process reaches this point
 	//Closes unneeded pipe ends, adds server to server_list, and creates new thread for monitoring
@@ -512,7 +569,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 char * start_server(char * name, char * input) {
 	char *token;
 	char *delim = ",\n\t";
-	char **args = (char **) malloc(5*sizeof(char *));
+	char **args = (char **) malloc(6*sizeof(char *));
 	char **launchargs = (char **) malloc(10*sizeof(char *));
 	int i = 0;
 	int j = 0;
@@ -527,7 +584,7 @@ char * start_server(char * name, char * input) {
 	i = 0;
 
 	//Process of setting up the arguments for the execvp() call
-	launchargs[i++] = "/usr/share/factorio/bin/x64/factorio";
+	launchargs[i++] = "TEMP";
 	if (strcmp(args[j++],"true") == 0) {
 		launchargs[i++] = "--start-server-load-latest";
 	} else {
@@ -547,6 +604,7 @@ char * start_server(char * name, char * input) {
 	strcat(launchargs[i], "/server-settings.json\0");
 	i++;
 	launchargs[i] = (char *) NULL;
+	launchargs[0] = args[j + 1];
 
 	char * result = launch_server(name, launchargs, args[j]);
 
@@ -618,7 +676,7 @@ void * bot_ready_watch(void * vbot) {
 
 void launch_bot() {
 	char **botargs = (char **) malloc(3*sizeof(char *));
-	botargs[0] = "nodejs\0";
+	botargs[0] = "node\0";
 	botargs[1] = "./3RaFactorioBot.js\0";
 	botargs[2] = (char *) NULL;
 	launch_server("bot", botargs, "bot");
@@ -646,7 +704,7 @@ void server_crashed(struct ServerData * server) {
 		time_t current_time = time(NULL);
 		struct tm *time_data = localtime(&current_time);
 		char *timestamp = (char *) malloc((strlen("YYYY-MM-DD HH:MM:SS") + 3) * sizeof(char));
-		sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
+		sprintf(timestamp, "%04d-%02d-%02d %02d:%02d:%02d", time_data->tm_year + 1900, time_data->tm_mon + 1, time_data->tm_mday, time_data->tm_hour, time_data->tm_min, time_data->tm_sec);
 		char *output_message = (char *) malloc((strlen(timestamp) + strlen("emergency$") + 4)*sizeof(char));
 		sprintf(output_message, "emergency$%s\n", timestamp);
 		free(timestamp);

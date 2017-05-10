@@ -1041,7 +1041,7 @@ function Download(url) {
 
 function server_sss(cmd) {
     if(user_level == "viewonly" && (cmd == "start" || cmd == "stop" || cmd == "forcekill" )) {
-        customAlerts.add("You have view only access","warning",true);
+        alert("You have view only access","warning",true);
         return;
     }
 	if(cmd == "forcekill") {
@@ -1058,13 +1058,13 @@ function server_sss(cmd) {
 	http.send(params);
 	http.onload = function() {
 		if(http.responseText) {
-            customAlerts.add(http.responseText,"info",true);
+            alert(http.responseText,"info",true);
 		}
 	};
 }
 function force_kill(cmd) {
 	if(user_level == "viewonly") {
-        customAlerts.add("You have view only access",'warning',true);
+        alert("You have view only access",'warning',true);
         return;
     }
 	if(cmd == "forcekill") {
@@ -1079,7 +1079,7 @@ function force_kill(cmd) {
 			http.send(params);
 			http.onload = function() {
 				if(http.responseText) {
-                    customAlerts.add(http.responseText,"info",true);
+                    alert(http.responseText,"info",true);
 				}
 			};
         }
@@ -1087,7 +1087,7 @@ function force_kill(cmd) {
 }
 function command() {
     if(user_level == "viewonly") {
-        customAlerts.add("You have view only access","warning",true);
+        alert("You have view only access","warning",true);
         return;
     }
     var http = new XMLHttpRequest();
@@ -1100,7 +1100,7 @@ function command() {
     http.send(params);
     http.onload = function() {
         if(http.responseText) {
-            customAlerts.add(http.responseText, "info",true);
+            alert(http.responseText, "info",true);
         }
     };
 }
@@ -1162,13 +1162,23 @@ function upload() {
 	if ($('#upload_file').val == "" || user_level == "viewonly") {
 		return;
 	}
+    if ($('#upload_max_filesize_m').val()) {
+		upload_max_filesize_m = $('#upload_max_filesize_m').val();
+	} else {
+        upload_max_filesize_m = "30M";
+    }
+    if ($('#upload_max_filesize_b').val()) {
+		upload_max_filesize_b = $('#upload_max_filesize_b').val();
+	} else {
+        upload_max_filesize_b = 31457280;
+    }
 	var the_file;
 	$('#fileStatus').html("");
 	if ($('#upload_file')[0].files[0]) {
 		the_file = $('#upload_file')[0].files[0];
-		if ( the_file.size > 31457280 ) {
+		if ( the_file.size > upload_max_filesize_b ) {
 			//This is also a server set limitation
-			$('#fileStatus').html("File is too big. Must be less than 30M");
+			$('#fileStatus').html("File is too big. Must be less than " + upload_max_filesize_m);
 			return;
 		}
 	} else {
@@ -1241,7 +1251,7 @@ function update_web_control(user_name) {
             $("#update_web_control").submit();
         }
     } else {
-        customAlerts.add("Must be a web admin to update gui :(", "error",true);
+        alert("Must be a web admin to update gui :(", "error",true);
     }
 }
 
@@ -1278,7 +1288,7 @@ function files_delete() {
             if(http.responseText == "success") {
                 location.reload();
             } else {
-                customAlerts.add(http.responseText,'info',true);
+                alert(http.responseText,'info',true);
             }
         }
     };
@@ -1294,7 +1304,7 @@ $(document).ready(function() {
 	});
     $('#delete_files').on('click', function() {
         if(user_level == "viewonly") {
-            customAlerts.add("You have view only access","warning",true);
+            alert("You have view only access","warning",true);
         	return;
         }
 		files_delete();
@@ -1321,7 +1331,7 @@ $(document).ready(function() {
 	//Upload button click event
 	$('#upload_button').on('click', function() {
         if(user_level == "viewonly") {
-            customAlerts.add("You have view only access","warning",true);
+            alert("You have view only access","warning",true);
         	return;
         }
 		$('#upload_file').click();

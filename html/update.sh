@@ -4,7 +4,7 @@ if [ "$result" == "html" ]; then
 	result="master";
 fi
 args=("$@");
-tmp_dir="/tmp/ramdisk"
+tmp_dir="/tmp";
 
 if [ "${args[0]}" ]; then
 	case "${args[0]}" in

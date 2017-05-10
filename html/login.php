@@ -71,10 +71,12 @@ if(isset($_GET['code'])) {
 		curl_setopt_array($curlrqst0, $options);
 		$tokenobject = curl_exec($curlrqst0);
 		$tokenjson = json_decode($tokenobject, true);
-		curl_close($curlrqst0);
-		
+
 		/* DEBUG */if(isset($debug)) { 	$debug[] = "tokenJson" . __LINE__;
-										$debug[] = print_r($tokenjson, true); }
+										$debug[] = print_r($tokenjson, true);
+										$debug[] = curl_error($curlrqst0); }
+										
+		curl_close($curlrqst0);
 		
 		if(isset($tokenjson['access_token'])) {
 			$token = $tokenjson['access_token'];
@@ -96,6 +98,11 @@ if(isset($_GET['code'])) {
 			curl_setopt($curlrqst1, CURLOPT_RETURNTRANSFER, true);
 			$userobject = curl_exec($curlrqst1);
 			$userjson = json_decode($userobject, true);
+			
+			/* DEBUG */if(isset($debug)) {  $debug[] = "UserJson" . __LINE__;
+											$debug[] = print_r($userjson, true);
+											$debug[] = curl_error($curlrqst1); }
+											
 			curl_close($curlrqst1);
 			
 			if(isset($userjson["id"])) {
@@ -104,33 +111,33 @@ if(isset($_GET['code'])) {
 				$error = "user_json_id";
 			}
 			
-			/* DEBUG */if(isset($debug)) {  $debug[] = "UserJson" . __LINE__;
-											$debug[] = print_r($userjson, true); }
-			
 			$curlrqst2 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/members/'.$userid);
 			curl_setopt($curlrqst2, CURLOPT_HTTPHEADER, $botheader);
 			curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
 			$memberobject = curl_exec($curlrqst2);
 			$memberjson = json_decode($memberobject, true);
+			/* DEBUG */if(isset($debug)) {  $debug[] = "MemberJson" . __LINE__;
+											$debug[] = print_r($memberjson, true);
+											$debug[] = curl_error($curlrqst2); }
 			curl_close($curlrqst2);
 			if (isset($memberjson['code'])&&($memberjson['code']==10007)) {
 				$error = "member_no_exist";
 			} elseif(!isset($memberjson["user"]["username"]) || !isset($memberjson["roles"])) {
 				$error = "member_data_invalid";
 			}
-			if(!isset($error)) {				
-				/* DEBUG */if(isset($debug)) {  $debug[] = "MemberJson" . __LINE__;
-												$debug[] = print_r($memberjson, true); }
-				
+
+			if(!isset($error)) {
 				$curlrqst3 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/roles');
 				curl_setopt($curlrqst3, CURLOPT_HTTPHEADER, $botheader);
 				curl_setopt($curlrqst3, CURLOPT_RETURNTRANSFER, true);
 				$roleobject = curl_exec($curlrqst3);
 				$rolejson = json_decode($roleobject, true);
-				curl_close($curlrqst3);
 				
 				/* DEBUG */if(isset($debug)) {  $debug[] = "RolesJson" . __LINE__;
-												$debug[] = print_r($rolejson, true); }
+												$debug[] = print_r($rolejson, true);
+												$debug[] = curl_error($curlrqst3); }
+												
+				curl_close($curlrqst3);
 				
 				$level1id = null;
 				$level2id = null;
@@ -146,7 +153,7 @@ if(isset($_GET['code'])) {
 					foreach($memberjson["roles"] as $mkey => $mvalue) {
 						if($mvalue == $level1id) $level1 = true;
 						if($mvalue == $level2id) $level2 = true;
-						if($level1id && $level2id) break 1;
+						if($level1 && $level2) break 1;
 					}
 				}
 				

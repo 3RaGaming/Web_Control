@@ -25,7 +25,26 @@ if(isset($_REQUEST['start'])) {
 		echo "You have read only access.";
 	} else {
 		if(file_exists("$base_dir$server_select/server-settings.json")) {
-			$server_settings_path = "$base_dir$server_select/server-settings.json";
+			$server_dir = $base_dir . $server_select . "/";
+			$server_settings_path = $server_dir . "server-settings.json";
+			$server_settings_web_path = $server_dir . "server-settings-web.json";
+			if(file_exists($server_settings_web_path)) {
+				$server_settings_web = json_decode(file_get_contents($server_settings_web_path), true);
+				if(isset($server_settings_web['version'])) {
+					$s_version = $server_settings_web['version'];
+					//available exe versions
+					$program_dir = "/usr/share/factorio/";
+					foreach(glob("$program_dir*", GLOB_ONLYDIR) as $dir) {
+						$dir = str_replace($program_dir, '', $dir);
+						$server_available_versions[$dir] = "$program_dir$dir";
+					}
+					if(!isset($server_available_versions[$s_version])) {
+						die('server-settings-web version '.$s_version.'  does not exist.');
+					}
+				}
+			} else {
+				die('Missing server-settings-web.json. Click "config" to attempt to generate one.');
+			}
 			$server_name="";
 			$server_password="";
 			$new_server_settings = false;
@@ -65,7 +84,7 @@ if(isset($_REQUEST['start'])) {
 					file_put_contents($server_settings_path, $newJsonString);
 				}
 			}
-			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "start" "'.$user_name.'"');
+			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "start" "'.$user_name.'" "'.$server_available_versions[$s_version].'"');
 			echo $output;
 		} else {
 			die('Missing server-settings.json');
@@ -94,6 +113,8 @@ if(isset($_REQUEST['start'])) {
 		echo $output;
 		$output = shell_exec('pkill -9 managepgm');
 		echo $output;
+		$output = shell_exec('screen -wipe');
+		#echo $output;
 		echo "Servers killed. You monster.";
 	}
 } elseif(isset($_REQUEST['command'])) {
