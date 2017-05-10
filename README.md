@@ -18,9 +18,8 @@ php7
 Node.js (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
 
 # Installation
-Easy Install!
-`wget https://raw.githubusercontent.com/3RaGaming/Web_Control/master/install.sh`
-`sudo bash install.sh`
+Easy Install! Put this line into your SSH terminal to begin the install:
+`bash <(curl -s https://raw.githubusercontent.com/3RaGaming/Web_Control/master/install.sh)`
 
 This will run you through the entire setup process. Once the program is installed on the server, you'll be instructed on how to access the web gui to continue the rest of the configuration.
 
