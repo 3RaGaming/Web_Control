@@ -33,7 +33,7 @@ Basically, you should treat /var/www/ as the root directory for all web_control 
 To compile the manage.c program, you must install gcc.  
 1) Open a Terminal window and navigate to `cd /var/www/factorio`
 
-2) Run the command `gcc -o managepgm -pthread manage.c` (On success, nothing should appear in the terminal. If an error message appears, message zackman0010 with the error message.)
+2) Run the command `gcc -o -std=gnu99 managepgm -pthread manage.c` (On success, nothing should appear in the terminal. If an error message appears, message zackman0010 with the error message.)
 
 3) Run the command `npm i --save --no-optional discord.js` (If a message appears saying missing requirements, ignore it. It's only the voice server parts, which are not used in this program)
 
