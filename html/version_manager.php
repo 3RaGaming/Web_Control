@@ -53,10 +53,24 @@
 		curl_close($ch);
 	}
 	
+	function getFilename($url){
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_HEADER, 1);
+		curl_setopt($ch, CURLOPT_NOBODY, 1);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+		$data = curl_exec($ch);
+
+		//echo $data;
+		preg_match("/Content-Disposition: .*filename=([^\n]+)/", $data, $filenames);
+		preg_match("/Location: ([^\n]+)/", $data, $filelocations);
+		return array($filenames[1],  $filelocations[1]);
+	}
+	
 	function install($version, $program_dir, $tmp_file) {
-		echo "installing\xA";
-		file_put_contents($tmp_file, json_encode(array("action" => "installing", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
-		echo "install\xA";
+		$progress_file = "/tmp/factorio-version-manager_".$version.".txt";
+		file_put_contents($tmp_file, json_encode(array("action" => "install", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
 		if(is_dir($program_dir)) {
 			unlink($tmp_file);
 			return "Install failed. Directory exists.";
@@ -66,28 +80,116 @@
 				"https://www.factorio.com/download-headless/experimental"
 			);
 			foreach($urls as $url) {
-				//run this script on each url in the array
+				//run this script on each url in the array until a match is found
 				$server_matched_versions = get_url($url);
-				//var_dump($server_available_versions);
 				//if a download link is found, iterate the results
 				if(isset($server_matched_versions[0])) {
 					foreach($server_matched_versions[0] as $key => $value) {
 						//find the verion number in the link
 						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-						//create array to work with later
 						print_r($output);
 						if($output[1]==$version) {
 							$direct_url = "https://www.factorio.com/$value";
 							break 2;
 						}
-						//add to total versions to compare against installed versions
 					}
 				}
 			}
 			print_r($server_matched_versions);
 			
 			if(isset($direct_url)) {
-				return $direct_url;
+				//create status files periodically so other users know whats going on. Should be able to use this for active user status updates as well
+				file_put_contents($tmp_file, json_encode(array("action" => "downloading", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
+				
+				//get's filename and download url, actually...
+				$file = getFilename($direct_url);
+				
+				//make sure we get both in return
+				if(isset($file[0])&&isset($file[1])) {
+					//define the function so we can get download status as we download
+					function progressCallback( $resource, $download_size, $downloaded_size, $upload_size, $uploaded_size )
+					{
+						static $previousProgress = 0;
+						
+						if ( $download_size == 0 )
+							$progress = 0;
+						else
+							$progress = round( $downloaded_size * 100 / $download_size );
+						
+						if ( $progress > $previousProgress)
+						{
+							$previousProgress = $progress;
+							//this *should* replace the file contents on each update. ajax can check for updates for a pretty progress bar and/or percentage
+							file_put_contents( $progress_file, "$progress" );
+						}
+					}
+					
+					//clean up the URL, filename and set the temporary path
+					$url = trim($file[1]);
+					$filename = preg_replace("/[^a-zA-Z0-9.-_]+/", "", $file[0]);
+					$filename_loc = "/tmp/".$filename;
+					
+					file_put_contents( $progress_file, '0' );
+					$targetFile = fopen( $filename_loc, 'w' );
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch, CURLOPT_NOPROGRESS, false );
+					curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+					curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, 'progressCallback' );
+					curl_setopt($ch, CURLOPT_FILE, $targetFile );
+					$data=curl_exec($ch);
+					curl_close($ch);
+					fclose( $targetFile );
+					if($data === false)
+					{
+						return 'Curl error: ' . __LINE__ . ' ' . curl_error($ch);
+					} //continue if successful
+					
+					file_put_contents($tmp_file, json_encode(array("action" => "unpacking", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
+					if(is_dir($program_dir)) {
+						return "directory exists";
+					} else {
+						$fileType = mime_content_type($filename_loc);
+						switch ($fileType) {
+							case "application/x-xz":
+								return "unsupported filetyle: $fileType";
+								break;
+							case "application/x-gzip";
+								$p = new PharData($filename_loc);
+								$p->decompress(); // creates /path/to/my.tar
+								print_r($p);
+								// unarchive from the tar
+								/*try {
+									$phar = new PharData('myphar.tar');
+									$phar->extractTo('/full/path'); // extract all files
+								} catch (Exception $e) {
+									// handle errors
+								}*/
+								break:
+							default:
+								return "unsupported filetyle: $fileType";
+						}
+						//mkdir($program_dir);
+					}
+					
+
+					
+					$p = new PharData('/path/to/my.tar.gz');
+					$p->decompress(); // creates /path/to/my.tar
+					
+					// unarchive from the tar
+					try {
+						$phar = new PharData('myphar.tar');
+						$phar->extractTo('/full/path'); // extract all files
+					} catch (Exception $e) {
+						// handle errors
+					}
+					
+				
+				} else {
+					return "issue finding remote file ".$file[0]." ".$file[1];
+				}
 			} else {
 				return "no download found";
 			}
