@@ -87,9 +87,7 @@
 				return $url;
 			} else {
 				return "no download found";
-				unlink($tmp_file);
 			}
-			unlink($tmp_file);
 			return "install success";
 		}
 	}
@@ -127,6 +125,7 @@
 						die('Action in progress: '.$tmp_file_contents->action.' by '.$tmp_file_contents->username);
 					} else {
 						$result = install($version, $program_dir, $tmp_file);
+						unlink($tmp_file);
 					}
 					//$log_record = $log_record." deleted\xA";
 				}
