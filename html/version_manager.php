@@ -75,6 +75,7 @@
 						//find the verion number in the link
 						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
 						//create array to work with later
+						print_r($output);
 						if($output[1]==$version) {
 							$direct_url = "https://www.factorio.com/$value";
 							break 2;
@@ -83,6 +84,8 @@
 					}
 				}
 			}
+			print_r($server_matched_versions);
+			
 			if(isset($url)) {
 				return $url;
 			} else {
