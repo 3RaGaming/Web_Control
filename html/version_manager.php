@@ -59,7 +59,7 @@
 		echo "install\xA";
 		if(is_dir($program_dir)) {
 			unlink($tmp_file);
-			return "Install failed. Directory exsists.";
+			return "Install failed. Directory exists.";
 		} else {
 			$urls = array(
 				"https://www.factorio.com/download-headless/stable",
@@ -115,6 +115,8 @@
 				$program_dir = $program_dir.$version."/";
 				$tmp_file = "/tmp/factorio-version-manager.$version.txt";
 				if(is_dir($program_dir)) {
+					$result = "Install failed. Directory exists.";
+				} else {
 					if(file_exists($tmp_file)) {
 						$tmp_file_contents = json_decode(file_get_contents($tmp_file));
 						die('Action in progress: '.$tmp_file_contents->action.' by '.$tmp_file_contents->username);
@@ -122,8 +124,6 @@
 						$result = install($version, $program_dir, $tmp_file);
 					}
 					//$log_record = $log_record." deleted\xA";
-				} else {
-					$result = "Invalid Version $version";
 				}
 			} else {
 				$result = "No Version provided";
