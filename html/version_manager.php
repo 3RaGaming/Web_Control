@@ -86,8 +86,8 @@
 			}
 			print_r($server_matched_versions);
 			
-			if(isset($url)) {
-				return $url;
+			if(isset($direct_url)) {
+				return $direct_url;
 			} else {
 				return "no download found";
 			}
