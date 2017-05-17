@@ -76,7 +76,7 @@
 						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
 						//create array to work with later
 						if($output[1]==$version) {
-							$url = "https://www.factorio.com/$value";
+							$direct_url = "https://www.factorio.com/$value";
 							break 2;
 						}
 						//add to total versions to compare against installed versions
