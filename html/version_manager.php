@@ -53,11 +53,47 @@
 		curl_close($ch);
 	}
 	
+	function install($version, $program_dir, $tmp_file) {
+		echo "installing\xA";
+		file_put_contents($tmp_file, json_encode(array("action" => "installing", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
+		echo "install\xA";
+		if(is_dir($program_dir)) {
+			unlink($tmp_file);
+			return "Install failed. Directory exsists.";
+		} else {
+			$urls = array(
+				"https://www.factorio.com/download-headless/stable",
+				"https://www.factorio.com/download-headless/experimental"
+			);
+			foreach($urls as $url) {
+				//run this script on each url in the array
+				$server_matched_versions = get_url($url);
+				//var_dump($server_available_versions);
+				//if a download link is found, iterate the results
+				if(isset($server_matched_versions[0])) {
+					foreach($server_matched_versions[0] as $key => $value) {
+						//find the verion number in the link
+						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
+						//var_dump($output[1]);
+						//get the experimental or stable tag from the url
+						$branch = substr($url, strrpos($url, '/') + 1);
+						//create array to work with later
+						$server_available_versions[$output[1]] = array(0=>$value,1=>$branch);
+						//add to total versions to compare against installed versions
+					}
+				}
+			}
+			print_r($server_available_versions);
+			unlink($tmp_file);
+			return "install success";
+		}
+	}
+	
 	function delete($version, $program_dir, $tmp_file) {
 		echo "delete-ing\xA";
 		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
 		echo "delete\xA";
-		//rrmdir($program_dir));
+		//rrmdir($program_dir);
 		if(is_dir($program_dir)) {
 			unlink($tmp_file);
 			return "delete failed";
@@ -74,9 +110,25 @@
 	
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['install'])&&$_REQUEST['install']!="") {
-			$version = preg_replace('/[^0-9.]+/', '', $_REQUEST['install']);
-			$program_dir = $program_dir.$version."/";
-			$tmp_file = "/tmp/factorio-version-manager.$version.txt";
+			if($_REQUEST['install']!="") {
+				$version = preg_replace('/[^0-9.]+/', '', $_REQUEST['install']);
+				$program_dir = $program_dir.$version."/";
+				$tmp_file = "/tmp/factorio-version-manager.$version.txt";
+				if(is_dir($program_dir)) {
+					if(file_exists($tmp_file)) {
+						$tmp_file_contents = json_decode(file_get_contents($tmp_file));
+						die('Action in progress: '.$tmp_file_contents->action.' by '.$tmp_file_contents->username);
+					} else {
+						$result = install($version, $program_dir, $tmp_file);
+					}
+					//$log_record = $log_record." deleted\xA";
+				} else {
+					$result = "Invalid Version $version";
+				}
+			} else {
+				$result = "No Version provided";
+			}
+			echo $result;
 			//file_put_contents($log_path, $log_record, FILE_APPEND);
 			die();
 		} elseif(isset($_REQUEST['delete'])) {
