@@ -55,15 +55,15 @@
 	
 	function delete($version, $program_dir, $tmp_file) {
 		echo "delete-ing\xA";
-		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name), JSON_PRETTY_PRINT));
+		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
 		echo "delete\xA";
 		//rrmdir($program_dir));
 		if(is_dir($program_dir)) {
-			echo "delete-failed\xA";
-			file_put_contents($tmp_file, json_encode(array("action" => "failed", "username" => $user_name), JSON_PRETTY_PRINT));
+			unlink($tmp_file);
+			return "delete failed";
 		} else {
-			echo "delete-success\xA";
-			file_put_contents($tmp_file, json_encode(array("action" => "success", "username" => $user_name), JSON_PRETTY_PRINT));
+			unlink($tmp_file);
+			return "delete success";
 		}
 	}
 	
@@ -90,7 +90,7 @@
 						if(isset($tmp_file_contents['time'])) {
 							
 						}
-						die('tmp file exists'.$tmp_file_contents);
+						die('Action in progress: '.$tmp_file_contents['action'].' by '.$tmp_file_contents['username']);
 					} else {
 						$result = delete($version, $program_dir, $tmp_file);
 						
