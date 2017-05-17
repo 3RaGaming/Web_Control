@@ -87,7 +87,7 @@
 				if(is_dir($program_dir)) {
 					if(file_exists($tmp_file)) {
 						$tmp_file_contents = json_decode(file_get_contents($tmp_file));
-						die('Action in progress: '.$tmp_file_contents['action'].' by '.$tmp_file_contents['username']);
+						die('Action in progress: '.$tmp_file_contents->action.' by '.$tmp_file_contents->username);
 					} else {
 						$result = delete($version, $program_dir, $tmp_file);
 						
