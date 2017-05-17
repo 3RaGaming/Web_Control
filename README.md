@@ -18,9 +18,8 @@ php7
 Node.js (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
 
 # Installation
-Easy Install!
-`wget https://raw.githubusercontent.com/3RaGaming/Web_Control/master/install.sh`
-`sudo bash install.sh`
+Easy Install! Put this line into your SSH terminal to begin the install:
+`bash <(curl -s https://raw.githubusercontent.com/3RaGaming/Web_Control/master/install.sh)`
 
 This will run you through the entire setup process. Once the program is installed on the server, you'll be instructed on how to access the web gui to continue the rest of the configuration.
 
@@ -34,7 +33,7 @@ Basically, you should treat /var/www/ as the root directory for all web_control 
 To compile the manage.c program, you must install gcc.  
 1) Open a Terminal window and navigate to `cd /var/www/factorio`
 
-2) Run the command `gcc -o managepgm -pthread manage.c` (On success, nothing should appear in the terminal. If an error message appears, message zackman0010 with the error message.)
+2) Run the command `gcc -o -std=gnu99 managepgm -pthread manage.c` (On success, nothing should appear in the terminal. If an error message appears, message zackman0010 with the error message.)
 
 3) Run the command `npm i --save --no-optional discord.js` (If a message appears saying missing requirements, ignore it. It's only the voice server parts, which are not used in this program)
 

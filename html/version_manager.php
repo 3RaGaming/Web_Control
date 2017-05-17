@@ -1,83 +1,4 @@
-<?php
-	//background script work in cli only
-	if (php_sapi_name() == "cli") {
-		//argv[1] = version argv[2] = action argv[3] = username
-		//log directory for managepgm. we'll store data for user installs and deletes here.
-		if(isset($argv[1])) { $version = preg_replace('/[^0-9.]+/', '', $argv[1]); } else { die('No version'); }
-		if(isset($argv[2])) { $action = preg_replace("/[^a-zA-Z]+/", "", $argv[2]); } else { die('No action'); }
-		if ( !in_array($action, array('install','delete')) ) { die("Invalid Action $action"); }
-		if(isset($argv[3])) { $user_name = preg_replace("/[^a-zA-Z0-9]+/", "", $argv[3]); } else { $user_name = "UNKNOWN"; }
-		$date = date('Y-m-d');
-		$time = date('H:i:s');
-		$log_dir = "/var/www/factorio/logs";
-		$log_path = "$log_dir/version-manager-$date.log";
-		//available exe versions
-		$program_dir = "/usr/share/factorio/$version";
-		$log_record = "\xA$date-$time\t".$user_name."\xA Attempting to \"$action\" version \"$version\"\xA";
-		if (!is_dir($log_dir)) {
-			// dir doesn't exist, make it
-			mkdir($log_dir);
-		}
-		$tmp_file = "/tmp/$version.install";
-		function rrmdir($dir) {
-			foreach(glob($dir . '/*') as $file) { 
-				if(is_dir($file)) rrmdir($file); else unlink($file); 
-			} rmdir($dir); 
-		}
-		function install() {
-			
-		}
-		echo "\xA$program_dir - $tmp_file - ";
-		ini_get('upload_tmp_dir');
-		echo "\xA";
-		sys_get_temp_dir();
-		if($action=="delete") {
-			if(is_dir($program_dir)) {
-				if(file_exists($tmp_file)) {
-					die('tmp file exists');
-				} else {
-					echo "delete-ing\xA";
-					file_put_contents($tmp_file, json_encode(array("delete","deleting $program_dir")));
-					sleep(10);
-					echo "delete\xA";
-					$file_c=0;
-					$objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($program_dir), RecursiveIteratorIterator::SELF_FIRST);
-					foreach($objects as $name => $object){
-						$file_c++;
-					}
-					printf("There were $file_c Files\xA");
-					//rrmdir($program_dir));
-					sleep (10);
-					if(is_dir($program_dir)) {
-						echo "delete-failed\xA";
-						file_put_contents($tmp_file, json_encode(array("delete","failed")));
-						sleep(10);
-						unlink($tmp_file);
-					} else {
-						echo "delete-success\xA";
-						file_put_contents($tmp_file, json_encode(array("delete","success")));
-						sleep(10);
-						unlink($tmp_file);
-					}
-				}
-				$log_record = $log_record." deleted\xA";
-			} else {
-				echo "no folder to delete";
-				$log_record = $log_record." no folder to delete\xA";
-			}
-		} elseif($action=="install") {
-			if(is_dir($program_dir)) {
-				echo "already installed";
-				$log_record = $log_record." already installed\xA";
-			} else {
-				echo "can install";
-				$log_record = $log_record." installed\xA";
-			}
-		}
-		file_put_contents($log_path, $log_record, FILE_APPEND);
-		die();
-	}
-	
+<?php	
 	if(!isset($_SESSION)) { session_start(); }
 	if(!isset($_SESSION['login'])) {
 		die('Error: Login required');
@@ -132,8 +53,59 @@
 		curl_close($ch);
 	}
 	
+	function delete($version, $program_dir, $tmp_file) {
+		echo "delete-ing\xA";
+		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name), JSON_PRETTY_PRINT));
+		echo "delete\xA";
+		//rrmdir($program_dir));
+		if(is_dir($program_dir)) {
+			echo "delete-failed\xA";
+			file_put_contents($tmp_file, json_encode(array("action" => "failed", "username" => $user_name), JSON_PRETTY_PRINT));
+		} else {
+			echo "delete-success\xA";
+			file_put_contents($tmp_file, json_encode(array("action" => "success", "username" => $user_name), JSON_PRETTY_PRINT));
+		}
+	}
+	
+	$date = date('Y-m-d');
+	$time = date('H:i:s');
+	$log_dir = "/var/www/factorio/logs";
+	$log_path = "$log_dir/version-manager-$date.log";
+	
 	if(isset($_REQUEST)) {
-		if(isset($_REQUEST['show'])) {
+		if(isset($_REQUEST['install'])&&$_REQUEST['install']!="") {
+			$version = preg_replace('/[^0-9.]+/', '', $_REQUEST['install']);
+			$program_dir = $program_dir.$version."/";
+			$tmp_file = "/tmp/factorio-version-manager.$version.txt";
+			//file_put_contents($log_path, $log_record, FILE_APPEND);
+			die();
+		} elseif(isset($_REQUEST['delete'])) {
+			if($_REQUEST['delete']!="") {
+				$version = preg_replace('/[^0-9.]+/', '', $_REQUEST['delete']);
+				$program_dir = $program_dir.$version."/";
+				$tmp_file = "/tmp/factorio-version-manager.$version.txt";
+				if(is_dir($program_dir)) {
+					if(file_exists($tmp_file)) {
+						$tmp_file_contents = json_decode(file_get_contents($tmp_file));
+						if(isset($tmp_file_contents['time'])) {
+							
+						}
+						die('tmp file exists'.$tmp_file_contents);
+					} else {
+						$result = delete($version, $program_dir, $tmp_file);
+						
+					}
+					//$log_record = $log_record." deleted\xA";
+				} else {
+					$result = "Invalid Version $version";
+				}
+			} else {
+				$result = "No Version provided";
+			}
+			echo $result;
+			//file_put_contents($log_path, $log_record, FILE_APPEND);
+			die();
+		} elseif(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
 				//print_r($server_installed_versions);
 				echo "<br /><br />";
@@ -191,7 +163,7 @@
 					} else {
 						//if tmp_file doesn't exist, general rules for if it's installed or not can be displayed
 						if(isset($server_installed_versions[$value])) {
-							echo "<span id=\"$value-span\"><button name=\"$value-delete\" onclick=\"return form_action(\'install\')\">delete</button> - installed</span>";
+							echo "<span id=\"$value-span\"><button name=\"$value-delete\" onclick=\"return form_action(\'delete\')\">delete</button> - installed</span>";
 						} else {
 							echo "<span id=\"$value-span\"><button name=\"$value-install\" onclick=\"return form_action(\'install\')\">install</button> - not found</span>";
 						}
@@ -219,8 +191,11 @@
 			$('#link_home').attr('href',"index.php?d=" + server);
 			$('#link_logs').attr('href',"logs.php?d=" + server + "#server_list-" + server);
 		}
-		var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
 <?php
+		echo "\t\tvar server_select = \"";
+		if(isset($server_select)) { echo $server_select; }  else { echo "error"; }
+		echo "\";\xA";
+
 		echo "\t\tvar user_level = \"$user_level\";\xA";
 		echo "\t\tvar user_name = \"$user_name\";\xA";
 		//Things to only start doing after the page has finished loading
