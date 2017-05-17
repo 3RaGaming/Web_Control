@@ -74,16 +74,21 @@
 					foreach($server_matched_versions[0] as $key => $value) {
 						//find the verion number in the link
 						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-						//var_dump($output[1]);
-						//get the experimental or stable tag from the url
-						$branch = substr($url, strrpos($url, '/') + 1);
 						//create array to work with later
-						$server_available_versions[$output[1]] = array(0=>$value,1=>$branch);
+						if($output[1]==$version) {
+							$url = "https://www.factorio.com/$value";
+							break 2;
+						}
 						//add to total versions to compare against installed versions
 					}
 				}
 			}
-			print_r($server_available_versions);
+			if(isset($url)) {
+				return $url;
+			} else {
+				return "no download found";
+				unlink($tmp_file);
+			}
 			unlink($tmp_file);
 			return "install success";
 		}
