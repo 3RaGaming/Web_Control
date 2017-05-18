@@ -68,6 +68,10 @@
 		return array($filenames[1],  $filelocations[1]);
 	}
 	
+	function move_dir($oldPath,$newPath) {
+		exec("mv ".escapeshellarg($oldPath)." ".escapeshellarg($newPath));
+	}
+	
 	function install($version, $program_dir, $tmp_file) {
 		$progress_file = "/tmp/factorio-version-manager_progress.".$version.".txt";
 		file_put_contents($tmp_file, json_encode(array("action" => "install", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
@@ -152,7 +156,8 @@
 						$fileType = mime_content_type($filename_loc);
 						switch ($fileType) {
 							case "application/x-xz":
-								return "unsupported filetyle: $fileType";
+								unlink($filename_loc);
+								return "filetype not yet implemented: $fileType";
 								break;
 							case "application/x-gzip";
 								$filename_tar = pathinfo( $filename_loc, PATHINFO_FILENAME ).".tar";
@@ -174,7 +179,7 @@
 									//mkdir($tar_dir);
 									$phar->extractTo($tar_dir);
 								} catch (Exception $e) {
-									return "tar extract failure $e";
+									return "tar extract failure: $e";
 									// handle errors
 								}
 								
@@ -189,13 +194,14 @@
 									return TRUE;
 								}
 								unlink($filepath_tar);
+								
 								if(is_dir_empty($tar_dir)) {
 									return "install fail. Dir is empty";
 								} else {
 									$files_dir = $tar_dir."factorio";
-									rename($files_dir, $program_dir);
+									move_dir($files_dir, $program_dir);
 									if(is_dir_empty($program_dir)) {
-										return "failed to move from tmp to $version";
+										return "failed to move from tmp to $program_dir";
 									} else {
 										return "Install Successfull! $program_dir";
 									}
@@ -216,11 +222,28 @@
 		}
 	}
 	
+	function rrmdir($src) {
+		$dir = opendir($src);
+		while(false !== ( $file = readdir($dir)) ) {
+			if (( $file != '.' ) && ( $file != '..' )) {
+				$full = $src . '/' . $file;
+				if ( is_dir($full) ) {
+					rrmdir($full);
+				}
+				else {
+					unlink($full);
+				}
+			}
+		}
+		closedir($dir);
+		rmdir($src);
+	}
+	
 	function delete($version, $program_dir, $tmp_file) {
 		echo "delete-ing\xA";
 		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
 		echo "delete\xA";
-		//rrmdir($program_dir);
+		rrmdir($program_dir);
 		if(is_dir($program_dir)) {
 			unlink($tmp_file);
 			return "delete failed";
@@ -251,19 +274,19 @@
 						$result = install($version, $program_dir, $tmp_file);
 						unlink($tmp_file);
 					}
-					//$log_record = $log_record." deleted\xA";
 				}
 			} else {
 				$result = "No Version provided";
 			}
 			echo $result;
-			//file_put_contents($log_path, $log_record, FILE_APPEND);
+			$log_record = "$time $date $version $result : $username \xA";
+			file_put_contents($log_path, $log_record, FILE_APPEND);
 			die();
 		} elseif(isset($_REQUEST['delete'])) {
 			if($_REQUEST['delete']!="") {
 				$version = preg_replace('/[^0-9.]+/', '', $_REQUEST['delete']);
 				$program_dir = $program_dir.$version."/";
-				$tmp_file = "/tmp/factorio-version-manager.$version.txt";
+				$tmp_file = "/tmp/factorio-version-manager_status.$version.txt";
 				if(is_dir($program_dir)) {
 					if(file_exists($tmp_file)) {
 						$tmp_file_contents = json_decode(file_get_contents($tmp_file));
@@ -279,7 +302,8 @@
 				$result = "No Version provided";
 			}
 			echo $result;
-			//file_put_contents($log_path, $log_record, FILE_APPEND);
+			$log_record = "$time $date $version $result : $username \xA";
+			file_put_contents($log_path, $log_record, FILE_APPEND);
 			die();
 		} elseif(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
@@ -341,7 +365,7 @@
 						if(isset($server_installed_versions[$value])) {
 							echo "<span id=\"$value-span\"><button name=\"$value-delete\" onclick=\"return form_action(\'delete\')\">delete</button> - installed</span>";
 						} else {
-							echo "<span id=\"$value-span\"><button name=\"$value-install\" onclick=\"return form_action(\'install\')\">install</button> - not found</span>";
+							echo "<span id=\"$value-span\"><button name=\"$value-install\" onclick=\"return form_action(\'install\')\">install</button></span>";
 						}
 					}
 					echo "</td></tr>\xA";
