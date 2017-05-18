@@ -241,9 +241,7 @@
 	}
 	
 	function delete($version, $program_dir, $tmp_file) {
-		echo "delete-ing\xA";
 		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
-		echo "delete\xA";
 		rrmdir($program_dir);
 		if(is_dir($program_dir)) {
 			unlink($tmp_file);
