@@ -144,7 +144,7 @@
 					{
 						return 'Curl error: ' . __LINE__ . ' ' . curl_error($ch);
 					} //continue if successful
-					
+					unlink($progress_file);
 					file_put_contents($tmp_file, json_encode(array("action" => "unpacking", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
 					if(is_dir($program_dir)) {
 						return "directory exists";
@@ -170,18 +170,35 @@
 								// unarchive from the tar
 								try {
 									$phar = new PharData($filepath_tar);
+									$tar_dir = "/tmp/$version/";
 									mkdir("/tmp/$version/");
-									$phar->extractTo("/tmp/$version/"); // extract all files
+									$phar->extractTo("/tmp/$version/");
 								} catch (Exception $e) {
+									return "tar extract failure $e";
 									// handle errors
 								}
 								
+								function is_dir_empty($dir) {
+									if (!is_readable($dir)) return NULL; 
+									$handle = opendir($dir);
+									while (false !== ($entry = readdir($handle))) {
+										if ($entry != "." && $entry != "..") {
+											return FALSE;
+										}
+									}
+									return TRUE;
+								}
+								unlink($filepath_tar);
+								if(is_dir_empty($tar_dir)) {
+									return "install success?";
+								} else {
+									return "install fail. Dir is empty";
+								}
 								
 								break;
 							default:
 								return "unsupported filetyle: $fileType";
 						}
-						//mkdir($program_dir);
 					}
 				} else {
 					return "issue finding remote file ".$file[0]." ".$file[1];
