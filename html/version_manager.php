@@ -171,8 +171,8 @@
 								try {
 									$phar = new PharData($filepath_tar);
 									$tar_dir = "/tmp/$version/";
-									mkdir("/tmp/$version/");
-									$phar->extractTo("/tmp/$version/");
+									//mkdir($tar_dir);
+									$phar->extractTo($tar_dir);
 								} catch (Exception $e) {
 									return "tar extract failure $e";
 									// handle errors
@@ -197,7 +197,7 @@
 									if(is_dir_empty($program_dir)) {
 										return "failed to move from tmp to $version";
 									} else {
-										return "Install Successfull!";
+										return "Install Successfull! $program_dir";
 									}
 								}
 								
