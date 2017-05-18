@@ -52,7 +52,7 @@
 		return $matches;
 		curl_close($ch);
 	}
-	
+
 	function getFilename($url){
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -67,11 +67,28 @@
 		preg_match("/Location: ([^\n]+)/", $data, $filelocations);
 		return array($filenames[1],  $filelocations[1]);
 	}
-	
+
 	function move_dir($oldPath,$newPath) {
 		exec("mv ".escapeshellarg($oldPath)." ".escapeshellarg($newPath));
 	}
-	
+
+	function rrmdir($src) {
+		$dir = opendir($src);
+		while(false !== ( $file = readdir($dir)) ) {
+			if (( $file != '.' ) && ( $file != '..' )) {
+				$full = $src . '/' . $file;
+				if ( is_dir($full) ) {
+					rrmdir($full);
+				}
+				else {
+					unlink($full);
+				}
+			}
+		}
+		closedir($dir);
+		rmdir($src);
+	}
+
 	function install($version, $program_dir, $tmp_file) {
 		$progress_file = "/tmp/factorio-version-manager_progress.".$version.".txt";
 		file_put_contents($tmp_file, json_encode(array("action" => "install", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
@@ -158,39 +175,12 @@
 							case "application/x-xz":
 								//unlink($filename_loc);
 								//return "filetype not yet implemented: $fileType";
-								
-								$filename_tar = pathinfo( $filename_loc, PATHINFO_FILENAME ).".tar";
-								$filepath_tar = "/tmp/$filename_tar";
-								if(file_exists($filepath_tar)) {
-									unlink($filepath_tar);
+								$tar_dir = "/tmp/$version/";
+								if(is_dir($tar_dir)) {
+									rrmdir($tar_dir);
 								}
-								$p = new PharData($filename_loc);
-								$p->decompress(); // creates /path/to/my.tar
-								unlink($filename_loc);
-								$i = 0;
-								while ( $i < 8 ) {
-									if(!file_exists($filepath_tar)) {
-										usleep(250000);
-									} else {
-										$i=10;
-									}
-									$i++;
-								}
-								if(!file_exists($filepath_tar)) {
-									return "unable to make tar file";
-								}
-								// unarchive from the tar
-								try {
-									$phar = new PharData($filepath_tar);
-									$tar_dir = "/tmp/$version/";
-									//mkdir($tar_dir);
-									$phar->extractTo($tar_dir);
-								} catch (Exception $e) {
-									unlink($filepath_tar);
-									if(is_dir($tar_dir)) rrmdir($tar_dir);
-									return "tar extract failure: $e";
-									// handle errors
-								}
+								mkdir($tar_dir);
+								exec("tar -xf $filename_loc -C $tar_dir");
 								
 								function is_dir_empty($dir) {
 									if (!is_readable($dir)) return NULL; 
@@ -202,13 +192,13 @@
 									}
 									return TRUE;
 								}
-								unlink($filepath_tar);
+								unlink($filename_loc);
 								if(is_dir_empty($tar_dir)) {
-									return "install fail. Dir is empty";
+									return "install fail. 'tar_dir' is empty";
 								} else {
 									$files_dir = $tar_dir."factorio";
 									move_dir($files_dir, $program_dir);
-									rmdir($tar_dir);
+									rrmdir($tar_dir);
 									if(is_dir_empty($program_dir)) {
 										return "failed to move from tmp to $program_dir";
 									} else {
@@ -289,23 +279,6 @@
 			}
 			return "install success";
 		}
-	}
-	
-	function rrmdir($src) {
-		$dir = opendir($src);
-		while(false !== ( $file = readdir($dir)) ) {
-			if (( $file != '.' ) && ( $file != '..' )) {
-				$full = $src . '/' . $file;
-				if ( is_dir($full) ) {
-					rrmdir($full);
-				}
-				else {
-					unlink($full);
-				}
-			}
-		}
-		closedir($dir);
-		rmdir($src);
 	}
 	
 	function delete($version, $program_dir, $tmp_file) {
