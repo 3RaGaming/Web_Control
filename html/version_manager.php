@@ -304,7 +304,7 @@
 					}
 					//$log_record = $log_record." deleted\xA";
 				} else {
-					$result = "Invalid Version $version";
+					$result = "Version $version not found";
 				}
 			} else {
 				$result = "No Version provided";
