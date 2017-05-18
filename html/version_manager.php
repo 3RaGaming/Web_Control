@@ -172,8 +172,10 @@
 								while ( $i < 8 ) {
 									if(!file_exists($filepath_tar)) {
 										usleep(250000);
-										$i++;
+									} else {
+										$i=10;
 									}
+									$i++;
 								}
 								if(!file_exists($filepath_tar)) {
 									return "unable to make tar file";
