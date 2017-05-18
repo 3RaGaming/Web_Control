@@ -403,9 +403,9 @@
 					} else {
 						//if tmp_file doesn't exist, general rules for if it's installed or not can be displayed
 						if(isset($server_installed_versions[$value])) {
-							echo "<span id=\"$value-span\"><button name=\"$value-button\" onclick=\"return w_delete('$value')\">delete</button></span> <span name=\"$value-status\"- installed</span>";
+							echo "<span id=\"$value-span\"><button name=\"button-$value\" onclick=\"return w_delete('$value')\">delete</button></span> <span name=\"status-$value\">- installed</span>";
 						} else {
-							echo "<span id=\"$value-span\"><button name=\"$value-button\" onclick=\"return w_install('$value')\">install</button></span> <span name=\"$value-status\"></span>";
+							echo "<span id=\"$value-span\"><button name=\"button-$value\" onclick=\"return w_install('$value')\">install</button></span> <span name=\"status-$value\"></span>";
 						}
 					}
 					echo "</td></tr>\xA";
@@ -429,17 +429,19 @@
 		}
 		load_list(false);
 		function w_install(e) {
+			if(e === false) break;
 			var version = e;
 			console.log(version);
-			$(version+'-status').html("p00t");
+			$('#status-'+version).html("p00t");
 		}
-		w_install();
+		w_install(false);
 		function w_delete(e) {
+			if(e === false) break;
 			var version = e;
 			consol.log(version);
-			$(version+'-status').html("p00t");
+			$('#status-'+version).html("p00t");
 		}
-		w_delete();
+		w_delete(false);
 <?php
 		echo "\t\tvar server_select = \"";
 		if(isset($server_select)) { echo $server_select; }  else { echo "servertest"; }
