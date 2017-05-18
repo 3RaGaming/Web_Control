@@ -168,8 +168,8 @@
 								$p = new PharData($filename_loc);
 								$p->decompress(); // creates /path/to/my.tar
 								unlink($filename_loc);
-								$i=0
-								while($i<8) {
+								$i = 0;
+								while ( $i < 8 ) {
 									if(!file_exists($filepath_tar)) {
 										usleep(250000);
 										$i++;
