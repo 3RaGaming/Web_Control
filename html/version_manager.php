@@ -388,11 +388,10 @@
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" >
-		function load_list() {
+		function load_list(server) {
 			$.get("version_manager.php?show=true", function(html) {
 				// replace the "ajax'd" data to the table body
 				$('#version_list').html(html);
-				//var serverSettings = $.map(html, function(el) { return el });
 				return false;
 			});
 			
@@ -401,7 +400,7 @@
 		}
 <?php
 		echo "\t\tvar server_select = \"";
-		if(isset($server_select)) { echo $server_select; }  else { echo "error"; }
+		if(isset($server_select)) { echo $server_select; }  else { echo "servertest"; }
 		echo "\";\xA";
 
 		echo "\t\tvar user_level = \"$user_level\";\xA";
@@ -414,7 +413,7 @@
 		echo "\t\t\t$('#link_home').attr('href',\"index.php?d=".$server_select."\");\xA";
 		echo "\t\t\t$('#link_logs').attr('href',\"logs.php?d=".$server_select."#server_list-".$server_select."\");\xA";
 		echo "\t\t\t$('#link_config').html('<a href=\"./server-settings.php?d=".$server_select."#server_list-".$server_select."\">config</a>');\xA";
-		echo "\xA\t\t\tload_list();\xA";
+		echo "\xA\t\t\tload_list(server_select);\xA";
 		echo "\t\t});\xA";
 ?>
 	</script>
