@@ -9,7 +9,7 @@ tmp_dir="/tmp";
 if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 		'count')
-			echo "6"
+			echo "5"
 			exit 1
 			;;
 
@@ -45,12 +45,6 @@ if [ "${args[0]}" ]; then
 			printf "Step ${args[0]} - Deleting temporary files \r\n";
 			rm -Rf $tmp_dir/$result.zip $tmp_dir/Web_Control-$result/
 			printf "\r\n-----------\r\n\r\n";
-			;;
-
-		'6')
-			printf "Step ${args[0]} - forcing file permissions to www-data user";
-			sudo chown -R www-data:www-data /var/www/
-			sudo chown -R www-data:www-data /usr/share/factorio/
 			;;
 
 		*)
