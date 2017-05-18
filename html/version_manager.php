@@ -155,14 +155,14 @@
 								return "unsupported filetyle: $fileType";
 								break;
 							case "application/x-gzip";
-								$filename_tar = pathinfo( $filename_loc, PATHINFO_FILENAME );
+								$filename_tar = pathinfo( $filename_loc, PATHINFO_FILENAME ).".tar";
 								$p = new PharData($filename_loc);
 								$p->decompress(); // creates /path/to/my.tar
 								
 								// unarchive from the tar
 								try {
 									$phar = new PharData($filename_tar);
-									$phar->extractTo('/full/path'); // extract all files
+									$phar->extractTo("/tmp/$version/"); // extract all files
 								} catch (Exception $e) {
 									// handle errors
 								}
@@ -172,21 +172,6 @@
 						}
 						//mkdir($program_dir);
 					}
-					
-
-					
-					$p = new PharData('/path/to/my.tar.gz');
-					$p->decompress(); // creates /path/to/my.tar
-					
-					// unarchive from the tar
-					try {
-						$phar = new PharData('myphar.tar');
-						$phar->extractTo('/full/path'); // extract all files
-					} catch (Exception $e) {
-						// handle errors
-					}
-					
-				
 				} else {
 					return "issue finding remote file ".$file[0]." ".$file[1];
 				}
