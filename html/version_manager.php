@@ -397,11 +397,13 @@
 		}
 		load_list(false);
 		function w_install(e) {
-			$(e).html("w00t");
+			console.log(e);
+			//$(e).html("w00t");
 		}
 		w_install();
 		function w_delete(e) {
-			$(e).html("p00t");
+			console.log(e);
+			//$(e).html("p00t");
 		}
 		w_delete();
 <?php
