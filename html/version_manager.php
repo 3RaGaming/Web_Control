@@ -371,9 +371,9 @@
 					} else {
 						//if tmp_file doesn't exist, general rules for if it's installed or not can be displayed
 						if(isset($server_installed_versions[$value])) {
-							echo "<span id=\"$value-span\"><button name=\"$value-delete\" onclick=\"return form_action(\'delete\')\">delete</button> - installed</span>";
+							echo "<span id=\"$value-span\"><button name=\"$value-button\" onclick=\"return form_action(\'delete\')\">delete</button></span> <span name=\"$value-status\"- installed</span>";
 						} else {
-							echo "<span id=\"$value-span\"><button name=\"$value-install\" onclick=\"return form_action(\'install\')\">install</button></span>";
+							echo "<span id=\"$value-span\"><button name=\"$value-button\" onclick=\"return form_action(\'install\')\">install</button></span> <span name=\"$value-status\"></span>";
 						}
 					}
 					echo "</td></tr>\xA";
@@ -388,16 +388,22 @@
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" >
-		function load_list(server) {
+		function load_list() {
 			$.get("version_manager.php?show=true", function(html) {
 				// replace the "ajax'd" data to the table body
 				$('#version_list').html(html);
 				return false;
 			});
-			
-			$('#link_home').attr('href',"index.php?d=" + server);
-			$('#link_logs').attr('href',"logs.php?d=" + server + "#server_list-" + server);
 		}
+		load_list(false);
+		function w_install(e) {
+			$(e).html("w00t");
+		}
+		w_install();
+		function w_delete(e) {
+			$(e).html("p00t");
+		}
+		w_delete();
 <?php
 		echo "\t\tvar server_select = \"";
 		if(isset($server_select)) { echo $server_select; }  else { echo "servertest"; }
@@ -410,10 +416,10 @@
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
 
 		// This is for displaying the server name & password in an input box
-		echo "\t\t\t$('#link_home').attr('href',\"index.php?d=".$server_select."\");\xA";
-		echo "\t\t\t$('#link_logs').attr('href',\"logs.php?d=".$server_select."#server_list-".$server_select."\");\xA";
-		echo "\t\t\t$('#link_config').html('<a href=\"./server-settings.php?d=".$server_select."#server_list-".$server_select."\">config</a>');\xA";
-		echo "\xA\t\t\tload_list(server_select);\xA";
+		echo "\t\t\t$('#link_home').attr('href',\"index.php?d=\"+server_select);\xA";
+		echo "\t\t\t$('#link_logs').attr('href',\"logs.php?d=\"+server_select+\"#server_list-\"+server_select);\xA";
+		echo "\t\t\t$('#link_config').attr('href',\"server-settings.php?d=\"+server_select+\"#server_list-\"+server_select);\xA";
+		echo "\xA\t\t\tload_list();\xA";
 		echo "\t\t});\xA";
 ?>
 	</script>
