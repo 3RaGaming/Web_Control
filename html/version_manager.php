@@ -397,13 +397,14 @@
 		}
 		load_list(false);
 		function w_install(e) {
+			version = e;
 			console.log(e);
-			//$(e).html("w00t");
+			$(#e+'-status').html("p00t");
 		}
 		w_install();
 		function w_delete(e) {
-			console.log(e);
-			//$(e).html("p00t");
+			version = e;
+			$(#e+'-status').html("p00t");
 		}
 		w_delete();
 <?php
