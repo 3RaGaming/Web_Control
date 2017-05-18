@@ -403,9 +403,9 @@
 					} else {
 						//if tmp_file doesn't exist, general rules for if it's installed or not can be displayed
 						if(isset($server_installed_versions[$value])) {
-							echo "<span id=\"$value-span\"><button name=\"button-$value\" onclick=\"return w_delete('$value')\">delete</button></span> <span name=\"status-$value\">- installed</span>";
+							echo "<span id=\"$value-span\"><button id=\"button-$value\" onclick=\"return w_delete('$value')\">delete</button></span> <span id=\"status-$value\">- installed</span>";
 						} else {
-							echo "<span id=\"$value-span\"><button name=\"button-$value\" onclick=\"return w_install('$value')\">install</button></span> <span name=\"status-$value\"></span>";
+							echo "<span id=\"$value-span\"><button id=\"button-$value\" onclick=\"return w_install('$value')\">install</button></span> <span id=\"status-$value\"></span>";
 						}
 					}
 					echo "</td></tr>\xA";
@@ -438,7 +438,7 @@
 		function w_delete(e) {
 			if(e === false) return;
 			var version = e;
-			consol.log(version);
+			console.log(version);
 			$('#status-'+version).html("p00t");
 		}
 		w_delete(false);
