@@ -190,9 +190,15 @@
 								}
 								unlink($filepath_tar);
 								if(is_dir_empty($tar_dir)) {
-									return "install success?";
-								} else {
 									return "install fail. Dir is empty";
+								} else {
+									$files_dir = $tar_dir."factorio";
+									rename($files_dir, $program_dir);
+									if(is_dir_empty($program_dir)) {
+										return "failed to move from tmp to $version";
+									} else {
+										return "Install Successfull!";
+									}
 								}
 								
 								break;
