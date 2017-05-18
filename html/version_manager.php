@@ -69,7 +69,7 @@
 	}
 	
 	function install($version, $program_dir, $tmp_file) {
-		$progress_file = "/tmp/factorio-version-manager_".$version.".txt";
+		$progress_file = "/tmp/factorio-version-manager_progress.".$version.".txt";
 		file_put_contents($tmp_file, json_encode(array("action" => "install", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
 		if(is_dir($program_dir)) {
 			unlink($tmp_file);
@@ -158,14 +158,20 @@
 								$filename_tar = pathinfo( $filename_loc, PATHINFO_FILENAME ).".tar";
 								$p = new PharData($filename_loc);
 								$p->decompress(); // creates /path/to/my.tar
-								
+								unlink($filename_loc);
+								if(!file_exists($filename_tar)) {
+									return "unable to make tar file";
+								}
 								// unarchive from the tar
 								try {
 									$phar = new PharData($filename_tar);
+									mkdir("/tmp/$version/");
 									$phar->extractTo("/tmp/$version/"); // extract all files
 								} catch (Exception $e) {
 									// handle errors
 								}
+								
+								
 								break;
 							default:
 								return "unsupported filetyle: $fileType";
@@ -206,7 +212,7 @@
 			if($_REQUEST['install']!="") {
 				$version = preg_replace('/[^0-9.]+/', '', $_REQUEST['install']);
 				$program_dir = $program_dir.$version."/";
-				$tmp_file = "/tmp/factorio-version-manager.$version.txt";
+				$tmp_file = "/tmp/factorio-version-manager_status.$version.txt";
 				if(is_dir($program_dir)) {
 					$result = "Install failed. Directory exists.";
 				} else {
@@ -236,7 +242,6 @@
 						die('Action in progress: '.$tmp_file_contents->action.' by '.$tmp_file_contents->username);
 					} else {
 						$result = delete($version, $program_dir, $tmp_file);
-						
 					}
 					//$log_record = $log_record." deleted\xA";
 				} else {
