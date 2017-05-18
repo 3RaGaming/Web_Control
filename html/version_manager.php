@@ -179,6 +179,7 @@
 									//mkdir($tar_dir);
 									$phar->extractTo($tar_dir);
 								} catch (Exception $e) {
+									unlink($filepath_tar);
 									return "tar extract failure: $e";
 									// handle errors
 								}
@@ -194,7 +195,7 @@
 									return TRUE;
 								}
 								unlink($filepath_tar);
-								
+								rmdir($tar_dir);
 								if(is_dir_empty($tar_dir)) {
 									return "install fail. Dir is empty";
 								} else {
