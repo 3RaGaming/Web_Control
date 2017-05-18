@@ -168,7 +168,13 @@
 								$p = new PharData($filename_loc);
 								$p->decompress(); // creates /path/to/my.tar
 								unlink($filename_loc);
-								sleep(1);
+								$i=0
+								while($i<8) {
+									if(!file_exists($filepath_tar)) {
+										usleep(250000);
+										$i++;
+									}
+								}
 								if(!file_exists($filepath_tar)) {
 									return "unable to make tar file";
 								}
@@ -180,6 +186,7 @@
 									$phar->extractTo($tar_dir);
 								} catch (Exception $e) {
 									unlink($filepath_tar);
+									if(is_dir($tar_dir)) rrmdir($tar_dir);
 									return "tar extract failure: $e";
 									// handle errors
 								}
@@ -195,12 +202,12 @@
 									return TRUE;
 								}
 								unlink($filepath_tar);
-								rmdir($tar_dir);
 								if(is_dir_empty($tar_dir)) {
 									return "install fail. Dir is empty";
 								} else {
 									$files_dir = $tar_dir."factorio";
 									move_dir($files_dir, $program_dir);
+									rmdir($tar_dir);
 									if(is_dir_empty($program_dir)) {
 										return "failed to move from tmp to $program_dir";
 									} else {
