@@ -156,15 +156,20 @@
 								break;
 							case "application/x-gzip";
 								$filename_tar = pathinfo( $filename_loc, PATHINFO_FILENAME ).".tar";
+								$filepath_tar = "/tmp/$filename_tar";
+								if(file_exists($filepath_tar)) {
+									unlink($filepath_tar);
+								}
 								$p = new PharData($filename_loc);
 								$p->decompress(); // creates /path/to/my.tar
 								unlink($filename_loc);
-								if(!file_exists($filename_tar)) {
+								sleep(1);
+								if(!file_exists($filepath_tar)) {
 									return "unable to make tar file";
 								}
 								// unarchive from the tar
 								try {
-									$phar = new PharData($filename_tar);
+									$phar = new PharData($filepath_tar);
 									mkdir("/tmp/$version/");
 									$phar->extractTo("/tmp/$version/"); // extract all files
 								} catch (Exception $e) {
