@@ -49,8 +49,8 @@ if [ "${args[0]}" ]; then
 
 		'6')
 			printf "Step ${args[0]} - forcing file permissions to www-data user";
-			chown -R www-data:www-data /var/www/
-			chown -R www-data:www-data /usr/share/factorio/
+			sudo chown -R www-data:www-data /var/www/
+			sudo chown -R www-data:www-data /usr/share/factorio/
 			;;
 
 		*)
