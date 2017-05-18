@@ -429,14 +429,14 @@
 		}
 		load_list(false);
 		function w_install(e) {
-			if(e === false) break;
+			if(e === false) return;
 			var version = e;
 			console.log(version);
 			$('#status-'+version).html("p00t");
 		}
 		w_install(false);
 		function w_delete(e) {
-			if(e === false) break;
+			if(e === false) return;
 			var version = e;
 			consol.log(version);
 			$('#status-'+version).html("p00t");
