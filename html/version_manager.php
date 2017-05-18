@@ -371,9 +371,9 @@
 					} else {
 						//if tmp_file doesn't exist, general rules for if it's installed or not can be displayed
 						if(isset($server_installed_versions[$value])) {
-							echo "<span id=\"$value-span\"><button name=\"$value-button\" onclick=\"return form_action(\'delete\')\">delete</button></span> <span name=\"$value-status\"- installed</span>";
+							echo "<span id=\"$value-span\"><button name=\"$value-button\" onclick=\"return w_delete('$value')\">delete</button></span> <span name=\"$value-status\"- installed</span>";
 						} else {
-							echo "<span id=\"$value-span\"><button name=\"$value-button\" onclick=\"return form_action(\'install\')\">install</button></span> <span name=\"$value-status\"></span>";
+							echo "<span id=\"$value-span\"><button name=\"$value-button\" onclick=\"return w_install('$value')\">install</button></span> <span name=\"$value-status\"></span>";
 						}
 					}
 					echo "</td></tr>\xA";
