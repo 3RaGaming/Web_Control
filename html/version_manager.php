@@ -87,7 +87,7 @@
 					foreach($server_matched_versions[0] as $key => $value) {
 						//find the verion number in the link
 						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-						print_r($output);
+						//print_r($output);
 						if($output[1]==$version) {
 							$direct_url = "https://www.factorio.com/$value";
 							break 2;
@@ -95,7 +95,6 @@
 					}
 				}
 			}
-			print_r($server_matched_versions);
 			
 			if(isset($direct_url)) {
 				//create status files periodically so other users know whats going on. Should be able to use this for active user status updates as well
@@ -126,7 +125,7 @@
 					
 					//clean up the URL, filename and set the temporary path
 					$url = trim($file[1]);
-					$filename = preg_replace("/[^a-zA-Z0-9.-_]+/", "", $file[0]);
+					$filename = preg_replace('/\.(?=.*\.)/', '_', preg_replace("/[^a-zA-Z0-9.-_]+/", "", $file[0]));
 					$filename_loc = "/tmp/".$filename;
 					
 					file_put_contents( $progress_file, '0' );
@@ -156,17 +155,18 @@
 								return "unsupported filetyle: $fileType";
 								break;
 							case "application/x-gzip";
+								$filename_tar = pathinfo( $filename_loc, PATHINFO_FILENAME );
 								$p = new PharData($filename_loc);
 								$p->decompress(); // creates /path/to/my.tar
-								print_r($p);
+								
 								// unarchive from the tar
-								/*try {
-									$phar = new PharData('myphar.tar');
+								try {
+									$phar = new PharData($filename_tar);
 									$phar->extractTo('/full/path'); // extract all files
 								} catch (Exception $e) {
 									// handle errors
-								}*/
-								break:
+								}
+								break;
 							default:
 								return "unsupported filetyle: $fileType";
 						}
