@@ -300,6 +300,9 @@
 	
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['install'])&&$_REQUEST['install']!="") {
+			if( $user_level == "viewonly" ) {
+				die('View only may not manage versions');
+			}
 			if($_REQUEST['install']!="") {
 				$js_value = preg_replace('/_/', '.', $_REQUEST['install']);
 				$version = preg_replace('/[^0-9.]+/', '', $js_value);
@@ -324,6 +327,9 @@
 			file_put_contents( $log_path, $log_record, FILE_APPEND );
 			die();
 		} elseif( isset( $_REQUEST['delete'] ) ) {
+			if( $user_level == "viewonly" ) {
+				die('View only may not manage versions');
+			}
 			if( $_REQUEST['delete']!="" ) {
 				$js_value = preg_replace('/_/', '.', $_REQUEST['delete']);
 				$version = preg_replace( '/[^0-9.]+/', '', $js_value );
