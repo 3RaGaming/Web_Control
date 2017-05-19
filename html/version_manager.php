@@ -320,21 +320,25 @@
 			}
 			echo $result;
 			$log_record = "$time $date $version $result : $username \xA";
-			file_put_contents($log_path, $log_record, FILE_APPEND);
+			file_put_contents( $log_path, $log_record, FILE_APPEND );
 			die();
-		} elseif(isset($_REQUEST['delete'])) {
-			if($_REQUEST['delete']!="") {
-				$version = preg_replace('/[^0-9.]+/', '', $_REQUEST['delete']);
+		} elseif( isset( $_REQUEST['delete'] ) ) {
+			if( $_REQUEST['delete']!="" ) {
+				$version = preg_replace( '/[^0-9.]+/', '', $_REQUEST['delete'] );
 				$program_dir = $program_dir.$version."/";
 				$tmp_file = "/tmp/factorio-version-manager_status.$version.txt";
 				if(is_dir($program_dir)) {
-					if(file_exists($tmp_file)) {
-						$tmp_file_contents = json_decode(file_get_contents($tmp_file));
-						die('Action in progress: '.$tmp_file_contents->action.' by '.$tmp_file_contents->username);
+					$dir_user = posix_getpwuid( fileowner( $program_dir ));
+					if( isset( $dir_user['name'] ) && $dir_user['name'] != "www-data" ) {
+						$result = "Invalid filesystem permissions to remove installation.";
 					} else {
-						$result = delete($version, $program_dir, $tmp_file);
+						if( file_exists( $tmp_file ) ) {
+							$tmp_file_contents = json_decode( file_get_contents( $tmp_file ) );
+							die('Action in progress: '.$tmp_file_contents->action.' by '.$tmp_file_contents->username);
+						} else {
+							$result = delete($version, $program_dir, $tmp_file);
+						}
 					}
-					//$log_record = $log_record." deleted\xA";
 				} else {
 					$result = "Version $version not found";
 				}
@@ -403,9 +407,15 @@
 					} else {
 						//if tmp_file doesn't exist, general rules for if it's installed or not can be displayed
 						if(isset($server_installed_versions[$value])) {
-							echo "<span id=\"$value-span\"><button id=\"button-$value\" onclick=\"return w_delete('$value')\">delete</button></span> <span id=\"status-$value\">- installed</span>";
+							$path = "/usr/share/factorio/$value";
+							$user = posix_getpwuid( fileowner( $path ));
+							if(isset($user['name'])&&$user['name']!="www-data") {
+								echo "<span id=\"span-$value\">Installed. Invalid filesystem permissions to delete.</span>";
+							} else {
+								echo "<span id=\"span-$value\"><button id=\"button-$value\" onclick=\"return w_delete('$value')\">delete</button></span> <span id=\"status-$value\">- installed</span></span>";
+							}
 						} else {
-							echo "<span id=\"$value-span\"><button id=\"button-$value\" onclick=\"return w_install('$value')\">install</button></span> <span id=\"status-$value\"></span>";
+							echo "<span id=\"span-$value\"><button id=\"button-$value\" onclick=\"return w_install('$value')\">install</button></span> <span id=\"status-$value\"></span>";
 						}
 					}
 					echo "</td></tr>\xA";
