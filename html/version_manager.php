@@ -398,24 +398,25 @@
 						echo "<font color=red>depreciated</font></td><td>";
 					}
 					//if the server is working on installing a version, this file will exist and hold the status of the install
-					$tmp_file = "/tmp/$value.install";
+					$tmp_file = "/tmp/factorio-version-manager_status.$value.txt";
+					$js_value = preg_replace('#\.#', '_', $value);
 					if(file_exists($tmp_file)) {
 						$tmp_status[$value] = file_get_contents($tmp_file);
 					}
 					if(isset($tmp_status[$value])) {
-						echo "<span id=\"$value-span\">$tmp_status[$value]</span>";
+						echo "<span id=\"span-$js_value\">$tmp_status[$value]</span>";
 					} else {
 						//if tmp_file doesn't exist, general rules for if it's installed or not can be displayed
 						if(isset($server_installed_versions[$value])) {
 							$path = "/usr/share/factorio/$value";
 							$user = posix_getpwuid( fileowner( $path ));
 							if(isset($user['name'])&&$user['name']!="www-data") {
-								echo "<span id=\"span-$value\">Installed. Invalid filesystem permissions to delete.</span>";
+								echo "<span id=\"span-$js_value\">Installed. Invalid filesystem permissions to delete.</span>";
 							} else {
-								echo "<span id=\"span-$value\"><button id=\"button-$value\" onclick=\"return w_delete('$value')\">delete</button></span> <span id=\"status-$value\">- installed</span></span>";
+								echo "<span id=\"span-$js_value\"><button id=\"button-$js_value\" onclick=\"return w_delete('$js_value')\">delete</button></span> <span id=\"status-$value\">- installed</span></span>";
 							}
 						} else {
-							echo "<span id=\"span-$value\"><button id=\"button-$value\" onclick=\"return w_install('$value')\">install</button></span> <span id=\"status-$value\"></span>";
+							echo "<span id=\"span-$js_value\"><button id=\"button-$js_value\" onclick=\"return w_install('$js_value')\">install</button></span> <span id=\"status-$value\"></span>";
 						}
 					}
 					echo "</td></tr>\xA";
