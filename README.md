@@ -13,7 +13,7 @@ Ubuntu 16.06 (or any other linux of your choosing, if you have the know-how to f
 
 Apache2 with SSL Enabled. (Web Control is set to only work on a an https connection)
 
-php7
+php7 with cURL
 
 Node.js (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
 
