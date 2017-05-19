@@ -302,9 +302,27 @@
 	$log_path = "$log_dir/version-manager-$date.log";
 	
 	if(isset($_REQUEST)) {
-		if(isset($_REQUEST['install'])&&$_REQUEST['install']!="") {
+		if(isset($_REQUEST['status'])&&$_REQUEST['status']!="") {
 			if( $user_level == "viewonly" ) {
-				die('View only may not manage versions');
+				die('View-only may not manage versions');
+			}
+			if($_REQUEST['status']!="") {
+				$js_value = preg_replace('/_/', '.', $_REQUEST['install']);
+				$version = preg_replace('/[^0-9.]+/', '', $js_value);
+				$tmp_file = "/tmp/factorio-version-manager_progress.$version.txt";
+				if(file_exists($tmp_file)) {
+					$result = file_get_contents($tmp_file);
+				} else {
+					$result = 0;
+				}
+			} else {
+				$result = "NVP";
+			}
+			echo $result;
+			die();
+		} if(isset($_REQUEST['install'])) {
+			if( $user_level == "viewonly" ) {
+				die('View-only may not manage versions');
 			}
 			if($_REQUEST['install']!="") {
 				$js_value = preg_replace('/_/', '.', $_REQUEST['install']);
@@ -331,7 +349,7 @@
 			die();
 		} elseif( isset( $_REQUEST['delete'] ) ) {
 			if( $user_level == "viewonly" ) {
-				die('View only may not manage versions');
+				die('View-only may not manage versions');
 			}
 			if( $_REQUEST['delete']!="" ) {
 				$js_value = preg_replace('/_/', '.', $_REQUEST['delete']);
@@ -454,15 +472,44 @@
 		}
 		load_list(false);
 		
+		var s_loc = window.location.pathname;
+		var s_dir = s_loc.substring(0, s_loc.lastIndexOf('/'));
+		var s_refreshtime=200;
+		var versionwork = {};
+		
+		function check_status(e)
+		{
+			if(e === false) return;
+			var version = "status-"+e;
+			if(!versionwork.hasOwnProperty(e)) versionwork[e] = 0;
+			//console.log("start" + versionwork[e]);
+			if(versionwork[e] >= 100) {
+				$('#status-' + e ).html('finished');
+				versionwork[e]=0;
+			} else if(versionwork[e] != -1) {
+				$.get(s_dir + "/version-manager.php?status=" + version, function(html) {
+					//console.log("recheck" + html);
+					$('#status-' + e ).html(html + "% downloaded");
+					versionwork[e] = html;
+				});
+				setTimeout(function() { check_status(e); }, s_refreshtime);
+			}
+		}
+		check_status(false);
+		
 		function w_install(e) {
 			if(e === false) return;
 			var version = e;
+			versionwork[e]=0;
+			$('#button-'+version).prop('disabled', true);
+			check_status(version);
 			$('#status-'+version).html('working...');
 			$.get("version_manager.php?install="+version, function(html) {
 				// replace the "ajax'd" data to the table body
 				if(html=="success") {
-					$('#button-'+version).attr('onclick', 'return w_delete(\''+version+'\')').html('delete');
+					$('#button-'+version).attr('onclick', 'return w_delete(\''+version+'\')').html('delete').prop('disabled', false);
 				}
+				versionwork[e]=-1;
 				$('#status-'+version).html(html);
 				return false;
 			});
@@ -472,6 +519,7 @@
 		function w_delete(e) {
 			if(e === false) return;
 			var version = e;
+			$('#button-'+version).prop('disabled', true);
 			$('#status-'+version).html('working...');
 			$.get("version_manager.php?delete="+version, function(html) {
 				if(html=="success") {
@@ -482,7 +530,7 @@
 							$('#span-'+version).html('Deleted. Re-installation unavailable.');
 							$('#status-'+version).html(' ');
 						} else {
-							$('#button-'+version).attr('onclick', 'return w_install(\''+version+'\')').html('install');
+							$('#button-'+version).attr('onclick', 'return w_install(\''+version+'\')').html('install').prop('disabled', false);
 							$('#status-'+version).html(html);
 						}
 					} else {
