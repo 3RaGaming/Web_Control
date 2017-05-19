@@ -413,10 +413,10 @@
 							if(isset($user['name'])&&$user['name']!="www-data") {
 								echo "<span id=\"span-$js_value\">Installed. Invalid filesystem permissions to delete.</span>";
 							} else {
-								echo "<span id=\"span-$js_value\"><button id=\"button-$js_value\" onclick=\"return w_delete('$js_value')\">delete</button></span> <span id=\"status-$value\">- installed</span></span>";
+								echo "<span id=\"span-$js_value\"><button id=\"button-$js_value\" onclick=\"return w_delete('$js_value')\">delete</button></span> <span id=\"status-$js_value\">- installed</span></span>";
 							}
 						} else {
-							echo "<span id=\"span-$js_value\"><button id=\"button-$js_value\" onclick=\"return w_install('$js_value')\">install</button></span> <span id=\"status-$value\"></span>";
+							echo "<span id=\"span-$js_value\"><button id=\"button-$js_value\" onclick=\"return w_install('$js_value')\">install</button></span> <span id=\"status-$js_value\"></span>";
 						}
 					}
 					echo "</td></tr>\xA";
