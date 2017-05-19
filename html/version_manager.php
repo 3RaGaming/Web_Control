@@ -94,6 +94,7 @@
 	}
 
 	function install($version, $program_dir, $tmp_file) {
+		global $progress_file;
 		$progress_file = "/tmp/factorio-version-manager_progress.".$version.".txt";
 		file_put_contents($tmp_file, json_encode(array("action" => "install", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
 		if(is_dir($program_dir)) {
@@ -133,13 +134,14 @@
 					//define the function so we can get download status as we download
 					function progressCallback( $resource, $download_size, $downloaded_size, $upload_size, $uploaded_size )
 					{
+						global $progress_file;
 						static $previousProgress = 0;
 						
 						if ( $download_size == 0 )
 							$progress = 0;
 						else
 							$progress = round( $downloaded_size * 100 / $download_size );
-						
+							
 						if ( $progress > $previousProgress)
 						{
 							$previousProgress = $progress;
@@ -310,6 +312,7 @@
 				$js_value = preg_replace('/_/', '.', $_REQUEST['status']);
 				$version = preg_replace('/[^0-9.]+/', '', $js_value);
 				$tmp_file = "/tmp/factorio-version-manager_progress.$version.txt";
+				 //factorio-version-manager_progress.0.12.35.txt
 				if(file_exists($tmp_file)) {
 					$result = file_get_contents($tmp_file);
 				} else {
@@ -480,13 +483,14 @@
 		function check_status(e)
 		{
 			if(e === false) return;
-			var version = "status-"+e;
+			//var version = "status-"+e;
 			if(!versionwork.hasOwnProperty(e)) versionwork[e] = 0;
 			//console.log("start" + versionwork[e]);
 			if(versionwork[e] >= 100) {
 				$('#status-' + e ).html('finished');
 				versionwork[e]=0;
 			} else if(versionwork[e] != -1) {
+				console.log(s_dir + "/version_manager.php?status=" + e);
 				$.get(s_dir + "/version_manager.php?status=" + e, function(html) {
 					//console.log("recheck" + html);
 					$('#status-' + e ).html(html + "% downloaded");
