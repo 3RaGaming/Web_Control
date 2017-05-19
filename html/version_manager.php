@@ -487,7 +487,7 @@
 				$('#status-' + e ).html('finished');
 				versionwork[e]=0;
 			} else if(versionwork[e] != -1) {
-				$.get(s_dir + "/version-manager.php?status=" + e, function(html) {
+				$.get(s_dir + "/version_manager.php?status=" + e, function(html) {
 					//console.log("recheck" + html);
 					$('#status-' + e ).html(html + "% downloaded");
 					versionwork[e] = html;
