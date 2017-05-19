@@ -1,7 +1,11 @@
 <?php	
 	if(!isset($_SESSION)) { session_start(); }
 	if(!isset($_SESSION['login'])) {
-		die('Error: Login required');
+		if( isset($_REQUEST['install']) || isset($_REQUEST['delete']) || isset($_REQUEST['show']) ) {
+			die('Error: Login required');
+		}
+		header("Location: ./login.php");
+		die();
 	} else {
 		if(isset($_SERVER["HTTPS"]) == false)
 		{
