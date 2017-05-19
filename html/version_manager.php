@@ -301,7 +301,8 @@
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['install'])&&$_REQUEST['install']!="") {
 			if($_REQUEST['install']!="") {
-				$version = preg_replace('/[^0-9.]+/', '', $_REQUEST['install']);
+				$js_value = preg_replace('/_/', '.', $_REQUEST['install']);
+				$version = preg_replace('/[^0-9.]+/', '', $js_value);
 				$program_dir = $program_dir.$version."/";
 				$tmp_file = "/tmp/factorio-version-manager_status.$version.txt";
 				if(is_dir($program_dir)) {
