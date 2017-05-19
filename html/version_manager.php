@@ -262,7 +262,7 @@
 									if(is_dir_empty($program_dir)) {
 										return "failed to move from tmp to $program_dir";
 									} else {
-										return "Install Successfull! $program_dir";
+										return "success";
 									}
 								}
 								
@@ -277,7 +277,6 @@
 			} else {
 				return "no download found";
 			}
-			return "install success";
 		}
 	}
 	
@@ -289,7 +288,7 @@
 			return "delete failed";
 		} else {
 			unlink($tmp_file);
-			return "delete success";
+			return "success";
 		}
 	}
 	
@@ -393,7 +392,9 @@
 				//display the table for installed and available versions
 				echo "<table><tr><td>Version</td><td></td><td>Control</td>\xA";
 				foreach($total_versions as $value) {
+					$js_value = preg_replace('#\.#', '_', $value);
 					echo "<tr><td>$value</td><td>";
+					
 					if(isset($server_available_versions[$value])) {
 						//display different colors for versions
 						if($server_available_versions[$value][1]=="stable") {
@@ -401,13 +402,13 @@
 						} elseif($server_available_versions[$value][1]=="experimental") {
 							echo "<font color=orange>";
 						}
-						echo $server_available_versions[$value][1]."</td><td>";
+						echo "<span id=\"dev-$js_value\">".$server_available_versions[$value][1]."</span></td><td>";
 					} else {
-						echo "<font color=red>depreciated</font></td><td>";
+						echo "<font color=red><span id=\"dev-$js_value\">depreciated</span></font></td><td>";
 					}
+					
 					//if the server is working on installing a version, this file will exist and hold the status of the install
 					$tmp_file = "/tmp/factorio-version-manager_status.$value.txt";
-					$js_value = preg_replace('#\.#', '_', $value);
 					if(file_exists($tmp_file)) {
 						$tmp_status[$value] = file_get_contents($tmp_file);
 					}
@@ -452,8 +453,12 @@
 		function w_install(e) {
 			if(e === false) return;
 			var version = e;
+			$('#status-'+version).html('working...');
 			$.get("version_manager.php?install="+version, function(html) {
 				// replace the "ajax'd" data to the table body
+				if(html=="success") {
+					$('#button-'+version).attr('onclick', 'return w_delete(\''+version+'\')').html('delete');
+				}
 				$('#status-'+version).html(html);
 				return false;
 			});
@@ -463,9 +468,25 @@
 		function w_delete(e) {
 			if(e === false) return;
 			var version = e;
+			$('#status-'+version).html('working...');
 			$.get("version_manager.php?delete="+version, function(html) {
-				// replace the "ajax'd" data to the table body
-				$('#status-'+version).html(html);
+				if(html=="success") {
+					var dev = $('#dev-'+version).html();
+					if (dev) {
+						console.log('dev set for '+version);
+						if( dev == "depreciated" ) {
+							$('#span-'+version).html('Deleted. Re-installation unavailable.');
+						} else {
+							$('#button-'+version).attr('onclick', 'return w_install(\''+version+'\')').html('install');
+							$('#status-'+version).html(html);
+						}
+					} else {
+						console.log('dev not set for '+version);
+					}
+					//$('#status-'+version).html(html);
+				} else {
+					$('#status-'+version).html(html);
+				}
 				return false;
 			});
 			//$('#status-'+version).html("p00t");
