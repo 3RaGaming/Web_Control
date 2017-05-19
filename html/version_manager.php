@@ -307,7 +307,7 @@
 				die('View-only may not manage versions');
 			}
 			if($_REQUEST['status']!="") {
-				$js_value = preg_replace('/_/', '.', $_REQUEST['install']);
+				$js_value = preg_replace('/_/', '.', $_REQUEST['status']);
 				$version = preg_replace('/[^0-9.]+/', '', $js_value);
 				$tmp_file = "/tmp/factorio-version-manager_progress.$version.txt";
 				if(file_exists($tmp_file)) {
