@@ -431,7 +431,8 @@
 <head>
 	<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" >
-		function load_list() {
+		function load_list(e) {
+			if(e === false) return;
 			$.get("version_manager.php?show=true", function(html) {
 				// replace the "ajax'd" data to the table body
 				$('#version_list').html(html);
@@ -439,20 +440,30 @@
 			});
 		}
 		load_list(false);
+		
 		function w_install(e) {
 			if(e === false) return;
 			var version = e;
-			console.log(version);
-			$('#status-'+version).html("p00t");
+			$.get("version_manager.php?install="+version, function(html) {
+				// replace the "ajax'd" data to the table body
+				$('#status-'+version).html(html);
+				return false;
+			});
 		}
 		w_install(false);
+		
 		function w_delete(e) {
 			if(e === false) return;
 			var version = e;
-			console.log(version);
-			$('#status-'+version).html("p00t");
+			$.get("version_manager.php?delete="+version, function(html) {
+				// replace the "ajax'd" data to the table body
+				$('#status-'+version).html(html);
+				return false;
+			});
+			//$('#status-'+version).html("p00t");
 		}
 		w_delete(false);
+		
 <?php
 		echo "\t\tvar server_select = \"";
 		if(isset($server_select)) { echo $server_select; }  else { echo "servertest"; }
