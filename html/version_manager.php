@@ -476,6 +476,7 @@
 						console.log('dev set for '+version);
 						if( dev == "depreciated" ) {
 							$('#span-'+version).html('Deleted. Re-installation unavailable.');
+							$('#status-'+version).html(' ');
 						} else {
 							$('#button-'+version).attr('onclick', 'return w_install(\''+version+'\')').html('install');
 							$('#status-'+version).html(html);
