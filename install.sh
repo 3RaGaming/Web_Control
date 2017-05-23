@@ -159,8 +159,6 @@ if [ ! -d "$install_dir/" ]; then
 	fi
 fi
 
-#DEV carry on from here
-
 printf "Downloading latest version of Web Control\n";
 wget -q https://github.com/3RaGaming/Web_Control/archive/master.zip -O /tmp/master.zip
 printf "Unzipping\n";
@@ -225,6 +223,29 @@ else
 	printf "Unable to location php_ini file.\nYou will be required to change the 'post_max_size' and 'upload_max_filesize' in your php.ini file.";
 fi
 systemctl restart apache2
+
+#request to remove index.html
+$file="/var/www/html/index.html";
+if [ -f "$file" ]; then
+	printf "Ubuntu likes to install a default web file at $file\n";
+	printf "This file is un-needed and will make using the web control difficult.";
+	while true; do
+		read -p "Should we remove this file now? " yn
+		case $yn in
+				[Yy]* )
+					rm -f $file
+					printf "File $file removed.\n";
+					break;;
+				[Nn]* )
+					printf "If you have made this file yourself, please rename it (anything but index) so the web control may function properly.\n";
+					printf "Press Enter to continue...";
+					read
+					break;;
+				* ) echo "Please answer yes[Y] or no[N].";;
+		esac
+	done
+fi
+
 printf "Installation complete!\n\n";
 printf "We will need to setup a user for you to login without discord authentication for now.\n";
 
