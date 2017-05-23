@@ -271,11 +271,11 @@ function set_password(){
     printf "Enter a password:\n"
     read -s password_1
     if [[ -n "$password_1" ]]; then
-        a=$(echo $password_1 | md5sum | awk '{ print $1 }')
+        a=$(echo -n $password_1 | md5sum | awk '{ print $1 }')
 		printf "Re-enter password:\n"
 		read -s password_2
 		if [[ -n "$password_2" ]]; then
-			b=$(echo $password_2 | md5sum | awk '{ print $1 }')
+			b=$(echo -n $password_2 | md5sum | awk '{ print $1 }')
 			if [[ $a != $b ]]; then
 				printf "Passwords do not match.\n"
 				set_password
