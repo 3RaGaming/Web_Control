@@ -173,7 +173,12 @@ printf "Adjusting permissions\n";
 chown -R www-data:www-data /var/www/
 chmod +x /var/www/factorio/manage.sh
 chmod +x /var/www/html/update.sh
-echo "Activating cron job for permissions\n";
+printf "We need to install a cronjob for managing deleting old file logs and checking file permissions periodically.\n";
+printf "We will save your current cronjob file as \"cronjob_old.txt\" in case you need to add anything custom back to it\n";
+printf "Press Enter when ready.\r";
+read
+printf "Activating cron job for permissions\n";
+crontab -l > cronjob_old.txt
 crontab /var/www/cronjob.txt
 printf "Compiling managepgm\n";
 cd /var/www/factorio/
