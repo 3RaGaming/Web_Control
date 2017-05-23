@@ -28,7 +28,7 @@ function version_gt() {
 printf "Welcome to 3Ra Gaming's Factorio Web Control Installer!\n\n"
 #printf "This tool will automatically check that all required dependancies are installed\n"
 #printf "If any are not yet installed, it will attempt to install them.\n\n"
-printf "This script shoud verify all dependancies and will attempt to install them. You will be asked before each dependency is installed.\n"
+printf "This script should verify all dependancies and will attempt to install them. You will be asked before each dependency is installed.\n"
 while true; do
 	read -p "Are you currently running Ubuntu 16.04 or higher?  " yn
 	case $yn in
@@ -83,7 +83,7 @@ apt install --force-yes --yes $depend_needed
 printf "\n\nBase Dependencies Installed!\n";
 
 function install_node () {
-	$url="https://deb.nodesource.com/setup_6.x";
+	url="https://deb.nodesource.com/setup_6.x";
 	curl -sL $url | sudo -E bash -
 	apt install --force-yes --yes nodejs
 }
@@ -125,14 +125,14 @@ if ! type node &> /dev/null2>&1; then
 	exit;
 fi
 version=`node -v`;
-print "Node JS $version has been installed";
+printf "Node JS $version has been installed";
 
 #Factorio Install
 if [ ! -d "$install_dir/" ]; then
 	printf "Factorio is not installed. Attempting to identify latest stable version...\n";
 	latest_version=`curl -v --silent https://updater.factorio.com/get-available-versions 2>&1 | grep stable | awk '{ print $2 }' | tr -d '"'`;
 	if [ "${latest_version}" ]; then
-		printf "latest version is $latest_version. ";
+		printf "Latest stable Factorio version is $latest_version. ";
 		while true; do
 			read -p "Download the latest version?  " yn
 			case $yn in
