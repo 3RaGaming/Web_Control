@@ -125,11 +125,11 @@ if ! type node &> /dev/null2>&1; then
 	exit;
 fi
 version=`node -v`;
-printf "Node JS $version has been installed";
+printf "Node JS $version is installed\n\n";
 
 #Factorio Install
 if [ ! -d "$install_dir/" ]; then
-	printf "Factorio is not installed. Attempting to identify latest stable version...\n";
+	printf "Factorio is not installed.\nAttempting to identify latest stable version...\n";
 	latest_version=`curl -v --silent https://updater.factorio.com/get-available-versions 2>&1 | grep stable | awk '{ print $2 }' | tr -d '"'`;
 	if [ "${latest_version}" ]; then
 		printf "Latest stable Factorio version is $latest_version. ";
@@ -177,6 +177,10 @@ echo "Activating cron job for permissions\n"
 crontab /var/www/cronjob.txt
 echo "Compiling managepgm\n"
 cd /var/www/factorio/
+printf "\nPreparing to compile the manager, and install discord js.\n"
+printf "Some warning messages will appear. These are normal. They are due to using a discord plugin that is capable of using voice, but we have no bot voice scripts implemented.\n"
+printf "\nPress Enter to continue.\n"
+read
 gcc -o managepgm -pthread manage.c
 echo "Installing Discord.js\n"
 npm install discord.js --save
