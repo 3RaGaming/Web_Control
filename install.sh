@@ -159,7 +159,7 @@ if [ ! -d "$install_dir/" ]; then
 	latest_version=`curl -v --silent https://updater.factorio.com/get-available-versions 2>&1 | grep stable | awk '{ print $2 }' | tr -d '"'`;
 	if [ "${latest_version}" ]; then
 		printf "Latest stable Factorio version is $latest_version. ";
-		if [ $silent == 0]; then
+		if [ $silent == 0 ]; then
 			while true; do
 				read -p "Download the latest version?  " yn
 				case $yn in
