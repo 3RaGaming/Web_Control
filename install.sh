@@ -69,7 +69,7 @@ done
 #Install dependencies
 echo "will verify install of:$depend_needed";
 while true; do
-	read -p "Are you ok with installing these now?\n(you must to continue with install) " yn
+	read -p "Are you ok with installing these now? (you must to continue with install) " yn
 	case $yn in
 		[Yy]* )
 			break;;
@@ -107,18 +107,18 @@ else
 	supported_node="6.9.5";
 	if version_gt $supported_node $version; then
 		printf "Only node $supported_node and above is supported.\nYou currently have $version installed\n";
+		while true; do
+			read -p "Attempt to update now?" yn
+			case $yn in
+				[Yy]* ) break;;
+				[Nn]* )
+					printf "\nPlease manually update your node JS then attempt install again.\n\n";
+					exit;;
+				* ) echo "Please answer yes[Y] or no[N].";;
+			esac
+		done
+		install_node;
 	fi
-	while true; do
-		read -p "Attempt to update now?" yn
-		case $yn in
-			[Yy]* ) break;;
-			[Nn]* )
-				printf "\nPlease manually update your node JS then attempt install again.\n\n";
-				exit;;
-			* ) echo "Please answer yes[Y] or no[N].";;
-		esac
-	done
-	install_node;
 fi
 if ! type node &> /dev/null2>&1; then
 	printf "for some reason, Node JS was unable to install. Please manually insatll node js version 6.9.5 or greater, ensure that it is installed with \`which node\`, and run this install script again";
