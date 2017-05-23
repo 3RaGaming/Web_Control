@@ -163,8 +163,7 @@ if [ ! -d "$install_dir/" ]; then
 			while true; do
 				read -p "Download the latest version?  " yn
 				case $yn in
-						[Yy]* )
-							install_factorio $install_dir $latest_version
+						[Yy]* ) install_factorio $install_dir $latest_version;
 							break;;
 						[Nn]* ) printf "That's alright. We can download it later.\n"; break;;
 						* ) echo "Please answer yes[Y] or no[N].";;
