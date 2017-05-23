@@ -164,14 +164,14 @@ if [ ! -d "$install_dir/" ]; then
 				read -p "Download the latest version?  " yn
 				case $yn in
 						[Yy]* )
-							factorio_install $install_dir $latest_version
+							install_factorio $install_dir $latest_version
 							break;;
 						[Nn]* ) printf "That's alright. We can download it later.\n"; break;;
 						* ) echo "Please answer yes[Y] or no[N].";;
 				esac
 			done
 		else
-			factorio_install $install_dir $latest_version
+			install_factorio $install_dir $latest_version
 		fi
 	else
 		printf "Unable to download latest version. Don't worry. We can install this later\n"
@@ -335,7 +335,7 @@ done
 
 #create standard login for silent installation
 if [ $silent == 1 ]; then
-        a=echo -n $silent_password | md5sum | awk '{ print $1 }'
+        a=$(echo -n $silent_password | md5sum | awk '{ print $1 }')
 	echo "$silent_user|$a|admin" > /var/www/users.txt;
 fi
 
