@@ -58,6 +58,7 @@ depend_arr+=("xz-utils");
 depend_arr+=("apache2");
 depend_arr+=("php");
 depend_arr+=("php-curl");
+depend_arr+=("libapache2-mod-php");
 
 depend_needed=;
 for depend_item in "${depend_arr[@]}"; do
