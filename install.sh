@@ -1,14 +1,14 @@
 #!/bin/bash
 if [ "$EUID" -ne 0 ]
-        then printf "Please run as root\n"
-        exit
+	then printf "Please run as root\n"
+	exit
 fi
 
 install_dir="/usr/share/factorio"
 #install_dir="/root/test"
 
 #compressed file extraction function. 0.14 is in tar.gz, and .15 is in tar.xz, for some reason.
-extract () {
+function extract () {
 	if [ -f $1 ] ; then
 		case $1 in
 			*.tar.gz)  tar --strip-components=1 -xzf $1 -C $2/$3; printf "Done!\n";;
@@ -20,31 +20,88 @@ extract () {
 	fi
 }
 
+#version checker. Will need this in the case node is already installed
+function version_gt() {
+	test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1";
+}
+
 printf "Welcome to 3Ra Gaming's Factorio Web Control Installer!\n\n"
 #printf "This tool will automatically check that all required dependancies are installed\n"
 #printf "If any are not yet installed, it will attempt to install them.\n\n"
 printf "This script DOES NOT yet verify all dependancies. Please check the github to ensure you have all the prerequisites installed\n"
 while true; do
-        read -p "Are you currently running Ubuntu 16.04 or higher?  " yn
-        case $yn in
-                [Yy]* ) break;;
-                [Nn]* )
-                        printf "\n\nUnfortunately, this installer was built for Ubuntu :(\n\n";
-                        printf "Please consult the github for manual instructions\n";
-                        printf "http://www.3ragaming.com/github\n";
-                        printf "You may also join our Discord and we will do our best to assist you\n";
-                        printf "http://www.3ragaming.com/discord\n\n";
-                        exit;;
-                * ) echo "Please answer yes[Y] or no[N].";;
-        esac
+	read -p "Are you currently running Ubuntu 16.04 or higher?  " yn
+	case $yn in
+		[Yy]* ) break;;
+		[Nn]* )
+			printf "\n\nUnfortunately, this installer was built for Ubuntu :(\n\n";
+			printf "Please consult the github for manual instructions\n";
+			printf "http://www.3ragaming.com/github\n";
+			printf "You may also join our Discord and we will do our best to assist you\n";
+			printf "http://www.3ragaming.com/discord\n\n";
+			exit;;
+		* ) echo "Please answer yes[Y] or no[N].";;
+	esac
 done
 
-#this statement is for debug testing. This should be removed when released to production
-if [ "$install_dir" == "/root/test" ]; then
-	if [ -d "$install_dir/" ]; then
-		rm -Rf $install_dir
+#Define dependencies
+#depend_arr+=("");
+depend_arr=();
+depend_arr+=("curl");
+depend_arr+=("zip");
+depend_arr+=("unzip");
+depend_arr+=("tar");
+depend_arr+=("gcc");
+depend_arr+=("crontab");
+depend_arr+=("npm");
+depend_arr+=("xz-utils");
+depend_arr+=("apache2");
+depend_arr+=("php");
+depend_arr+=("php-curl");
+
+depend_needed=;
+for depend_item in "${depend_arr[@]}"; do
+	if ! type $depend_item &> /dev/null2>&1; then
+		depend_needed="$depend_needed $depend_item";
 	fi
+done
+
+#Install dependencies
+echo "will verify install of:$depend_needed";
+while true; do
+	read -p "Are you ok with installing these now?\n(you must to continue with install) " yn
+	case $yn in
+		[Yy]* )
+			break;;
+		[Nn]* )
+			printf "We cannot proceed without these installed.";
+			exit;;
+		* ) echo "Please answer yes[Y] or no[N].\n";;
+	esac
+done
+apt install --force-yes --yes $depend_needed
+printf "\n\nBase Dependencies Installed!\n";
+
+#check/install node version
+printf "Checking if node js is installed\n";
+if ! type node &> /dev/null2>&1; then
+	$url="https://deb.nodesource.com/setup_6.x";
+	curl -sL $url | sudo -E bash -
+	apt install --force-yes --yes nodejs
+else
+	version=`node -v`;
+	supported_node="6.9.5";
+	if version_gt $supported_node $version; then
+		printf "Only node $supported_node and above is supported.\nYou currently have $version installed\nPlease manually update your node JS then attempt install again."
+	fi
+	exit;
 fi
+if ! type node &> /dev/null2>&1; then
+	printf "for some reason, Node JS was unable to install. Please manually insatll node js version 6.9.5 or greater, ensure that it is installed with \`which node\`, and run this install script again"
+	exit;
+fi
+version=`node -v`;
+print "Node JS $version has been installed";
 
 #Factorio Install
 if [ ! -d "$install_dir/" ]; then
