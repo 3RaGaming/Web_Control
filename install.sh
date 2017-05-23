@@ -161,30 +161,98 @@ fi
 
 #DEV carry on from here
 
-echo "Downloading latest version of Web Control\n"
+printf "Downloading latest version of Web Control\n";
 wget -q https://github.com/3RaGaming/Web_Control/archive/master.zip -O /tmp/master.zip
-echo "Unzipping\n"
+printf "Unzipping\n";
 unzip -u /tmp/master.zip -d /tmp/
-echo "Creating directories\n"
+printf "Creating directories\n";
 mkdir -p /var/www/
-echo "Installing Web Control\n"
+printf "Installing Web Control\n";
 cp -R /tmp/Web_Control-master/* /var/www/
-echo "Adjusting permissions\n"
+printf "Adjusting permissions\n";
 chown -R www-data:www-data /var/www/
 chmod +x /var/www/factorio/manage.sh
 chmod +x /var/www/html/update.sh
-echo "Activating cron job for permissions\n"
+echo "Activating cron job for permissions\n";
 crontab /var/www/cronjob.txt
-echo "Compiling managepgm\n"
+printf "Compiling managepgm\n";
 cd /var/www/factorio/
-printf "\nPreparing to compile the manager, and install discord js.\n"
-printf "Some warning messages will appear. These are normal. They are due to using a discord plugin that is capable of using voice, but we have no bot voice scripts implemented.\n"
-printf "\nPress Enter to continue.\n"
+printf "\nPreparing to compile the manager, and install discord js.\n";
+printf "Some warning messages about discord will appear. These are normal, you may ignore them.\n";
+printf "\nPress Enter to continue.\n";
 read
 gcc -o managepgm -pthread manage.c
-echo "Installing Discord.js\n"
+printf "Installing Discord.js\n"
 npm install discord.js --save
-echo "Cleaning temporary files\n"
+printf "Cleaning temporary files\n"
 rm -Rf /tmp/master.zip /tmp/Web_Control-master/
-echo "Installation complete. Press enter to exit.\n"
+printf "Enabling SSL and restarting web server\n";
+a2enmod ssl
+a2ensite default-ssl
+systemctl restart apache2
+printf "Installation complete!\n\n";
+printf "We will need to setup a user for you to login without discord authentication for now.\n";
+
+function set_username(){
+    printf "Please enter a username to create:\n"
+    read username
+    if [[ -n "$username" ]]; then
+        a=$(echo $username | tr -d "\n" | wc -c)
+        b=$(echo $username | tr -cd "[:alnum:]" | wc -c)
+        if [[ $a != $b ]]; then
+            printf "Only letters and numbers are supported for usernames.\n"
+            set_username
+        else
+			g_username=$(echo $username | tr -cd "[:alnum:]")
+        fi
+    else
+        printf "Username cannot be left empty.\n"
+        set_username
+    fi
+}
+function set_password(){
+    printf "Enter a password:\n"
+    read -s password_1
+    if [[ -n "$password_1" ]]; then
+        a=$(echo $password_1 | md5sum | awk '{ print $1 }')
+		printf "Re-enter password:\n"
+		read -s password_2
+		if [[ -n "$password_2" ]]; then
+			b=$(echo $password_2 | md5sum | awk '{ print $1 }')
+			if [[ $a != $b ]]; then
+				printf "Passwords do not match.\n"
+				set_password
+			else
+				g_password=$b
+			fi
+		else
+			printf "Passwords do not match.\n"
+			set_password
+		fi
+    else
+        printf "Password cannot be left empty.\n"
+        set_password
+    fi
+}
+
+while true; do
+	read -p "Would you like to setup this user now? (This will remove all other users from the users.txt file) " yn
+	case $yn in
+			[Yy]* )
+				set_username
+				set_password
+				printf "Will create user \"$g_username\" with password $g_password\n";
+				echo "$g_username|$g_password|admin" > /var/www/users.txt;
+				break;;
+			[Nn]* ) printf "If you find you cannot login using /altlogin.php, edit the /var/www/users.txt file.\n"; break;;
+			* ) echo "Please answer yes[Y] or no[N].";;
+	esac
+done
+
+
+printf "Additional users may be added using additional lines in /var/www/users.txt. Passwords are MD5 encrypted\n";
+printf "Access your site with https://IP_ADDRESS/altlogin.php\n";
+printf "Eventually we will have a splash page for first time logins to assit the rest of the web control setup.\n";
+printf "Until then, the rest of the configuration must be done manually in /var/www/factorio/config.json\n";
+printf "Press Enter to exit.\n";
 read
