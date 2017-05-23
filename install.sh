@@ -28,13 +28,13 @@ function version_gt() {
 printf "Welcome to 3Ra Gaming's Factorio Web Control Installer!\n\n"
 #printf "This tool will automatically check that all required dependancies are installed\n"
 #printf "If any are not yet installed, it will attempt to install them.\n\n"
-printf "This script DOES NOT yet verify all dependancies. Please check the github to ensure you have all the prerequisites installed\n"
+printf "This script shoud verify all dependancies and will attempt to install them. You will be asked before each dependency is installed.\n"
 while true; do
 	read -p "Are you currently running Ubuntu 16.04 or higher?  " yn
 	case $yn in
 		[Yy]* ) break;;
 		[Nn]* )
-			printf "\n\nUnfortunately, this installer was built for Ubuntu :(\n\n";
+			printf "\nUnfortunately, this installer was built for Ubuntu :(\n\n";
 			printf "Please consult the github for manual instructions\n";
 			printf "http://www.3ragaming.com/github\n";
 			printf "You may also join our Discord and we will do our best to assist you\n";
@@ -82,22 +82,46 @@ done
 apt install --force-yes --yes $depend_needed
 printf "\n\nBase Dependencies Installed!\n";
 
-#check/install node version
-printf "Checking if node js is installed\n";
-if ! type node &> /dev/null2>&1; then
+function install_node () {
 	$url="https://deb.nodesource.com/setup_6.x";
 	curl -sL $url | sudo -E bash -
 	apt install --force-yes --yes nodejs
+}
+
+#check/install node version
+printf "Checking if Node JS is installed\n";
+if ! type node &> /dev/null2>&1; then
+	while true; do
+		read -p "Node JS is not installed. Install now?" yn
+		case $yn in
+			[Yy]* ) break;;
+			[Nn]* )
+				printf "\nUnfortunately, Node JS is required for the web control to function.\n\n";
+				exit;;
+			* ) echo "Please answer yes[Y] or no[N].";;
+		esac
+	done
+	install_node;
 else
 	version=`node -v`;
 	supported_node="6.9.5";
 	if version_gt $supported_node $version; then
-		printf "Only node $supported_node and above is supported.\nYou currently have $version installed\nPlease manually update your node JS then attempt install again."
+		printf "Only node $supported_node and above is supported.\nYou currently have $version installed\n";
 	fi
-	exit;
+	while true; do
+		read -p "Attempt to update now?" yn
+		case $yn in
+			[Yy]* ) break;;
+			[Nn]* )
+				printf "\nPlease manually update your node JS then attempt install again.\n\n";
+				exit;;
+			* ) echo "Please answer yes[Y] or no[N].";;
+		esac
+	done
+	install_node;
 fi
 if ! type node &> /dev/null2>&1; then
-	printf "for some reason, Node JS was unable to install. Please manually insatll node js version 6.9.5 or greater, ensure that it is installed with \`which node\`, and run this install script again"
+	printf "for some reason, Node JS was unable to install. Please manually insatll node js version 6.9.5 or greater, ensure that it is installed with \`which node\`, and run this install script again";
 	exit;
 fi
 version=`node -v`;
@@ -105,7 +129,7 @@ print "Node JS $version has been installed";
 
 #Factorio Install
 if [ ! -d "$install_dir/" ]; then
-	printf "Factorio is not installed. Attempting to identify latest stable version...\n"
+	printf "Factorio is not installed. Attempting to identify latest stable version...\n";
 	latest_version=`curl -v --silent https://updater.factorio.com/get-available-versions 2>&1 | grep stable | awk '{ print $2 }' | tr -d '"'`;
 	if [ "${latest_version}" ]; then
 		printf "latest version is $latest_version. ";
@@ -121,6 +145,7 @@ if [ ! -d "$install_dir/" ]; then
 							printf "extracting to $install_dir/$latest_version/ ... "
 							mkdir $install_dir/$latest_version
 							extract $download $install_dir $latest_version
+							chown -R www-data:www-data $install_dir/
 						else
 							printf "Unable to download latest version. Don't worry. We can install this later\n"
 						fi
