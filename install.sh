@@ -189,6 +189,36 @@ rm -Rf /tmp/master.zip /tmp/Web_Control-master/
 printf "Enabling SSL and restarting web server\n";
 a2enmod ssl
 a2ensite default-ssl
+printf "Checking upload limits\n";
+php_ini=`php --ini | grep Loaded | awk '{ print $4 }'`
+if [ -f "$php_ini" ]
+then
+	echo "$php_ini found."
+	php_ini_post_max_size_raw=`grep post_max_size $php_ini`
+	php_ini_post_max_size=`grep post_max_size $php_ini | awk '{ print $3 }' | tr -dc '0-9'`
+	php_ini_upload_max_filesize_raw=`grep upload_max_filesize $php_ini`
+	php_ini_upload_max_filesize=`grep upload_max_filesize $php_ini | awk '{ print $3 }' | tr -dc '0-9'`
+	if [ "$php_ini_post_max_size" -lt "156" ]; then
+		#change it to
+		php_ini_post_max_size_raw=`grep post_max_size $php_ini`
+		php_ini_most_max_size_new="post_max_size = 156M";
+		sed -i -e "s/$php_ini_post_max_size_raw/$php_ini_most_max_size_new/g" "$php_ini"
+		printf "Updated post_max_size to 156M\n";
+	else
+		printf "$php_ini_post_max_size_raw, this will do\n";
+	fi
+	if [ "$php_ini_upload_max_filesize" -lt "150" ]; then
+		#change it
+		php_ini_upload_max_filesize_raw=`grep upload_max_filesize $php_ini`
+		php_ini_upload_max_filesize_new="upload_max_filesize = 150M";
+		sed -i -e "s/$php_ini_upload_max_filesize_raw/$php_ini_upload_max_filesize_new/g" "$php_ini"
+		printf "Updated upload_max_filesize to 150M\n";
+	else
+		printf "$php_ini_upload_max_filesize_raw, this will do\n";
+	fi
+else
+	printf "Unable to location php_ini file.\nYou will be required to change the 'post_max_size' and 'upload_max_filesize' in your php.ini file.";
+fi
 systemctl restart apache2
 printf "Installation complete!\n\n";
 printf "We will need to setup a user for you to login without discord authentication for now.\n";
