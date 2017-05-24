@@ -19,10 +19,11 @@ function extract () {
 		case $1 in
 			*.tar.gz)  tar --strip-components=1 -xzf $1 -C $2/$3; printf "Done!\n";;
 			*.tar.xz)  tar --strip-components=1 -xf $1 -C $2/$3; printf "Done!\n";;
-			*)         printf "Unknown compressiong type can't extract from $1\n"; break;;
+			*)         printf "Unknown compression type can't extract from $1\n"; fail_fac_install=true; break;;
 		esac
 	else
 		printf "Unable to access file $1... We'll deal with that later...\n"
+		fail_fac_install=true;
 	fi
 }
 
@@ -165,6 +166,7 @@ if [ ! -d "$install_dir/" ]; then
 		fi
 	else
 		printf "Unable to download latest version. Don't worry. We can install this later\n"
+		fail_fac_install=true;
 	fi
 fi
 
@@ -180,6 +182,38 @@ printf "Adjusting permissions\n";
 chown -R www-data:www-data /var/www/
 chmod +x /var/www/factorio/manage.sh
 chmod +x /var/www/html/update.sh
+
+config_file="/var/www/factorio/server1/config/config.ini";
+if [ ! -d "/var/www/factorio/server1" ]; then
+	printf "\"Server1\" not found. Renaming example folder.\n";
+	mv /var/www/factorio/serverexample /var/www/factorio/server1
+	#need to fix read data and save data also
+	if [ -z "$fail_fac_install" ]; then
+		printf = "Please be sure to insatll a factorio version using the web control before attempting to start a game server";
+	else
+		dir="/usr/share/factorio/*";
+		for file in $dir; do
+			latest_dir=`echo "$file" | awk -F "/" '{ print $5 }'`
+			break
+		done
+		if [ -z "$latest_dir" ]; then
+			read_data=`grep "read-data" $config_file`;
+			read_data_new="read-data=/usr/share/factorio/$latest_dir";
+			sed -i -e "s/$read_data/$read_data_new/g" "$config_file"
+			printf "Updated: $read_data_new\n";	
+		else
+			printf = "Error setting read-data. Please use the web control to save a server config before attempting to start the server.";
+		fi
+	fi
+fi
+
+#ensure write-data is set correctly
+save_data=`grep "write-data" $config_file`;
+#change it to
+save_data_new="write-data=/var/www/factorio/server1";
+sed -i -e "s/$save_data/$save_data_new/g" "$config_file"
+printf "Updated: $save_data_new\n";
+
 printf "We need to install a cronjob for managing deleting old file logs and checking file permissions periodically.\n";
 printf "We will save your current cronjob file as \"cronjob_old.txt\" in case you need to add anything custom back to it\n";
 printf "Press Enter when ready.\r";
