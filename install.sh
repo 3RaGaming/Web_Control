@@ -117,16 +117,7 @@ function install_node () {
 #check/install node version
 printf "Checking if Node JS is installed\n";
 if ! type node &> /dev/null2>&1; then
-	while [ $silent == 0 ]; do
-		read -p "Node JS is not installed. Install now?" yn
-		case $yn in
-			[Yy]* ) break;;
-			[Nn]* )
-				printf "\nUnfortunately, Node JS is required for the web control to function.\n\n";
-				exit;;
-			* ) echo "Please answer yes[Y] or no[N].";;
-		esac
-	done
+	printf "Node JS is not installed. Installing.../n";
 	install_node;
 else
 	version=`node -v`;
