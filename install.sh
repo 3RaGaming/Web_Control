@@ -235,7 +235,7 @@ then
 else
 	printf "Unable to location php_ini file.\nYou will be required to change the 'post_max_size' and 'upload_max_filesize' in your php.ini file.";
 fi
-systemctl restart apache2
+service apache2 restart
 
 #request to remove index.html
 file="/var/www/html/index.html";
