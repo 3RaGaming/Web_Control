@@ -138,13 +138,13 @@ depend_arr+=("libapache2-mod-php");
 depend_needed=;
 for depend_item in "${depend_arr[@]}"; do
 	if ! type $depend_item &> /dev/null2>&1; then
-		depend_needed="$depend_needed $depend_item";
+		apt install --force-yes --yes $depend_item
 	fi
 done
 
 #Install dependencies
-printf "will verify install of:$depend_needed\n";
-apt install --force-yes --yes $depend_needed
+#printf "will verify install of:$depend_needed\n";
+#apt install --force-yes --yes $depend_needed
 printf "Base Dependencies Installed!\n\n";
 
 #check/install node version
@@ -202,7 +202,7 @@ unzip -u /tmp/master.zip -d /tmp/
 printf "Creating directories\n";
 mkdir -p /var/www/
 printf "Installing Web Control\n";
-cp -R /tmp/Web_Control-master/* /var/www/
+rsync -a -v --ignore-existing /tmp/Web_Control-master/* /var/www/
 printf "Adjusting permissions\n";
 chown -R www-data:www-data /var/www/
 chmod +x /var/www/factorio/manage.sh
@@ -224,7 +224,7 @@ if [ ! -d "/var/www/factorio/server1" ]; then
 		if [ -z "$latest_dir" ]; then
 			read_data=`grep "read-data" $config_file`;
 			read_data_new="read-data=/usr/share/factorio/$latest_dir";
-			sed -i -e "s/$read_data/$read_data_new/g" "$config_file"
+			sed -i -e "s|$read_data|$read_data_new|g" "$config_file"
 			printf "Updated: $read_data_new\n";	
 		else
 			printf = "Error setting read-data. Please use the web control to save a server config before attempting to start the server.";
@@ -236,7 +236,7 @@ fi
 save_data=`grep "write-data" $config_file`;
 #change it to
 save_data_new="write-data=/var/www/factorio/server1";
-sed -i -e "s/$save_data/$save_data_new/g" "$config_file"
+sed -i -e "s|$save_data|$save_data_new|g" "$config_file"
 printf "Updated: $save_data_new\n";
 
 printf "We need to install a cronjob for managing deleting old file logs and checking file permissions periodically.\n";
