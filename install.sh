@@ -217,19 +217,10 @@ if [ ! -d "/var/www/factorio/server1" ]; then
 	if [ -z "$fail_fac_install" ]; then
 		printf = "Please be sure to insatll a factorio version using the web control before attempting to start a game server";
 	else
-		dir="/usr/share/factorio/*";
-		for file in $dir; do
-			latest_dir=`echo "$file" | awk -F "/" '{ print $5 }'`
-			break
-		done
-		if [ -z "$latest_dir" ]; then
-			read_data=`grep "read-data" $config_file`;
-			read_data_new="read-data=/usr/share/factorio/$latest_dir";
-			sed -i -e "s|$read_data|$read_data_new|g" "$config_file"
-			printf "Updated: $read_data_new\n";	
-		else
-			printf = "Error setting read-data. Please use the web control to save a server config before attempting to start the server.";
-		fi
+		read_data=`grep "read-data" $config_file`;
+		read_data_new="read-data=/usr/share/factorio/$latlatest_versionest_dir";
+		sed -i -e "s|$read_data|$read_data_new|g" "$config_file"
+		printf "Updated: $read_data_new\n";	
 	fi
 fi
 
