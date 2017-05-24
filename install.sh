@@ -225,7 +225,7 @@ fi
 systemctl restart apache2
 
 #request to remove index.html
-$file="/var/www/html/index.html";
+file="/var/www/html/index.html";
 if [ -f "$file" ]; then
 	printf "Ubuntu likes to install a default web file at $file\n";
 	printf "This file is un-needed and will make using the web control difficult.";
