@@ -12,6 +12,7 @@ esac
 
 install_dir="/usr/share/factorio"
 supported_node="6.9.5";
+fail_fac_install=false;
 
 #compressed file extraction function. 0.14 is in tar.gz, and .15 is in tar.xz, for some reason.
 function extract_f () {
@@ -214,14 +215,22 @@ if [ ! -d "/var/www/factorio/server1" ]; then
 	printf "\"Server1\" not found. Renaming example folder.\n";
 	mv /var/www/factorio/serverexample /var/www/factorio/server1
 	#need to fix read data and save data also
-	if [ -z "$fail_fac_install" ]; then
-		printf = "Please be sure to insatll a factorio version using the web control before attempting to start a game server";
+	printf "\"Server1\" moved!\n";
+	if [ "$fail_fac_install" = true ]; then
+		printf "Please be sure to insatll a factorio version using the web control before attempting to start a game server\n";
 	else
+		dir="/usr/share/factorio/*";
+		for file in $dir; do
+		first_dir=`echo "$file" | awk -F "/" '{ print $5 }'`;
+			break;
+		done
 		read_data=`grep "read-data" $config_file`;
-		read_data_new="read-data=/usr/share/factorio/$latlatest_versionest_dir";
+		read_data_new="read-data=/usr/share/factorio/$first_dir/data";
 		sed -i -e "s|$read_data|$read_data_new|g" "$config_file"
 		printf "Updated: $read_data_new\n";	
 	fi
+else
+	rm -Rf /var/www/factorio/serverexample
 fi
 
 #ensure write-data is set correctly
