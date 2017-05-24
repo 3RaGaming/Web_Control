@@ -123,6 +123,7 @@ depend_arr+=("curl");
 depend_arr+=("zip");
 depend_arr+=("unzip");
 depend_arr+=("tar");
+depend_arr+=("rsync");
 depend_arr+=("gcc");
 depend_arr+=("cron");
 depend_arr+=("wget");
@@ -202,7 +203,7 @@ unzip -u /tmp/master.zip -d /tmp/
 printf "Creating directories\n";
 mkdir -p /var/www/
 printf "Installing Web Control\n";
-rsync -a -v --ignore-existing /tmp/Web_Control-master/* /var/www/
+rsync --ignore-existing -a -v /tmp/Web_Control-master/* /var/www/
 printf "Adjusting permissions\n";
 chown -R www-data:www-data /var/www/
 chmod +x /var/www/factorio/manage.sh
