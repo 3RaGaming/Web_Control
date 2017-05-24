@@ -11,10 +11,10 @@ case $1 in
 esac
 
 install_dir="/usr/share/factorio"
-#install_dir="/root/test"
+supported_node="6.9.5";
 
 #compressed file extraction function. 0.14 is in tar.gz, and .15 is in tar.xz, for some reason.
-function extract () {
+function extract_f () {
 	if [ -f $1 ] ; then
 		case $1 in
 			*.tar.gz)  tar --strip-components=1 -xzf $1 -C $2/$3; printf "Done!\n";;
@@ -28,7 +28,7 @@ function extract () {
 }
 
 #version checker. Will need this in the case node is already installed
-function version_gt() {
+function version_gt () {
 	test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1";
 }
 
@@ -41,19 +41,68 @@ function install_factorio () {
 		printf "Downloaded to $download\n"
 		printf "extracting to $1/$2/ ... "
 		mkdir $1/$2
-		extract $download $1 $2
+		extract_f $download $1 $2
 		chown -R www-data:www-data $1/
 	else
 		printf "Unable to download latest version. Don't worry. We can install this later\n"
 	fi
 }
 
+function install_node () {
+	url="https://deb.nodesource.com/setup_6.x";
+	curl -sL $url | sudo -E bash -
+	apt install --force-yes --yes nodejs
+}
+
+function set_username(){
+    printf "Please enter a username to create:\n"
+    read username
+    if [[ -n "$username" ]]; then
+        a=$(echo $username | tr -d "\n" | wc -c)
+        b=$(echo $username | tr -cd "[:alnum:]" | wc -c)
+        if [[ $a != $b ]]; then
+            printf "Only letters and numbers are supported for usernames.\n"
+            set_username
+        else
+			g_username=$(echo $username | tr -cd "[:alnum:]")
+        fi
+    else
+        printf "Username cannot be left empty.\n"
+        set_username
+    fi
+}
+
+function set_password(){
+    printf "Enter a password:\n"
+    read -s password_1
+    if [[ -n "$password_1" ]]; then
+        a=$(echo -n $password_1 | md5sum | awk '{ print $1 }')
+		printf "Re-enter password:\n"
+		read -s password_2
+		if [[ -n "$password_2" ]]; then
+			b=$(echo -n $password_2 | md5sum | awk '{ print $1 }')
+			if [[ $a != $b ]]; then
+				printf "Passwords do not match.\n"
+				set_password
+			else
+				g_password=$b
+			fi
+		else
+			printf "Passwords do not match.\n"
+			set_password
+		fi
+    else
+        printf "Password cannot be left empty.\n"
+        set_password
+    fi
+}
+
 printf "Welcome to 3Ra Gaming's Factorio Web Control Installer!\n\n"
 #printf "This tool will automatically check that all required dependancies are installed\n"
 #printf "If any are not yet installed, it will attempt to install them.\n\n"
-printf "This script should verify all dependancies and will attempt to install them. You will be asked before each dependency is installed.\n"
+printf "This script should verify all dependancies and will attempt to install them.\n"
 while [ $silent == 0 ]; do
-	read -p "Are you currently running Ubuntu 16.04 or higher?  " yn
+	read -p "Are you currently running Ubuntu 16.04 or higher? [y/n] " yn
 	case $yn in
 		[Yy]* ) break;;
 		[Nn]* )
@@ -94,26 +143,9 @@ for depend_item in "${depend_arr[@]}"; do
 done
 
 #Install dependencies
-echo "will verify install of:$depend_needed";
-while [ $silent == 0 ]; do
-	read -p "Are you ok with installing these now? (you must to continue with install) " yn
-	case $yn in
-		[Yy]* )
-			break;;
-		[Nn]* )
-			printf "We cannot proceed without these installed.";
-			exit;;
-		* ) echo "Please answer yes[Y] or no[N].\n";;
-	esac
-done
+printf "will verify install of:$depend_needed\n";
 apt install --force-yes --yes $depend_needed
-printf "\n\nBase Dependencies Installed!\n";
-
-function install_node () {
-	url="https://deb.nodesource.com/setup_6.x";
-	curl -sL $url | sudo -E bash -
-	apt install --force-yes --yes nodejs
-}
+printf "Base Dependencies Installed!\n\n";
 
 #check/install node version
 printf "Checking if Node JS is installed\n";
@@ -122,11 +154,10 @@ if ! type node &> /dev/null2>&1; then
 	install_node;
 else
 	version=`node -v`;
-	supported_node="6.9.5";
 	if version_gt $supported_node $version; then
 		printf "Only node $supported_node and above is supported.\nYou currently have $version installed\n";
 		while [ $silent == 0 ]; do
-			read -p "Attempt to update now?" yn
+			read -p "Attempt to update now? [y/n] " yn
 			case $yn in
 				[Yy]* ) break;;
 				[Nn]* )
@@ -139,7 +170,7 @@ else
 	fi
 fi
 if ! type node &> /dev/null2>&1; then
-	printf "for some reason, Node JS was unable to install. Please manually insatll node js version 6.9.5 or greater, ensure that it is installed with \`which node\`, and run this install script again";
+	printf "for some reason, Node JS was unable to install. Please manually insatll node js version 6.9.5 or greater, ensure that it is installed with \`which node\`, and run this install script again\n";
 	exit;
 fi
 version=`node -v`;
@@ -150,22 +181,16 @@ if [ ! -d "$install_dir/" ]; then
 	printf "Factorio is not installed.\nAttempting to identify latest stable version...\n";
 	latest_version=`curl -v --silent https://updater.factorio.com/get-available-versions 2>&1 | grep stable | awk '{ print $2 }' | tr -d '"'`;
 	if [ "${latest_version}" ]; then
-		printf "Latest stable Factorio version is $latest_version. ";
-		if [ $silent == 0 ]; then
-			while true; do
-				read -p "Download the latest version?  " yn
-				case $yn in
-						[Yy]* ) install_factorio $install_dir $latest_version;
-							break;;
-						[Nn]* ) printf "That's alright. We can download it later.\n"; break;;
-						* ) echo "Please answer yes[Y] or no[N].";;
-				esac
-			done
+		printf "Latest stable Factorio version is $latest_version. Installing...\n";
+		install_factorio $install_dir $latest_version
+		if [ -d "$install_dir/" ]; then
+			printf "Factorio $latest_version installed!\n\n";
 		else
-			install_factorio $install_dir $latest_version
+			printf "Unable to download latest version. Don't worry. We can install this later\n";
+			fail_fac_install=true;
 		fi
 	else
-		printf "Unable to download latest version. Don't worry. We can install this later\n"
+		printf "Unable to download latest version. Don't worry. We can install this later\n";
 		fail_fac_install=true;
 	fi
 fi
@@ -278,7 +303,7 @@ if [ -f "$file" ]; then
 	printf "This file is un-needed and will make using the web control difficult.";
 	if [ $silent == 0 ]; then
 		while true; do
-			read -p "Should we remove this file now? " yn
+			read -p "Should we remove this file now? [y/n] " yn
 			case $yn in
 					[Yy]* )
 						rm -f $file
@@ -301,50 +326,8 @@ fi
 printf "Installation complete!\n\n";
 printf "We will need to setup a user for you to login without discord authentication for now.\n";
 
-function set_username(){
-    printf "Please enter a username to create:\n"
-    read username
-    if [[ -n "$username" ]]; then
-        a=$(echo $username | tr -d "\n" | wc -c)
-        b=$(echo $username | tr -cd "[:alnum:]" | wc -c)
-        if [[ $a != $b ]]; then
-            printf "Only letters and numbers are supported for usernames.\n"
-            set_username
-        else
-			g_username=$(echo $username | tr -cd "[:alnum:]")
-        fi
-    else
-        printf "Username cannot be left empty.\n"
-        set_username
-    fi
-}
-function set_password(){
-    printf "Enter a password:\n"
-    read -s password_1
-    if [[ -n "$password_1" ]]; then
-        a=$(echo -n $password_1 | md5sum | awk '{ print $1 }')
-		printf "Re-enter password:\n"
-		read -s password_2
-		if [[ -n "$password_2" ]]; then
-			b=$(echo -n $password_2 | md5sum | awk '{ print $1 }')
-			if [[ $a != $b ]]; then
-				printf "Passwords do not match.\n"
-				set_password
-			else
-				g_password=$b
-			fi
-		else
-			printf "Passwords do not match.\n"
-			set_password
-		fi
-    else
-        printf "Password cannot be left empty.\n"
-        set_password
-    fi
-}
-
 while [ $silent == 0 ]; do
-	read -p "Would you like to setup this user now? (This will remove all other users from the users.txt file) " yn
+	read -p "Would you like to setup this user now? (This will remove all other users from the users.txt file) [y/n] " yn
 	case $yn in
 			[Yy]* )
 				set_username
