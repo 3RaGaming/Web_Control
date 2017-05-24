@@ -4,6 +4,12 @@ if [ "$EUID" -ne 0 ]
 	exit
 fi
 
+#set silent install flag and standard user/password
+case $1 in
+	'-s'|'--silent') silent=1; silent_user=admin; silent_password=password;;
+	*)               silent=0;;
+esac
+
 install_dir="/usr/share/factorio"
 #install_dir="/root/test"
 
@@ -25,11 +31,27 @@ function version_gt() {
 	test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1";
 }
 
+#factorio installation. $1 = install_dir $2 = latest_version
+function install_factorio () {
+	mkdir $1
+	download=`curl -JLO# https://www.factorio.com/get-download/$2/headless/linux64`
+	download=`echo $download | awk '{ print $5 }' | tr -d "'"`
+	if [ "${download}" ]; then
+		printf "Downloaded to $download\n"
+		printf "extracting to $1/$2/ ... "
+		mkdir $1/$2
+		extract $download $1 $2
+		chown -R www-data:www-data $1/
+	else
+		printf "Unable to download latest version. Don't worry. We can install this later\n"
+	fi
+}
+
 printf "Welcome to 3Ra Gaming's Factorio Web Control Installer!\n\n"
 #printf "This tool will automatically check that all required dependancies are installed\n"
 #printf "If any are not yet installed, it will attempt to install them.\n\n"
 printf "This script should verify all dependancies and will attempt to install them. You will be asked before each dependency is installed.\n"
-while true; do
+while [ $silent == 0 ]; do
 	read -p "Are you currently running Ubuntu 16.04 or higher?  " yn
 	case $yn in
 		[Yy]* ) break;;
@@ -72,7 +94,7 @@ done
 
 #Install dependencies
 echo "will verify install of:$depend_needed";
-while true; do
+while [ $silent == 0 ]; do
 	read -p "Are you ok with installing these now? (you must to continue with install) " yn
 	case $yn in
 		[Yy]* )
@@ -95,7 +117,7 @@ function install_node () {
 #check/install node version
 printf "Checking if Node JS is installed\n";
 if ! type node &> /dev/null2>&1; then
-	while true; do
+	while [ $silent == 0 ]; do
 		read -p "Node JS is not installed. Install now?" yn
 		case $yn in
 			[Yy]* ) break;;
@@ -111,7 +133,7 @@ else
 	supported_node="6.9.5";
 	if version_gt $supported_node $version; then
 		printf "Only node $supported_node and above is supported.\nYou currently have $version installed\n";
-		while true; do
+		while [ $silent == 0 ]; do
 			read -p "Attempt to update now?" yn
 			case $yn in
 				[Yy]* ) break;;
@@ -137,27 +159,19 @@ if [ ! -d "$install_dir/" ]; then
 	latest_version=`curl -v --silent https://updater.factorio.com/get-available-versions 2>&1 | grep stable | awk '{ print $2 }' | tr -d '"'`;
 	if [ "${latest_version}" ]; then
 		printf "Latest stable Factorio version is $latest_version. ";
-		while true; do
-			read -p "Download the latest version?  " yn
-			case $yn in
-					[Yy]* )
-						mkdir $install_dir
-						download=`curl -JLO# https://www.factorio.com/get-download/$latest_version/headless/linux64`
-						download=`echo $download | awk '{ print $5 }' | tr -d "'"`
-						if [ "${download}" ]; then
-							printf "Downloaded to $download\n"
-							printf "extracting to $install_dir/$latest_version/ ... "
-							mkdir $install_dir/$latest_version
-							extract $download $install_dir $latest_version
-							chown -R www-data:www-data $install_dir/
-						else
-							printf "Unable to download latest version. Don't worry. We can install this later\n"
-						fi
-						break;;
-					[Nn]* ) printf "That's alright. We can download it later.\n"; break;;
-					* ) echo "Please answer yes[Y] or no[N].";;
-			esac
-		done
+		if [ $silent == 0 ]; then
+			while true; do
+				read -p "Download the latest version?  " yn
+				case $yn in
+						[Yy]* ) install_factorio $install_dir $latest_version;
+							break;;
+						[Nn]* ) printf "That's alright. We can download it later.\n"; break;;
+						* ) echo "Please answer yes[Y] or no[N].";;
+				esac
+			done
+		else
+			install_factorio $install_dir $latest_version
+		fi
 	else
 		printf "Unable to download latest version. Don't worry. We can install this later\n"
 	fi
@@ -178,7 +192,9 @@ chmod +x /var/www/html/update.sh
 printf "We need to install a cronjob for managing deleting old file logs and checking file permissions periodically.\n";
 printf "We will save your current cronjob file as \"cronjob_old.txt\" in case you need to add anything custom back to it\n";
 printf "Press Enter when ready.\r";
-read
+if [ $silent == 0 ]; then
+	read
+fi
 printf "Activating cron job for permissions\n";
 crontab -l > cronjob_old.txt
 crontab /var/www/cronjob.txt
@@ -187,7 +203,9 @@ cd /var/www/factorio/
 printf "\nPreparing to compile the manager, and install discord js.\n";
 printf "Some warning messages about discord will appear. These are normal, you may ignore them.\n";
 printf "\nPress Enter to continue.\n";
-read
+if [ $silent == 0 ]; then
+	read
+fi
 gcc -o managepgm -pthread manage.c
 printf "Installing Discord.js\n"
 npm install discord.js --save
@@ -233,21 +251,26 @@ file="/var/www/html/index.html";
 if [ -f "$file" ]; then
 	printf "Ubuntu likes to install a default web file at $file\n";
 	printf "This file is un-needed and will make using the web control difficult.";
-	while true; do
-		read -p "Should we remove this file now? " yn
-		case $yn in
-				[Yy]* )
-					rm -f $file
-					printf "File $file removed.\n";
-					break;;
-				[Nn]* )
-					printf "If you have made this file yourself, please rename it (anything but index) so the web control may function properly.\n";
-					printf "Press Enter to continue...";
-					read
-					break;;
-				* ) echo "Please answer yes[Y] or no[N].";;
-		esac
-	done
+	if [ $silent == 0 ]; then
+		while true; do
+			read -p "Should we remove this file now? " yn
+			case $yn in
+					[Yy]* )
+						rm -f $file
+						printf "File $file removed.\n";
+						break;;
+					[Nn]* )
+						printf "If you have made this file yourself, please rename it (anything but index) so the web control may function properly.\n";
+						printf "Press Enter to continue...";
+						read
+						break;;
+					* ) echo "Please answer yes[Y] or no[N].";;
+			esac
+		done
+	else
+		rm -f $file
+		printf "File $file removed.\n";
+	fi
 fi
 
 printf "Installation complete!\n\n";
@@ -295,7 +318,7 @@ function set_password(){
     fi
 }
 
-while true; do
+while [ $silent == 0 ]; do
 	read -p "Would you like to setup this user now? (This will remove all other users from the users.txt file) " yn
 	case $yn in
 			[Yy]* )
@@ -309,10 +332,19 @@ while true; do
 	esac
 done
 
+#create standard login for silent installation
+if [ $silent == 1 ]; then
+        a=$(echo -n $silent_password | md5sum | awk '{ print $1 }')
+	echo "$silent_user|$a|admin" > /var/www/users.txt;
+fi
 
 printf "Additional users may be added using additional lines in /var/www/users.txt. Passwords are MD5 encrypted\n";
 printf "Access your site with https://IP_ADDRESS/altlogin.php\n";
 printf "Eventually we will have a splash page for first time logins to assit the rest of the web control setup.\n";
 printf "Until then, the rest of the configuration must be done manually in /var/www/factorio/config.json\n";
 printf "Press Enter to exit.\n";
-read
+if [ $silent == 0 ]; then
+	read
+fi
+
+
