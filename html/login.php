@@ -207,7 +207,7 @@ if(!empty($userN) && !empty($passW)) {
 			$report = "With debug disabled, Session would have been created.";
 			$debug[] = print_r($session, true);
 		} else {
-			$session['login']['user']]=$userN;
+			$session['login']['user']=$userN;
 			$session['login']['level']=trim($userL);
 			//Allow login
 		}
