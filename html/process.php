@@ -46,7 +46,6 @@ if(isset($_REQUEST['start'])) {
 				die('Missing server-settings-web.json. Click "config" to attempt to generate one.');
 			}
 			$server_name="";
-			$server_password="";
 			$new_server_settings = false;
 			//echo "Sending Start Server Command:\n\n";
 			$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "prestart" "'.$_SESSION['login']['user'].'"');
@@ -65,19 +64,6 @@ if(isset($_REQUEST['start'])) {
 					}
 				} else {
 					die('Invalid server-settings.json on name');
-				}
-				if(isset($data["game_password"])) {
-					if(isset($_REQUEST['server_password'])) {
-						$server_password = $_REQUEST['server_password'];
-						$server_password = trim ( $server_password , " \t\n\r\0\x0B" );
-					}
-					if($server_password!=$data['game_password']) {
-						//set new password
-						$data['game_password']=$server_password;
-						$new_server_settings = true;
-					}
-				} else {
-					die('Invalid server-settings.json on game_password');
 				}
 				if($new_server_settings == true) {
 					$newJsonString = json_encode($data, JSON_PRETTY_PRINT);
