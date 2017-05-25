@@ -177,6 +177,47 @@ if(isset($_GET['code'])) {
 } /* DEBUG */elseif(isset($debug)) {
 	$debug[] = "no CODE parameter found.";
 }
+
+$userN="";
+$passW="";
+if(isset($_POST['uname'])) {
+	$userN = addslashes($_POST['uname']);
+}
+if(isset($_POST['passw'])) {
+	$passW = addslashes(md5(trim($_POST['passw'])));
+}
+ /* DEBUG */ if(isset($debug)) {
+	$debug[] = "Alt-login used";
+	$debug[] = "$userN - $passW";
+}
+if(!empty($userN) && !empty($passW)) {
+	$userlist = file ('/var/www/users.txt');
+	$success = false;
+	foreach ($userlist as $user) {
+		$user_details = explode('|', $user);
+		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
+			$userN = $user_details[0];
+			$userL = $user_details[2];
+			$success = true;
+			break;
+		}
+	}
+	if ($success) {
+		if(isset($debug)) {
+			$report = "With debug disabled, Session would have been created.";
+			$debug[] = print_r($session, true);
+		} else {
+			$session['login']['user']]=$userN;
+			$session['login']['level']=trim($userL);
+			//Allow login
+		}
+	} else {
+		$error = "password";
+	}
+} elseif(isset($_POST['submit'])) {
+	$error = "form_empty";
+}
+
 if(isset($error)) {
 	switch($error) {
 		case "unauthorized":
@@ -189,13 +230,19 @@ if(isset($error)) {
 			$report = "Error with discord API";
 			break;
 		case "member":
-			$report = "You are not a member of the 3Ra Discord Server";
+			$report = "You are not a member of the Discord Server";
 			break;
 		case "logged_out":
 			$report = "You have been logged out";
 			break;
 		case "logged_in":
 			$report = "You are already logged in";
+			break;
+		case "password";
+			$report =  "Invalid username or password";
+			break;
+		case "form_empty";
+			$report = "<br />I don't like no input<br />";
 			break;
 		default:
 			$report = "Unknown Error Occurred - $error";
@@ -221,24 +268,52 @@ if(!isset($clientid)) {
 	$clientid = $json_config['clientid'];
 }
 
-session_write_close();
-
 ?>
 <html>
-<head>
-<link rel="stylesheet" media="all" href="assets/css/login.css" />
-</head>
-<body>
-<div class="login-page">
-  <div class="form">
-    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?php echo $clientid; ?>&scope=identify%20guilds&redirect_uri=<?php echo $redirect_url; ?>&response_type=code">
-	  <img style="width: 100%;" src="./assets/img/3rabutton.png" alt="Login With Discord"/>
-	</a>
-	<?php 	if(isset($report)) { echo "<br /><br />".$report; }
-			if(isset($debug)) { echo "<br />debug enabled";}?>
-  </div>
-</div>
-</body>
+	<head>
+		<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
+		<link rel="stylesheet" media="all" href="assets/css/login.css" />
+		<script>
+			function show_hide(v_show, v_hide) {
+				document.getElementById(v_show).style.visibility="block";
+				document.getElementById(v_hide).style.visibility="none";
+			}
+			
+			<?php
+				echo "\t\t\t$(document).ready(function() {\xA";
+				if( isset($_POST['submit']) || $clientid=="PUT_YOUR_BOT_CLIENT_ID_HERE" ) {
+					echo "\t\t\t\tshow_hide('login-discord','login-alt');\xA";
+				}
+				echo (empty($userN)?'\t\t\t$("#uname").attr("placeholder");\xA':'\t\t\t$("#uname").val("'.$userN.'");\xA');
+				echo "\t\t\t}\xA";
+			?>
+			
+		</script>
+	</head>
+	<body>
+		<div class="login-page">
+			<div class="form">
+				<span id="login-discord">
+					<a href="#" onClick="show_hide('login-alt','login-discord');">Alternate Login</a><br />
+					<a id="" href="https://discordapp.com/oauth2/authorize?client_id=<?php echo $clientid; ?>&scope=identify%20guilds&redirect_uri=<?php echo $redirect_url; ?>&response_type=code">
+					<img style="width: 100%;" src="./assets/img/3rabutton.png" alt="Login With Discord"/>
+					</a>
+				</span>
+				<span id="login-alt" style="display: none;">
+					<a href="#" onClick="show_hide('login-discord','login-alt');">Discord Login</a><br />
+					<form class="login-form" name="login" method="post">
+						<input type="hidden" name="login" value="submit" />
+						<input type="text" id="uname" name="uname" />
+						<input type="password" name="passw" placeholder="password"/>
+						<button onclick="document.login.submit();">login</button>
+					</form>
+				</span>
+				<?php 	if(isset($report)) { echo "<br /><br />".$report; }
+						if(isset($debug)) { echo "<br />debug enabled";}?>
+			</div>
+		</div>
+	</body>
+	
 <?php
 	if(isset($debug)) {
 		echo "<pre>";
