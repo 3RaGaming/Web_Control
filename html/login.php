@@ -175,9 +175,9 @@ if(isset($_GET['code'])) {
 		}
 	}
 } /* DEBUG */elseif(isset($debug)) {
-	$debug[] = "no CODE parameter found.";
-}
+	$debug[] = "no CODE parameter found."; }
 
+/**** Alternate Login Processing Below ****/
 $userN="";
 $passW="";
 if(isset($_POST['uname'])) {
@@ -217,7 +217,7 @@ if(!empty($userN) && !empty($passW)) {
 } elseif(isset($_POST['submit'])) {
 	$error = "form_empty";
 }
-
+ /**** Handle Error Messages ****/
 if(isset($error)) {
 	switch($error) {
 		case "unauthorized":
@@ -260,14 +260,9 @@ if(isset($error)) {
 		die();
 	}
 }
-//session_write_close();
-
-if(!isset($clientid)) {
-	$config_file = file_get_contents('/var/www/factorio/config.json');
-	$json_config = json_decode($config_file, true);
-	$clientid = $json_config['clientid'];
-}
-
+$config_file = file_get_contents('/var/www/factorio/config.json');
+$json_config = json_decode($config_file, true);
+$clientid = $json_config['clientid'];
 ?>
 <html>
 	<head>
@@ -280,13 +275,13 @@ if(!isset($clientid)) {
 			}
 			<?php
 				echo "\t\t$(document).ready(function() {\xA";
-				if( isset($_POST['submit']) || $clientid=="PUT_YOUR_BOT_CLIENT_ID_HERE" ) {
-					echo "\t\t\t\tshow_hide('login-discord','login-alt');\xA";
+				if( isset($_POST['submit']) || ( isset($clientid) && $clientid == "PUT_YOUR_BOT_CLIENT_ID_HERE" ) || !isset($clientid) ) {
+					echo "\t\t\t\tshow_hide('login-alt','login-discord');\xA";
 				}
 				echo "\t\t\t";
 				echo (empty($userN)?'$("#uname").attr("placeholder");':'$("#uname").val("'.$userN.'");');
 				echo "\xA";
-				echo "\t\t\t}\xA";
+				echo "\t\t\t});\xA";
 			?>
 		</script>
 	</head>
@@ -313,7 +308,6 @@ if(!isset($clientid)) {
 			</div>
 		</div>
 	</body>
-	
 <?php
 	if(isset($debug)) {
 		echo "<pre>";
