@@ -280,11 +280,13 @@ if(!isset($clientid)) {
 			}
 			
 			<?php
-				echo "\t\t\t$(document).ready(function() {\xA";
+				echo "\t\t$(document).ready(function() {\xA";
 				if( isset($_POST['submit']) || $clientid=="PUT_YOUR_BOT_CLIENT_ID_HERE" ) {
 					echo "\t\t\t\tshow_hide('login-discord','login-alt');\xA";
 				}
-				echo (empty($userN)?'\t\t\t$("#uname").attr("placeholder");\xA':'\t\t\t$("#uname").val("'.$userN.'");\xA');
+				echo '\t\t\t';
+				echo (empty($userN)?'$("#uname").attr("placeholder");':'$("#uname").val("'.$userN.'");');
+				echo '\xA';
 				echo "\t\t\t}\xA";
 			?>
 			
