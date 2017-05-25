@@ -186,9 +186,11 @@ if(isset($_POST['uname'])) {
 if(isset($_POST['passw'])) {
 	$passW = addslashes(md5(trim($_POST['passw'])));
 }
- /* DEBUG */ if(isset($debug)) {
-	$debug[] = "Alt-login used";
-	$debug[] = "$userN - $passW";
+if(isset($_POST['submit'])) {
+	/* DEBUG */ if(isset($debug)) {
+		$debug[] = "Alt-login post data triggered";
+		$debug[] = "username:'$userN' - password:'$passW'";
+	}
 }
 if(!empty($userN) && !empty($passW)) {
 	$userlist = file ('/var/www/users.txt');
