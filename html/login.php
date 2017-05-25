@@ -278,8 +278,8 @@ $clientid = $json_config['clientid'];
 				if( isset($_POST['submit']) || ( isset($clientid) && $clientid == "PUT_YOUR_BOT_CLIENT_ID_HERE" ) || !isset($clientid) ) {
 					echo "\t\t\t\tshow_hide('login-alt','login-discord');\xA";
 				}
-				echo "\t\t\t";
-				echo (empty($userN)?'$("#uname").attr("placeholder");':'$("#uname").val("'.$userN.'");');
+				echo "\t\t\t\t";
+				echo (empty($userN)?'$("#uname").attr("placeholder","username");':'$("#uname").val("'.$userN.'");');
 				echo "\xA";
 				echo "\t\t\t});\xA";
 			?>
