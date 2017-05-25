@@ -265,6 +265,11 @@ if(isset($error)) {
 $config_file = file_get_contents('/var/www/factorio/config.json');
 $json_config = json_decode($config_file, true);
 $clientid = $json_config['clientid'];
+/* DEBUG */ if(isset($debug)) {
+	if(( isset($clientid) && $clientid == "PUT_YOUR_BOT_CLIENT_ID_HERE" )) {
+		$debug[] = "Default JSON['clientid'] being used. Discord Auth unavailable.";
+	}
+}
 ?>
 <html>
 	<head>
