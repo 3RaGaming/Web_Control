@@ -1,15 +1,21 @@
 # Web_Control
-Web gui used to control the game servers, and introduce discord chat integration. Discord auth is available for web contorl logins.
+Web accessable server management. Start/Stop servers, upload/delete save files, chat with active servers, edit server settings, download log files, and more! Discord auth is available for web contorl logins. There are two levels of login: Admin (can update Web-Control with click of a button) and Moderator (cannot update web-control). All user actions are logged, and log files cannot be removed from the web interface. More permission adjustment is in the works. View our trello (https://trello.com/b/QP2fuOXj/web-control) for project status and plans. A more detailed guide to the web control is in the works here: http://3ragaming.com/faq/web_control/
 
-Game and Apache are run on the same server, for now.
+Game, Web server, and discord bot must on the same server (for now).
 
 # Requirements
-(Realized this was kind of important... so we're working on it)
-
 configure the sudoers file to allow www-data access to screen and gcc
 `www-data ALL=(ALL:ALL) /usr/bin/screen *
 www-data ALL=(ALL:ALL) /usr/bin/gcc *`
-Or else you will be unable to start the factorio server from the web control
+or else you will be unable to start the factorio server from the web control
+
+Easy Install! Put this line into your SSH terminal to begin the install:
+
+`bash <(curl -s https://raw.githubusercontent.com/3RaGaming/Web_Control/master/install.sh)`
+
+This will run you through the entire setup process. Once the program is installed on the server, you'll be instructed on how to access the web gui to continue the rest of the configuration.
+
+# Dependencies
 
 Ubuntu 16.04 (or any other linux of your choosing, if you have the know-how to figure it out)
 
@@ -27,19 +33,15 @@ crontab (apt install cron, specifically)
 
 Node.js v6.9.5 or higher (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
 
-# Installation
-Easy Install! Put this line into your SSH terminal to begin the install:
-`bash <(curl -s https://raw.githubusercontent.com/3RaGaming/Web_Control/master/install.sh)`
+# Manual Installation
 
-This will run you through the entire setup process. Once the program is installed on the server, you'll be instructed on how to access the web gui to continue the rest of the configuration.
-
-Or if you prefer to do it manually, here are the steps.
+If you prefer to do it manually, here are the steps.
 Right now the file path dependancies are as follows:  
 /var/www/html for the web files  
 /var/www/factorio for the server save locations.  
 /usr/share/factorio/0.12.34 for the factorio instance itself
 (each factorio server version should be in it's own appropriately named folder)
-Basically, you should treat /var/www/ as the root directory for all web_control files.
+Basically, you should treat /var/www/ as the root directory for all web_control repo files.
 
 To compile the manage.c program, you must install gcc.  
 1) Open a Terminal window and navigate to `cd /var/www/factorio`
