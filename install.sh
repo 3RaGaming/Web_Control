@@ -52,6 +52,7 @@ depend_arr+=("zip");
 depend_arr+=("unzip");
 depend_arr+=("tar");
 depend_arr+=("gcc");
+depend_arr+=("screen");
 depend_arr+=("crontab");
 depend_arr+=("npm");
 depend_arr+=("xz-utils");
@@ -300,14 +301,14 @@ while true; do
 				printf "Will create user \"$g_username\" with password $g_password\n";
 				echo "$g_username|$g_password|admin" > /var/www/users.txt;
 				break;;
-			[Nn]* ) printf "If you find you cannot login using /altlogin.php, edit the /var/www/users.txt file.\n"; break;;
+			[Nn]* ) printf "If you find you cannot login, edit the /var/www/users.txt file.\n"; break;;
 			* ) echo "Please answer yes[Y] or no[N].";;
 	esac
 done
 
 
 printf "Additional users may be added using additional lines in /var/www/users.txt. Passwords are MD5 encrypted\n";
-printf "Access your site with https://IP_ADDRESS/altlogin.php\n";
+printf "Access your site with https://IP_ADDRESS/\n";
 printf "Eventually we will have a splash page for first time logins to assit the rest of the web control setup.\n";
 printf "Until then, the rest of the configuration must be done manually in /var/www/factorio/config.json\n";
 printf "Press Enter to exit.\n";

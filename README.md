@@ -1,5 +1,7 @@
 # Web_Control
-Quick and dirty web gui used to control the game servers. Game and Apache are run on the same server, for now.
+Web gui used to control the game servers, and introduce discord chat integration. Discord auth is available for web contorl logins.
+
+Game and Apache are run on the same server, for now.
 
 # Requirements
 (Realized this was kind of important... so we're working on it)
@@ -9,13 +11,21 @@ configure the sudoers file to allow www-data access to screen and gcc
 www-data ALL=(ALL:ALL) /usr/bin/gcc *`
 Or else you will be unable to start the factorio server from the web control
 
-Ubuntu 16.06 (or any other linux of your choosing, if you have the know-how to figure it out)
+Ubuntu 16.04 (or any other linux of your choosing, if you have the know-how to figure it out)
 
-Apache2 with SSL Enabled. (Web Control is set to only work on a an https connection)
+Apache2 with SSL Enabled. (Web Control is currently set to only work on a an https connection)
 
 php7 with cURL
 
-Node.js (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
+gnu "screen" (apt install screen)
+
+gcc and npm
+
+zip, unzip, tar, and xz-utils
+
+crontab (apt install cron, specifically)
+
+Node.js v6.9.5 or higher (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
 
 # Installation
 Easy Install! Put this line into your SSH terminal to begin the install:
@@ -27,7 +37,8 @@ Or if you prefer to do it manually, here are the steps.
 Right now the file path dependancies are as follows:  
 /var/www/html for the web files  
 /var/www/factorio for the server save locations.  
-/usr/share/factorio/ for the factorio instance itself  
+/usr/share/factorio/0.12.34 for the factorio instance itself
+(each factorio server version should be in it's own appropriately named folder)
 Basically, you should treat /var/www/ as the root directory for all web_control files.
 
 To compile the manage.c program, you must install gcc.  
