@@ -289,13 +289,13 @@ $clientid = $json_config['clientid'];
 		<div class="login-page">
 			<div class="form">
 				<span id="login-discord">
-					<a href="#" onClick="show_hide('login-alt','login-discord');">Alternate Login</a><br />
+					<a href="#" onClick="show_hide('login-alt','login-discord');">Alternate Login</a><br /><br />
 					<a id="" href="https://discordapp.com/oauth2/authorize?client_id=<?php echo $clientid; ?>&scope=identify%20guilds&redirect_uri=<?php echo $redirect_url; ?>&response_type=code">
 					<img style="width: 100%;" src="./assets/img/3rabutton.png" alt="Login With Discord"/>
 					</a>
 				</span>
 				<span id="login-alt" style="display: none;">
-					<a href="#" onClick="show_hide('login-discord','login-alt');">Discord Login</a><br />
+					<a href="#" onClick="show_hide('login-discord','login-alt');">Discord Login</a><br /><br />
 					<form class="login-form" name="login" method="post">
 						<input type="hidden" name="login" value="submit" />
 						<input type="text" id="uname" name="uname" />
