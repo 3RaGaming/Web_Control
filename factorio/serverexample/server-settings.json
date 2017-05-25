@@ -15,8 +15,8 @@
   },
 
   "_comment_credentials": "Your factorio.com login credentials. Required for games with visibility public",
-  "username": "USERNAME",
-  "password": "PASSWORD",
+  "username": "",
+  "password": "",
 
   "_comment_token": "Authentication token. May be used instead of 'password' above.",
   "token": "",
