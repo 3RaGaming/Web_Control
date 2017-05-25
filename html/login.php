@@ -40,10 +40,10 @@ $redirect_url = urlencode("https://" .$_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_N
 		$debug[] = "login-get";
 		$debug[] = print_r($_REQUEST, true);
 	}
-	
+
 if(isset($_GET['code'])) {
 	$code = $_GET['code'];
-	
+
 	$config_file = file_get_contents('/var/www/factorio/config.json');
 	$json_config = json_decode($config_file, true);
 	if($json_config) {
@@ -57,7 +57,7 @@ if(isset($_GET['code'])) {
 	if(!isset($error)) {
 		$botheader = array();
 		$botheader[] = 'Authorization: Bot '.$bottoken;
-		
+
 		$url = 'https://discordapp.com/api/oauth2/token?';
 		$postField = 'grant_type=authorization_code&client_id='.urlencode($client_id).'&client_secret='.urlencode($client_secret).'&redirect_uri='.$redirect_url.'&code='.urlencode($code);
 		//echo $postField;
@@ -66,7 +66,7 @@ if(isset($_GET['code'])) {
 						CURLOPT_FOLLOWLOCATION => 1,
 						CURLOPT_POST => true,
 						CURLOPT_POSTFIELDS => $postField );
-		
+
 		$curlrqst0 = curl_init();
 		curl_setopt_array($curlrqst0, $options);
 		$tokenobject = curl_exec($curlrqst0);
@@ -75,9 +75,9 @@ if(isset($_GET['code'])) {
 		/* DEBUG */if(isset($debug)) { 	$debug[] = "tokenJson" . __LINE__;
 										$debug[] = print_r($tokenjson, true);
 										$debug[] = curl_error($curlrqst0); }
-										
+
 		curl_close($curlrqst0);
-		
+
 		if(isset($tokenjson['access_token'])) {
 			$token = $tokenjson['access_token'];
 			/* DEBUG */if(isset($debug)) { $debug[] = "TOKEN SET"; }
@@ -89,28 +89,28 @@ if(isset($_GET['code'])) {
 			$tokenheader = array();
 			$tokenheader[] = 'Content-Type application/json';
 			$tokenheader[] = 'Authorization: Bearer '.$token;
-			
+
 			/* DEBUG */if(isset($debug)) {  $debug[] = "token header" . __LINE__;
 											$debug[] = print_r($tokenheader, true); }
-			
+
 			$curlrqst1 = curl_init('https://discordapp.com/api/users/@me');
 			curl_setopt($curlrqst1, CURLOPT_HTTPHEADER, $tokenheader);
 			curl_setopt($curlrqst1, CURLOPT_RETURNTRANSFER, true);
 			$userobject = curl_exec($curlrqst1);
 			$userjson = json_decode($userobject, true);
-			
+
 			/* DEBUG */if(isset($debug)) {  $debug[] = "UserJson" . __LINE__;
 											$debug[] = print_r($userjson, true);
 											$debug[] = curl_error($curlrqst1); }
-											
+
 			curl_close($curlrqst1);
-			
+
 			if(isset($userjson["id"])) {
 				$userid = $userjson["id"];
 			} else {
 				$error = "user_json_id";
 			}
-			
+
 			$curlrqst2 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/members/'.$userid);
 			curl_setopt($curlrqst2, CURLOPT_HTTPHEADER, $botheader);
 			curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
@@ -132,13 +132,13 @@ if(isset($_GET['code'])) {
 				curl_setopt($curlrqst3, CURLOPT_RETURNTRANSFER, true);
 				$roleobject = curl_exec($curlrqst3);
 				$rolejson = json_decode($roleobject, true);
-				
+
 				/* DEBUG */if(isset($debug)) {  $debug[] = "RolesJson" . __LINE__;
 												$debug[] = print_r($rolejson, true);
 												$debug[] = curl_error($curlrqst3); }
-												
+
 				curl_close($curlrqst3);
-				
+
 				$level1id = null;
 				$level2id = null;
 				foreach($rolejson as $key => $value) {
@@ -146,7 +146,7 @@ if(isset($_GET['code'])) {
 					if($rolejson[$key]["name"] == $level2role) $level2id = $rolejson[$key]["id"];
 					if($level1id !== null && $level2id !== null) break 1;
 				}
-				
+
 				$level1 = false;
 				$level2 = false;
 				if(isset($memberjson["roles"])) {
@@ -156,7 +156,7 @@ if(isset($_GET['code'])) {
 						if($level1 && $level2) break 1;
 					}
 				}
-				
+
 				if ($level1 || $userid == "129357924324605952" /* zacks id */) {
 					/* DEBUG */if(isset($debug)) { $debug[] = "admin login verified!"; }
 					$session['login']['user']=$memberjson["user"]["username"];
@@ -275,21 +275,19 @@ if(!isset($clientid)) {
 		<link rel="stylesheet" media="all" href="assets/css/login.css" />
 		<script>
 			function show_hide(v_show, v_hide) {
-				document.getElementById(v_show).style.visibility="block";
-				document.getElementById(v_hide).style.visibility="none";
+				document.getElementById(v_show).style.display="block";
+				document.getElementById(v_hide).style.display="none";
 			}
-			
 			<?php
 				echo "\t\t$(document).ready(function() {\xA";
 				if( isset($_POST['submit']) || $clientid=="PUT_YOUR_BOT_CLIENT_ID_HERE" ) {
 					echo "\t\t\t\tshow_hide('login-discord','login-alt');\xA";
 				}
-				echo '\t\t\t';
+				echo "\t\t\t";
 				echo (empty($userN)?'$("#uname").attr("placeholder");':'$("#uname").val("'.$userN.'");');
-				echo '\xA';
+				echo "\xA";
 				echo "\t\t\t}\xA";
 			?>
-			
 		</script>
 	</head>
 	<body>
