@@ -1,5 +1,5 @@
 {
-	"bot_enabled": false
+	"bot_enabled": false,
 	"token": "PUT_YOUR_BOT_TOKEN_HERE",
 	"guildid": "This is the ID of your guild",
 	"adminrole": "This is the name of the role you wish to allow the webserver's admin permissions and the bot's eval command to",
