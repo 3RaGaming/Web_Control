@@ -117,6 +117,40 @@ while [ $silent == 0 ]; do
 	esac
 done
 
+#Define web dependencies
+#depend_arr+=("");
+web_depend_arr=();
+web_depend_arr+=("apache2");
+web_depend_arr+=("php");
+web_depend_arr+=("php-curl");
+web_depend_arr+=("libapache2-mod-php");
+web_insalled=false;
+
+printf "\nThis script depends on running a web server to function.\n";
+printf "This next step will install Apache2 and PhP, or you may skip this step to step-up your web server manually.\n";
+while [ $silent == 0 ]; do
+	read -p "Install Apache2 and PhP now? [y/n] " yn
+	case $yn in
+		[Yy]* )
+			web_insalled=true;
+			for web_depend_item in "${web_depend_arr[@]}"; do
+				if ! type $depend_item &> /dev/null2>&1; then
+					apt install --force-yes --yes $depend_item
+				fi
+			done
+			break;;
+		[Nn]* )
+			printf "This script will still attempt to install to /var/www/html/\n";
+			printf "If you do not wish this, you may cancel the install now.\n";
+			printf "Press Enter when ready.\r";
+			if [ $silent == 0 ]; then
+				read
+			fi
+			break;;
+		* ) echo "Please answer yes[Y] or no[N].";;
+	esac
+done
+
 #Define dependencies
 #depend_arr+=("");
 depend_arr=();
@@ -132,21 +166,14 @@ depend_arr+=("wget");
 depend_arr+=("sudo");
 depend_arr+=("npm");
 depend_arr+=("xz-utils");
-depend_arr+=("apache2");
-depend_arr+=("php");
-depend_arr+=("php-curl");
-depend_arr+=("libapache2-mod-php");
 
-depend_needed=;
+#Install dependencies
 for depend_item in "${depend_arr[@]}"; do
 	if ! type $depend_item &> /dev/null2>&1; then
 		apt install --force-yes --yes $depend_item
 	fi
 done
 
-#Install dependencies
-#printf "will verify install of:$depend_needed\n";
-#apt install --force-yes --yes $depend_needed
 printf "Base Dependencies Installed!\n\n";
 
 #check/install node version
@@ -262,50 +289,51 @@ printf "Installing Discord.js\n"
 npm install discord.js --save
 printf "Cleaning temporary files\n"
 rm -Rf /tmp/master.zip /tmp/Web_Control-master/
-printf "Enabling SSL and restarting web server\n";
-a2enmod ssl
-a2ensite default-ssl
-printf "Checking upload limits\n";
-php_ini=`php --ini | grep Loaded | awk '{ print $4 }'`
-if [ -f "$php_ini" ]
-then
-	echo "$php_ini found."
-	php_ini_post_max_size_raw=`grep post_max_size $php_ini`
-	php_ini_post_max_size=`grep post_max_size $php_ini | awk '{ print $3 }' | tr -dc '0-9'`
-	php_ini_upload_max_filesize_raw=`grep upload_max_filesize $php_ini`
-	php_ini_upload_max_filesize=`grep upload_max_filesize $php_ini | awk '{ print $3 }' | tr -dc '0-9'`
-	if [ "$php_ini_post_max_size" -lt "156" ]; then
-		#change it to
+if [ "$web_insalled" = true ]; then
+	printf "Enabling SSL and restarting web server\n";
+	a2enmod ssl
+	a2ensite default-ssl
+	printf "Checking upload limits\n";
+	php_ini=`php --ini | grep Loaded | awk '{ print $4 }'`
+	if [ -f "$php_ini" ];
+	then
+		echo "$php_ini found.";
 		php_ini_post_max_size_raw=`grep post_max_size $php_ini`
-		php_ini_most_max_size_new="post_max_size = 156M";
-		sed -i -e "s/$php_ini_post_max_size_raw/$php_ini_most_max_size_new/g" "$php_ini"
-		printf "Updated post_max_size to 156M\n";
-	else
-		printf "$php_ini_post_max_size_raw, this will do\n";
-	fi
-	if [ "$php_ini_upload_max_filesize" -lt "150" ]; then
-		#change it
+		php_ini_post_max_size=`grep post_max_size $php_ini | awk '{ print $3 }' | tr -dc '0-9'`
 		php_ini_upload_max_filesize_raw=`grep upload_max_filesize $php_ini`
-		php_ini_upload_max_filesize_new="upload_max_filesize = 150M";
-		sed -i -e "s/$php_ini_upload_max_filesize_raw/$php_ini_upload_max_filesize_new/g" "$php_ini"
-		printf "Updated upload_max_filesize to 150M\n";
+		php_ini_upload_max_filesize=`grep upload_max_filesize $php_ini | awk '{ print $3 }' | tr -dc '0-9'`
+		if [ "$php_ini_post_max_size" -lt "156" ]; then
+			#change it to
+			php_ini_post_max_size_raw=`grep post_max_size $php_ini`
+			php_ini_most_max_size_new="post_max_size = 156M";
+			sed -i -e "s/$php_ini_post_max_size_raw/$php_ini_most_max_size_new/g" "$php_ini";
+			printf "Updated post_max_size to 156M\n";
+		else
+			printf "$php_ini_post_max_size_raw, this will do\n";
+		fi
+		if [ "$php_ini_upload_max_filesize" -lt "150" ]; then
+			#change it
+			php_ini_upload_max_filesize_raw=`grep upload_max_filesize $php_ini`
+			php_ini_upload_max_filesize_new="upload_max_filesize = 150M";
+			sed -i -e "s/$php_ini_upload_max_filesize_raw/$php_ini_upload_max_filesize_new/g" "$php_ini"
+			printf "Updated upload_max_filesize to 150M\n";
+		else
+			printf "$php_ini_upload_max_filesize_raw, this will do\n";
+		fi
 	else
-		printf "$php_ini_upload_max_filesize_raw, this will do\n";
+		printf "Unable to location php_ini file.\nYou will be required to change the 'post_max_size' and 'upload_max_filesize' in your php.ini file.";
 	fi
-else
-	printf "Unable to location php_ini file.\nYou will be required to change the 'post_max_size' and 'upload_max_filesize' in your php.ini file.";
-fi
-service apache2 restart
+	service apache2 restart
 
-#request to remove index.html
-file="/var/www/html/index.html";
-if [ -f "$file" ]; then
-	printf "Ubuntu likes to install a default web file at $file\n";
-	printf "This file is un-needed and will make using the web control difficult.";
-	if [ $silent == 0 ]; then
-		while true; do
-			read -p "Should we remove this file now? [y/n] " yn
-			case $yn in
+	#request to remove index.html
+	file="/var/www/html/index.html";
+	if [ -f "$file" ]; then
+		printf "Ubuntu likes to install a default web file at $file\n";
+		printf "This file is un-needed and will make using the web control difficult.";
+		if [ $silent == 0 ]; then
+			while true; do
+				read -p "Should we remove this file now? [y/n] " yn
+				case $yn in
 					[Yy]* )
 						rm -f $file
 						printf "File $file removed.\n";
@@ -316,28 +344,28 @@ if [ -f "$file" ]; then
 						read
 						break;;
 					* ) echo "Please answer yes[Y] or no[N].";;
-			esac
-		done
-	else
-		rm -f $file
-		printf "File $file removed.\n";
+				esac
+			done
+		else
+			rm -f $file
+			printf "File $file removed.\n";
+		fi
 	fi
 fi
 
 printf "Installation complete!\n\n";
 printf "We will need to setup a user for you to login without discord authentication for now.\n";
-
 while [ $silent == 0 ]; do
 	read -p "Would you like to setup this user now? (This will remove all other users from the users.txt file) [y/n] " yn
 	case $yn in
-			[Yy]* )
-				set_username
-				set_password
-				printf "Will create user \"$g_username\" with password $g_password\n";
-				echo "$g_username|$g_password|admin" > /var/www/users.txt;
-				break;;
-			[Nn]* ) printf "If you find you cannot login, edit the /var/www/users.txt file.\n"; break;;
-			* ) echo "Please answer yes[Y] or no[N].";;
+		[Yy]* )
+			set_username
+			set_password
+			printf "Will create user \"$g_username\" with password $g_password\n";
+			echo "$g_username|$g_password|admin" > /var/www/users.txt;
+			break;;
+		[Nn]* ) printf "If you find you cannot login, edit the /var/www/users.txt file.\n"; break;;
+		* ) echo "Please answer yes[Y] or no[N].";;
 	esac
 done
 
@@ -355,5 +383,3 @@ printf "Press Enter to exit.\n";
 if [ $silent == 0 ]; then
 	read
 fi
-
-
