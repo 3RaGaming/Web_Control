@@ -124,7 +124,7 @@ web_depend_arr+=("apache2");
 web_depend_arr+=("php");
 web_depend_arr+=("php-curl");
 web_depend_arr+=("libapache2-mod-php");
-web_insalled=false;
+web_installed=false;
 
 printf "\nThis script depends on running a web server to function.\n";
 printf "This next step will install Apache2 and PhP, or you may skip this step to step-up your web server manually.\n";
@@ -132,7 +132,7 @@ while [ $silent == 0 ]; do
 	read -p "Install Apache2 and PhP now? [y/n] " yn
 	case $yn in
 		[Yy]* )
-			web_insalled=true;
+			web_installed=true;
 			for web_depend_item in "${web_depend_arr[@]}"; do
 				if ! type $depend_item &> /dev/null2>&1; then
 					apt install --force-yes --yes $depend_item
@@ -150,6 +150,15 @@ while [ $silent == 0 ]; do
 		* ) echo "Please answer yes[Y] or no[N].";;
 	esac
 done
+
+if [ $silent == 1 ]; then
+	web_installed=true;
+	for web_depend_item in "${web_depend_arr[@]}"; do
+		if ! type $depend_item &> /dev/null2>&1; then
+			apt install --force-yes --yes $depend_item
+		fi
+	done
+fi
 
 #Define dependencies
 #depend_arr+=("");
@@ -289,7 +298,7 @@ printf "Installing Discord.js\n"
 npm install discord.js --save
 printf "Cleaning temporary files\n"
 rm -Rf /tmp/master.zip /tmp/Web_Control-master/
-if [ "$web_insalled" = true ]; then
+if [ "$web_installed" = true ]; then
 	printf "Enabling SSL and restarting web server\n";
 	a2enmod ssl
 	a2ensite default-ssl
