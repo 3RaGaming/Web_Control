@@ -134,8 +134,8 @@ while [ $silent == 0 ]; do
 		[Yy]* )
 			web_installed=true;
 			for web_depend_item in "${web_depend_arr[@]}"; do
-				if ! type $depend_item &> /dev/null2>&1; then
-					apt install --force-yes --yes $depend_item
+				if ! type $web_depend_item &> /dev/null2>&1; then
+					apt install --force-yes --yes $web_depend_item
 				fi
 			done
 			break;;
@@ -154,8 +154,8 @@ done
 if [ $silent == 1 ]; then
 	web_installed=true;
 	for web_depend_item in "${web_depend_arr[@]}"; do
-		if ! type $depend_item &> /dev/null2>&1; then
-			apt install --force-yes --yes $depend_item
+		if ! type $web_depend_item &> /dev/null2>&1; then
+			apt install --force-yes --yes $web_depend_item
 		fi
 	done
 fi
