@@ -123,6 +123,7 @@ web_depend_arr=();
 web_depend_arr+=("apache2");
 web_depend_arr+=("php");
 web_depend_arr+=("php-curl");
+web_depend_arr+=("php-zip");
 web_depend_arr+=("libapache2-mod-php");
 web_insalled=false;
 
