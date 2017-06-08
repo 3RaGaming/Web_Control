@@ -133,12 +133,7 @@ while [ $silent == 0 ]; do
 	read -p "Install Apache2 and PhP now? [y/n] " yn
 	case $yn in
 		[Yy]* )
-			web_insalled=true;
-			for web_depend_item in "${web_depend_arr[@]}"; do
-				if ! type $depend_item &> /dev/null2>&1; then
-					apt install --force-yes --yes $depend_item
-				fi
-			done
+			web_installed=true;
 			break;;
 		[Nn]* )
 			printf "This script will still attempt to install to /var/www/html/\n";
@@ -151,6 +146,15 @@ while [ $silent == 0 ]; do
 		* ) echo "Please answer yes[Y] or no[N].";;
 	esac
 done
+
+if [ $silent == 1 ]; then
+	web_installed=true;
+	for web_depend_item in "${web_depend_arr[@]}"; do
+		if ! type $web_depend_item &> /dev/null2>&1; then
+			apt install --force-yes --yes $web_depend_item
+		fi
+	done
+fi
 
 #Define dependencies
 #depend_arr+=("");
@@ -290,7 +294,7 @@ printf "Installing Discord.js\n"
 npm install discord.js --save
 printf "Cleaning temporary files\n"
 rm -Rf /tmp/master.zip /tmp/Web_Control-master/
-if [ "$web_insalled" = true ]; then
+if [ "$web_installed" = true ]; then
 	printf "Enabling SSL and restarting web server\n";
 	a2enmod ssl
 	a2ensite default-ssl
