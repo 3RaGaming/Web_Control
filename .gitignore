@@ -247,3 +247,11 @@ factorio/screenlog.0
 /factorio/.vs/factorio/v15
 *.sln
 *.vcxproj
+/.vs/Web_Control/v15/Browse.VC.db
+/.vs/Web_Control/v15/Browse.VC.opendb
+/.vs/config
+/.vs/Web_Control/v15
+*.njsproj
+/html/vwd.webinfo
+/html/Web.config
+*.phpproj
