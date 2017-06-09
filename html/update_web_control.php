@@ -23,9 +23,11 @@
 				echo "<pre>Updating...\r\n";
 				ob_flush();
 				flush();
+				//retrieve $count to know how mant times to loop later
 				exec('bash update.sh count', $count);
 				ob_flush();
 				flush();
+				//we loop here so we can flush the output and view the update progress in the web control.
 				for($n=1; $n<=$count[0]; $n++) {
 					system('bash update.sh '.$n.'');
 					ob_flush();

@@ -1,14 +1,18 @@
 #!/bin/bash
 result=("${PWD##*/}");
+#use master repo by default. If subfolder is a branch that exists, we'll use that branch repo instead (example: beta)
 if [ "$result" == "html" ]; then
 	result="master";
 fi
+#args contains which number php is commanding to work on
+#we do this in steps in hopes that php can flush it's output, so we cna view each step taking place.
 args=("$@");
 tmp_dir="/tmp";
 
 if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 		'count')
+			#ensure total number of steps is echoed here! PHP uses this to know how many times to loop		
 			echo "6"
 			exit 1
 			;;
@@ -17,7 +21,13 @@ if [ "${args[0]}" ]; then
 			printf "Detected \"$result\" branch \r\n";
 			printf "Step ${args[0]} - Downloading latest updates \r\n";
 			#wget -q https://github.com/3RaGaming/Web_Control/archive/$result.zip -O $tmp_dir/$result.zip
-			wget -q https://gitlab.com/3RaGaming/Web_Control/repository/archive.zip?ref=$result -O $tmp_dir/$result.zip
+			wget -t 1 -T 5 https://gitlab.com/3RaGaming/Web_Control/repository/archive.zip?ref=$result -O $tmp_dir/$result.zip && wget_result=true || wget_result=false
+			if [ "$wget_result" = true ]; then
+					printf "Download Completed \r\n"
+			else
+					printf "Download Failed. Halting update \r\n"
+					exit
+			fi
 			printf "\r\n-----------\r\n\r\n";
 			;;
 
