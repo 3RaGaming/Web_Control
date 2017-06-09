@@ -5,7 +5,7 @@ function tc_console()
 {
 	asyncAjax("GET",dir + "/assets/api/console.php?d=" + server_select + "&s=console",Math.random(),display,{},"console");
 	asyncAjax("GET",dir + "/assets/api/console.php?d=" + server_select + "&s=chat",Math.random(),display,{},"chat");
-	setTimeout(tc_console,refreshtime);
+	setTimeout(function() { tc_console(); }, refreshtime );
 }
 
 function display(xhr,cdat,scr)

@@ -40,10 +40,10 @@ $redirect_url = urlencode("https://" .$_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_N
 		$debug[] = "login-get";
 		$debug[] = print_r($_REQUEST, true);
 	}
-	
+
 if(isset($_GET['code'])) {
 	$code = $_GET['code'];
-	
+
 	$config_file = file_get_contents('/var/www/factorio/config.json');
 	$json_config = json_decode($config_file, true);
 	if($json_config) {
@@ -57,7 +57,7 @@ if(isset($_GET['code'])) {
 	if(!isset($error)) {
 		$botheader = array();
 		$botheader[] = 'Authorization: Bot '.$bottoken;
-		
+
 		$url = 'https://discordapp.com/api/oauth2/token?';
 		$postField = 'grant_type=authorization_code&client_id='.urlencode($client_id).'&client_secret='.urlencode($client_secret).'&redirect_uri='.$redirect_url.'&code='.urlencode($code);
 		//echo $postField;
@@ -66,16 +66,18 @@ if(isset($_GET['code'])) {
 						CURLOPT_FOLLOWLOCATION => 1,
 						CURLOPT_POST => true,
 						CURLOPT_POSTFIELDS => $postField );
-		
+
 		$curlrqst0 = curl_init();
 		curl_setopt_array($curlrqst0, $options);
 		$tokenobject = curl_exec($curlrqst0);
 		$tokenjson = json_decode($tokenobject, true);
-		curl_close($curlrqst0);
-		
+
 		/* DEBUG */if(isset($debug)) { 	$debug[] = "tokenJson" . __LINE__;
-										$debug[] = print_r($tokenjson, true); }
-		
+										$debug[] = print_r($tokenjson, true);
+										$debug[] = curl_error($curlrqst0); }
+
+		curl_close($curlrqst0);
+
 		if(isset($tokenjson['access_token'])) {
 			$token = $tokenjson['access_token'];
 			/* DEBUG */if(isset($debug)) { $debug[] = "TOKEN SET"; }
@@ -87,51 +89,56 @@ if(isset($_GET['code'])) {
 			$tokenheader = array();
 			$tokenheader[] = 'Content-Type application/json';
 			$tokenheader[] = 'Authorization: Bearer '.$token;
-			
+
 			/* DEBUG */if(isset($debug)) {  $debug[] = "token header" . __LINE__;
 											$debug[] = print_r($tokenheader, true); }
-			
+
 			$curlrqst1 = curl_init('https://discordapp.com/api/users/@me');
 			curl_setopt($curlrqst1, CURLOPT_HTTPHEADER, $tokenheader);
 			curl_setopt($curlrqst1, CURLOPT_RETURNTRANSFER, true);
 			$userobject = curl_exec($curlrqst1);
 			$userjson = json_decode($userobject, true);
+
+			/* DEBUG */if(isset($debug)) {  $debug[] = "UserJson" . __LINE__;
+											$debug[] = print_r($userjson, true);
+											$debug[] = curl_error($curlrqst1); }
+
 			curl_close($curlrqst1);
-			
+
 			if(isset($userjson["id"])) {
 				$userid = $userjson["id"];
 			} else {
 				$error = "user_json_id";
 			}
-			
-			/* DEBUG */if(isset($debug)) {  $debug[] = "UserJson" . __LINE__;
-											$debug[] = print_r($userjson, true); }
-			
+
 			$curlrqst2 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/members/'.$userid);
 			curl_setopt($curlrqst2, CURLOPT_HTTPHEADER, $botheader);
 			curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
 			$memberobject = curl_exec($curlrqst2);
 			$memberjson = json_decode($memberobject, true);
+			/* DEBUG */if(isset($debug)) {  $debug[] = "MemberJson" . __LINE__;
+											$debug[] = print_r($memberjson, true);
+											$debug[] = curl_error($curlrqst2); }
 			curl_close($curlrqst2);
 			if (isset($memberjson['code'])&&($memberjson['code']==10007)) {
 				$error = "member_no_exist";
 			} elseif(!isset($memberjson["user"]["username"]) || !isset($memberjson["roles"])) {
 				$error = "member_data_invalid";
 			}
-			if(!isset($error)) {				
-				/* DEBUG */if(isset($debug)) {  $debug[] = "MemberJson" . __LINE__;
-												$debug[] = print_r($memberjson, true); }
-				
+
+			if(!isset($error)) {
 				$curlrqst3 = curl_init('https://discordapp.com/api/guilds/'.$guildid.'/roles');
 				curl_setopt($curlrqst3, CURLOPT_HTTPHEADER, $botheader);
 				curl_setopt($curlrqst3, CURLOPT_RETURNTRANSFER, true);
 				$roleobject = curl_exec($curlrqst3);
 				$rolejson = json_decode($roleobject, true);
-				curl_close($curlrqst3);
-				
+
 				/* DEBUG */if(isset($debug)) {  $debug[] = "RolesJson" . __LINE__;
-												$debug[] = print_r($rolejson, true); }
-				
+												$debug[] = print_r($rolejson, true);
+												$debug[] = curl_error($curlrqst3); }
+
+				curl_close($curlrqst3);
+
 				$level1id = null;
 				$level2id = null;
 				foreach($rolejson as $key => $value) {
@@ -139,17 +146,17 @@ if(isset($_GET['code'])) {
 					if($rolejson[$key]["name"] == $level2role) $level2id = $rolejson[$key]["id"];
 					if($level1id !== null && $level2id !== null) break 1;
 				}
-				
+
 				$level1 = false;
 				$level2 = false;
 				if(isset($memberjson["roles"])) {
 					foreach($memberjson["roles"] as $mkey => $mvalue) {
 						if($mvalue == $level1id) $level1 = true;
 						if($mvalue == $level2id) $level2 = true;
-						if($level1id && $level2id) break 1;
+						if($level1 && $level2) break 1;
 					}
 				}
-				
+
 				if ($level1 || $userid == "129357924324605952" /* zacks id */) {
 					/* DEBUG */if(isset($debug)) { $debug[] = "admin login verified!"; }
 					$session['login']['user']=$memberjson["user"]["username"];
@@ -168,8 +175,51 @@ if(isset($_GET['code'])) {
 		}
 	}
 } /* DEBUG */elseif(isset($debug)) {
-	$debug[] = "no CODE parameter found.";
+	$debug[] = "no CODE parameter found."; }
+
+/**** Alternate Login Processing Below ****/
+$userN="";
+$passW="";
+if(isset($_POST['uname'])) {
+	$userN = addslashes($_POST['uname']);
 }
+if(isset($_POST['passw'])) {
+	$passW = addslashes(md5(trim($_POST['passw'])));
+}
+if(isset($_POST['submit'])) {
+	/* DEBUG */ if(isset($debug)) {
+		$debug[] = "Alt-login post data triggered";
+		$debug[] = "username:'$userN' - password:'$passW'";
+	}
+}
+if(!empty($userN) && !empty($passW)) {
+	$userlist = file ('/var/www/users.txt');
+	$success = false;
+	foreach ($userlist as $user) {
+		$user_details = explode('|', $user);
+		if ((strtolower($user_details[0]) == strtolower($userN)) && trim($user_details[1]) == $passW) {
+			$userN = $user_details[0];
+			$userL = $user_details[2];
+			$success = true;
+			break;
+		}
+	}
+	if ($success) {
+		if(isset($debug)) {
+			$report = "With debug disabled, Session would have been created.";
+			$debug[] = print_r($session, true);
+		} else {
+			$session['login']['user']=$userN;
+			$session['login']['level']=trim($userL);
+			//Allow login
+		}
+	} else {
+		$error = "password";
+	}
+} elseif(isset($_POST['submit'])) {
+	$error = "form_empty";
+}
+ /**** Handle Error Messages ****/
 if(isset($error)) {
 	switch($error) {
 		case "unauthorized":
@@ -182,13 +232,19 @@ if(isset($error)) {
 			$report = "Error with discord API";
 			break;
 		case "member":
-			$report = "You are not a member of the 3Ra Discord Server";
+			$report = "You are not a member of the Discord Server";
 			break;
 		case "logged_out":
 			$report = "You have been logged out";
 			break;
 		case "logged_in":
 			$report = "You are already logged in";
+			break;
+		case "password";
+			$report =  "Invalid username or password";
+			break;
+		case "form_empty";
+			$report = "<br />I don't like no input<br />";
 			break;
 		default:
 			$report = "Unknown Error Occurred - $error";
@@ -206,32 +262,59 @@ if(isset($error)) {
 		die();
 	}
 }
-//session_write_close();
-
-if(!isset($clientid)) {
-	$config_file = file_get_contents('/var/www/factorio/config.json');
-	$json_config = json_decode($config_file, true);
-	$clientid = $json_config['clientid'];
+$config_file = file_get_contents('/var/www/factorio/config.json');
+$json_config = json_decode($config_file, true);
+$clientid = $json_config['clientid'];
+/* DEBUG */ if(isset($debug)) {
+	if(( isset($clientid) && $clientid == "PUT_YOUR_BOT_CLIENT_ID_HERE" )) {
+		$debug[] = "Default JSON['clientid'] being used. Discord Auth unavailable.";
+	}
 }
-
-session_write_close();
-
 ?>
 <html>
-<head>
-<link rel="stylesheet" media="all" href="assets/css/login.css" />
-</head>
-<body>
-<div class="login-page">
-  <div class="form">
-    <a href = "https://discordapp.com/oauth2/authorize?client_id=<?php echo $clientid; ?>&scope=identify%20guilds&redirect_uri=<?php echo $redirect_url; ?>&response_type=code">
-	  <img style="width: 100%;" src="./assets/img/3rabutton.png" alt="Login With Discord"/>
-	</a>
-	<?php 	if(isset($report)) { echo "<br /><br />".$report; }
-			if(isset($debug)) { echo "<br />debug enabled";}?>
-  </div>
-</div>
-</body>
+	<head>
+		<script type="text/javascript" language="javascript" src="assets/jquery-3.1.1.min.js"></script>
+		<link rel="stylesheet" media="all" href="assets/css/login.css" />
+		<script>
+			function show_hide(v_show, v_hide) {
+				document.getElementById(v_show).style.display="block";
+				document.getElementById(v_hide).style.display="none";
+			}
+			<?php
+				echo "\t\t$(document).ready(function() {\xA";
+				if( isset($_POST['submit']) || ( isset($clientid) && $clientid == "PUT_YOUR_BOT_CLIENT_ID_HERE" ) || !isset($clientid) ) {
+					echo "\t\t\t\tshow_hide('login-alt','login-discord');\xA";
+				}
+				echo "\t\t\t\t";
+				echo (empty($userN)?'$("#uname").attr("placeholder","username");':'$("#uname").val("'.$userN.'");');
+				echo "\xA";
+				echo "\t\t\t});\xA";
+			?>
+		</script>
+	</head>
+	<body>
+		<div class="login-page">
+			<div class="form">
+				<span id="login-discord">
+					<a href="#" onClick="show_hide('login-alt','login-discord');">Alternate Login</a><br /><br />
+					<a id="" href="https://discordapp.com/oauth2/authorize?client_id=<?php echo $clientid; ?>&scope=identify%20guilds&redirect_uri=<?php echo $redirect_url; ?>&response_type=code">
+					<img style="width: 100%;" src="./assets/img/3rabutton.png" alt="Login With Discord"/>
+					</a>
+				</span>
+				<span id="login-alt" style="display: none;">
+					<a href="#" onClick="show_hide('login-discord','login-alt');">Discord Login</a><br /><br />
+					<form class="login-form" name="login" method="post">
+						<input type="hidden" name="login" value="submit" />
+						<input type="text" id="uname" name="uname" />
+						<input type="password" name="passw" placeholder="password"/>
+						<button onclick="document.login.submit();">login</button>
+					</form>
+				</span>
+				<?php 	if(isset($report)) { echo "<br /><br />".$report; }
+						if(isset($debug)) { echo "<br />debug enabled";}?>
+			</div>
+		</div>
+	</body>
 <?php
 	if(isset($debug)) {
 		echo "<pre>";

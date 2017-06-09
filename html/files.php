@@ -29,6 +29,24 @@ if(!isset($server_select)) {
 }
 session_write_close();
 
+//Get the max upload size in megabytes and bytes for use later on
+function return_bytes($val) {
+	$val = trim($val);
+	$last = strtolower($val[strlen($val)-1]);
+	switch($last)
+	{
+		case 'g':
+		$val *= 1024;
+		case 'm':
+		$val *= 1024;
+		case 'k':
+		$val *= 1024;
+	}
+	return $val;
+}
+$upload_max_filesize_m = ini_get('upload_max_filesize');
+$upload_max_filesize_b = return_bytes($upload_max_filesize_m);
+
 if(isset($_REQUEST['archive'])) {
 	die('this feature not ready yet.');
 	try
@@ -180,10 +198,10 @@ if(isset($_REQUEST['archive'])) {
 		
 		//Validate size
 		if(isset($_FILES['file']['size'])) {
-			if($_FILES['file']['size']<31457280) {
+			if($_FILES['file']['size']<$upload_max_filesize_b) {
 				$filesize = $_FILES['file']['size'];
 			} else {
-				die('File must be less than 30M'); 
+				die("File must be less than $upload_max_filesize_m"); 
 			}
 		} else { 
 			die('Error s'.__LINE__.': Invalid File'); 
@@ -191,7 +209,7 @@ if(isset($_REQUEST['archive'])) {
 		
 		if(isset($_FILES['file']['type'])) {
 			$fileType = $_FILES['file']['type'];
-			if( $fileType == "application/zip" || $fileType == "application/x-zip-compressed" ) {
+			if( $fileType == "application/zip" || $fileType == "application/x-zip-compressed" || ($fileType == "application/octet-stream" && pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION) == "zip") ) {
 				//we good
 			} else {
 				die($fileType.'Invalid File Type');

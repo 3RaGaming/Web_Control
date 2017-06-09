@@ -37,11 +37,11 @@
 				flush();
 			}
 		} else {
-			header("Location: ./login.php");
+			header("Location: ./login.php?POSTnotset");
 			die();
 		}
 	} else {
-		header("Location: ./login.php");
+		header("Location: ./login.php?notadmin");
 		die();
 	}
 ?>

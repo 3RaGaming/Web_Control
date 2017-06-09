@@ -1,0 +1,8 @@
+{
+    "bans": [
+        {
+            "username": "exampleban",
+            "reason": "This is an example ban"
+        }
+    ]
+}
