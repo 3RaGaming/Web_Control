@@ -5,17 +5,18 @@ if(isset($_SERVER["HTTPS"]) == false) {
 	die();
 }
 //set debug?
+$debug = false;
 if(isset($_REQUEST['debug'])) {
 	if($_REQUEST['debug']=="true") {
 		$_SESSION['debug'] = true;
-		$debug = array();
-		$debug[] = true;
+		$debug = true;
+		$debugArr[] = array();
 	} else {
 		unset($_SESSION['debug']);
 	}
 } elseif(isset($_SESSION['debug'])) {
-	$debug = array();
-	$debug[] = true;
+	$debug = true;
+	$debugArr[] = array();
 }
 //If logged in, and requested to logout... log them out and show login screen
 if(isset($_SESSION['login'])) {
@@ -35,10 +36,8 @@ if(isset($_SESSION['login'])) {
 session_write_close();
 $redirect_url = urlencode("https://" .$_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_NAME"]);
 
-	/* DEBUG */if(isset($debug)) {
-		$debug[] = print_r($_SESSION, true);
-		$debug[] = "login-get";
-		$debug[] = print_r($_REQUEST, true);
+	/* DEBUG */if($debug) {
+		$debugArr[][__LINE__." login-get"] = array(print_r($_SESSION, true), print_r($_REQUEST, true));
 	}
 
 if(isset($_GET['code'])) {
@@ -72,26 +71,23 @@ if(isset($_GET['code'])) {
 		$tokenobject = curl_exec($curlrqst0);
 		$tokenjson = json_decode($tokenobject, true);
 
-		/* DEBUG */if(isset($debug)) { 	$debug[] = "tokenJson" . __LINE__;
-										$debug[] = print_r($tokenjson, true);
-										$debug[] = curl_error($curlrqst0); }
+		/* DEBUG */if($debug) { 	$debugArr[][__LINE__." tokenJson"] = array(print_r($tokenjson, true), curl_error($curlrqst0)); }
 
 		curl_close($curlrqst0);
 
 		if(isset($tokenjson['access_token'])) {
 			$token = $tokenjson['access_token'];
-			/* DEBUG */if(isset($debug)) { $debug[] = "TOKEN SET"; }
+			/* DEBUG */if($debug) {	$debugArr[][__LINE__." Token Set"] = true; }
 		} else {
 			$error = "access_token";
-			/* DEBUG */if(isset($debug)) { $debug[] = "TOKEN NOT SET"; }
+			/* DEBUG */if($debug) {	$debugArr[][__LINE__." Token *NOT* Set"] = false; }
 		}
 		if(!isset($error)) {
 			$tokenheader = array();
 			$tokenheader[] = 'Content-Type application/json';
 			$tokenheader[] = 'Authorization: Bearer '.$token;
 
-			/* DEBUG */if(isset($debug)) {  $debug[] = "token header" . __LINE__;
-											$debug[] = print_r($tokenheader, true); }
+			/* DEBUG */if(($debug) {  $debugArr[][__LINE__." token header"] = print_r($tokenheader, true); }
 
 			$curlrqst1 = curl_init('https://discordapp.com/api/users/@me');
 			curl_setopt($curlrqst1, CURLOPT_HTTPHEADER, $tokenheader);
@@ -99,9 +95,7 @@ if(isset($_GET['code'])) {
 			$userobject = curl_exec($curlrqst1);
 			$userjson = json_decode($userobject, true);
 
-			/* DEBUG */if(isset($debug)) {  $debug[] = "UserJson" . __LINE__;
-											$debug[] = print_r($userjson, true);
-											$debug[] = curl_error($curlrqst1); }
+			/* DEBUG */if($debug) {  $debugArr[][__LINE__." UserJson"] = array(print_r($userjson, true), curl_error($curlrqst1)); }
 
 			curl_close($curlrqst1);
 
@@ -116,9 +110,7 @@ if(isset($_GET['code'])) {
 			curl_setopt($curlrqst2, CURLOPT_RETURNTRANSFER, true);
 			$memberobject = curl_exec($curlrqst2);
 			$memberjson = json_decode($memberobject, true);
-			/* DEBUG */if(isset($debug)) {  $debug[] = "MemberJson" . __LINE__;
-											$debug[] = print_r($memberjson, true);
-											$debug[] = curl_error($curlrqst2); }
+			/* DEBUG */if(isset($debug)) {  $debugArr[][__LINE__." MemberJson"] = array(print_r($memberjson, true), curl_error($curlrqst2)); }
 			curl_close($curlrqst2);
 			if (isset($memberjson['code'])&&($memberjson['code']==10007)) {
 				$error = "member_no_exist";
@@ -133,9 +125,7 @@ if(isset($_GET['code'])) {
 				$roleobject = curl_exec($curlrqst3);
 				$rolejson = json_decode($roleobject, true);
 
-				/* DEBUG */if(isset($debug)) {  $debug[] = "RolesJson" . __LINE__;
-												$debug[] = print_r($rolejson, true);
-												$debug[] = curl_error($curlrqst3); }
+				/* DEBUG */if(isset($debug)) {	$debugArr[][__LINE__." RolesJson"] = array(print_r($rolejson, true), curl_error($curlrqst3)); }
 
 				curl_close($curlrqst3);
 
@@ -158,24 +148,26 @@ if(isset($_GET['code'])) {
 				}
 
 				if ($level1 || $userid == "129357924324605952" /* zacks id */) {
-					/* DEBUG */if(isset($debug)) { $debug[] = "admin login verified!"; }
+					/* DEBUG */if(isset($debug)) { $debugArr[][__LINE__." admin login verified!"] = true; }
 					$session['login']['user']=$memberjson["user"]["username"];
 					$session['login']['level']="admin";
 				} elseif ($level2) {
-					/* DEBUG */if(isset($debug)) { $debug[] = "mod login verified!"; }
+					/* DEBUG */if(isset($debug)) { $debugArr[][__LINE__." mod login verified!"] = true; }
 					$session['login']['user']=$memberjson["user"]["username"];
 					$session['login']['level']="mod";
 				} elseif($userid == "264805254758006801" ) {
+					/* DEBUG */if(isset($debug)) { $debugArr[][__LINE__." guest only assigned!"] = true; }
 					$session['login']['user']=$memberjson["user"]["username"];
 					$session['login']['level']="guest";
 				} else {
+					/* DEBUG */if(isset($debug)) { $debugArr[][__LINE__." unauthorized user!"] = false; }
 					$error = "unauthorized";
 				}
 			}
 		}
 	}
-} /* DEBUG */elseif(isset($debug)) {
-	$debug[] = "no CODE parameter found."; }
+} /* DEBUG */elseif($debug) {
+	$debugArr[][__LINE__." No CODE parameter found."] = false; }
 
 /**** Alternate Login Processing Below ****/
 $userN="";
@@ -187,9 +179,8 @@ if(isset($_POST['passw'])) {
 	$passW = addslashes(md5(trim($_POST['passw'])));
 }
 if(isset($_POST['submit'])) {
-	/* DEBUG */ if(isset($debug)) {
-		$debug[] = "Alt-login post data triggered";
-		$debug[] = "username:'$userN' - password:'$passW'";
+	/* DEBUG */ if($debug) {
+		$debugArr[][__LINE__." Alt-login post data submitted"] = "username:'$userN' - password:'$passW'";
 	}
 }
 if(!empty($userN) && !empty($passW)) {
@@ -205,9 +196,9 @@ if(!empty($userN) && !empty($passW)) {
 		}
 	}
 	if ($success) {
-		if(isset($debug)) {
+		if($debug) {
 			$report = "With debug disabled, Session would have been created.";
-			$debug[] = print_r($session, true);
+			$debugArr[][__LINE__." Login would-be success"] = print_r($session, true);
 		} else {
 			$session['login']['user']=$userN;
 			$session['login']['level']=trim($userL);
@@ -250,7 +241,6 @@ if(isset($error)) {
 			$report = "Unknown Error Occurred - $error";
 	}
 } elseif(isset($session['login']['user'])&&isset($session['login']['level'])) {
-	echo "attempted";
 	if(isset($debug)) {
 		$report = "With debug disabled, Session would have been created.";
 		$debug[] = print_r($session, true);
@@ -265,9 +255,9 @@ if(isset($error)) {
 $config_file = file_get_contents('/var/www/factorio/config.json');
 $json_config = json_decode($config_file, true);
 $clientid = $json_config['clientid'];
-/* DEBUG */ if(isset($debug)) {
+/* DEBUG */ if($debug) {
 	if(( isset($clientid) && $clientid == "PUT_YOUR_BOT_CLIENT_ID_HERE" )) {
-		$debug[] = "Default JSON['clientid'] being used. Discord Auth unavailable.";
+		$debugArr[][__LINE__." Default clientid"] = "Default JSON['clientid'] being used. Discord Auth unavailable.";
 	}
 }
 ?>
