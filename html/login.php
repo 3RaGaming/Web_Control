@@ -36,7 +36,7 @@ if(isset($_SESSION['login'])) {
 session_write_close();
 $redirect_url = urlencode("https://" .$_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_NAME"]);
 
-	/* DEBUG */if($debug) {
+	/* DEBUG */if(isset($debug)) {
 		$debugArr[][__LINE__." login-get"] = array(print_r($_SESSION, true), print_r($_REQUEST, true));
 	}
 
@@ -71,23 +71,23 @@ if(isset($_GET['code'])) {
 		$tokenobject = curl_exec($curlrqst0);
 		$tokenjson = json_decode($tokenobject, true);
 
-		/* DEBUG */if($debug) { 	$debugArr[][__LINE__." tokenJson"] = array(print_r($tokenjson, true), curl_error($curlrqst0)); }
+		/* DEBUG */if(isset($debug)) { 	$debugArr[][__LINE__." tokenJson"] = array(print_r($tokenjson, true), curl_error($curlrqst0)); }
 
 		curl_close($curlrqst0);
 
 		if(isset($tokenjson['access_token'])) {
 			$token = $tokenjson['access_token'];
-			/* DEBUG */if($debug) {	$debugArr[][__LINE__." Token Set"] = true; }
+			/* DEBUG */if(isset($debug)) {	$debugArr[][__LINE__." Token Set"] = true; }
 		} else {
 			$error = "access_token";
-			/* DEBUG */if($debug) {	$debugArr[][__LINE__." Token *NOT* Set"] = false; }
+			/* DEBUG */if(isset($debug)) {	$debugArr[][__LINE__." Token *NOT* Set"] = false; }
 		}
 		if(!isset($error)) {
 			$tokenheader = array();
 			$tokenheader[] = 'Content-Type application/json';
 			$tokenheader[] = 'Authorization: Bearer '.$token;
 
-			/* DEBUG */if(($debug) {  $debugArr[][__LINE__." token header"] = print_r($tokenheader, true); }
+			/* DEBUG */if(isset($debug)) {  $debugArr[][__LINE__." token header"] = print_r($tokenheader, true); }
 
 			$curlrqst1 = curl_init('https://discordapp.com/api/users/@me');
 			curl_setopt($curlrqst1, CURLOPT_HTTPHEADER, $tokenheader);
@@ -95,7 +95,7 @@ if(isset($_GET['code'])) {
 			$userobject = curl_exec($curlrqst1);
 			$userjson = json_decode($userobject, true);
 
-			/* DEBUG */if($debug) {  $debugArr[][__LINE__." UserJson"] = array(print_r($userjson, true), curl_error($curlrqst1)); }
+			/* DEBUG */if(isset($debug)) {  $debugArr[][__LINE__." UserJson"] = array(print_r($userjson, true), curl_error($curlrqst1)); }
 
 			curl_close($curlrqst1);
 
@@ -125,7 +125,7 @@ if(isset($_GET['code'])) {
 				$roleobject = curl_exec($curlrqst3);
 				$rolejson = json_decode($roleobject, true);
 
-				/* DEBUG */if(isset($debug)) {	$debugArr[][__LINE__." RolesJson"] = array(print_r($rolejson, true), curl_error($curlrqst3)); }
+				/* DEBUG */if(isset(isset($debug))) {	$debugArr[][__LINE__." RolesJson"] = array(print_r($rolejson, true), curl_error($curlrqst3)); }
 
 				curl_close($curlrqst3);
 
@@ -166,8 +166,9 @@ if(isset($_GET['code'])) {
 			}
 		}
 	}
-} /* DEBUG */elseif($debug) {
-	$debugArr[][__LINE__." No CODE parameter found."] = false; }
+} /* DEBUG */elseif(isset($debug)) {
+	$debugArr[][__LINE__." No CODE parameter found."] = false;
+}
 
 /**** Alternate Login Processing Below ****/
 $userN="";
@@ -179,7 +180,7 @@ if(isset($_POST['passw'])) {
 	$passW = addslashes(md5(trim($_POST['passw'])));
 }
 if(isset($_POST['submit'])) {
-	/* DEBUG */ if($debug) {
+	/* DEBUG */ if(isset($debug)) {
 		$debugArr[][__LINE__." Alt-login post data submitted"] = "username:'$userN' - password:'$passW'";
 	}
 }
@@ -255,7 +256,7 @@ if(isset($error)) {
 $config_file = file_get_contents('/var/www/factorio/config.json');
 $json_config = json_decode($config_file, true);
 $clientid = $json_config['clientid'];
-/* DEBUG */ if($debug) {
+/* DEBUG */ if(isset($debug)) {
 	if(( isset($clientid) && $clientid == "PUT_YOUR_BOT_CLIENT_ID_HERE" )) {
 		$debugArr[][__LINE__." Default clientid"] = "Default JSON['clientid'] being used. Discord Auth unavailable.";
 	}
