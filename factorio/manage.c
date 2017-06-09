@@ -624,8 +624,28 @@ char * stop_server(char * name) {
 	//Get the server to shut down
 	struct ServerData *server = find_server(name);
 
+	int endID;
+	int successful = 0;
 	kill(server->pid, SIGINT); //Send CTRL-C to the server, should close pipes on server end
-	waitpid(server->pid, NULL, 0); //Wait for server to close
+	for (int i = 0; i < 10; i++) {
+		//Wait for 10 seconds to see if server closed successfully
+		endID = waitpid(server->pid, NULL, WNOHANG); //Check if server is closed
+		if (endID == server->pid) {
+			successful = 1;
+			break;
+		}
+		sleep(1);
+	}
+	if (successful == 0) {
+		//If server did not close normally, force close the server
+		kill(server->pid, SIGKILL);
+		if (strcmp(name, "bot") != 0) {
+			FILE *logfile = fopen(server->logfile, "a");
+			fputs("The server took too long to shut down and had to be force closed. Data loss may have occured.\r\n", logfile);
+			fflush(logfile);
+			fclose(logfile);
+		}
+	}
 	pthread_join(thread_list[server->serverid], NULL); //Wait for thread to terminate
 	close(server->input); //Close input pipe
 	close(server->output); //Close output pipe

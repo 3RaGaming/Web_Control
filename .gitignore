@@ -242,3 +242,8 @@ factorio/savedata.json
 factorio/screenlog.0
 
 
+/Web_Control.phpproj
+/Web_Control.sln
+/factorio/.vs/factorio/v15
+*.sln
+*.vcxproj
