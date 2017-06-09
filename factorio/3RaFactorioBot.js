@@ -1093,7 +1093,7 @@ function handleInput(input) {
 					//bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 				});
 				savedata.channels[channelid].status = "stopped";
-				if (update_descriptions) version_send(bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
+				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
 				delete savedata.playerlists[channelid];
 				fs.unlinkSync("savedata.json");
 				fs.writeFileSync("savedata.json", JSON.stringify(savedata));
