@@ -5,7 +5,6 @@ if(isset($_SERVER["HTTPS"]) == false) {
 	die();
 }
 //set debug?
-$debug = false;
 if(isset($_REQUEST['debug'])) {
 	if($_REQUEST['debug']=="true") {
 		$_SESSION['debug'] = true;
