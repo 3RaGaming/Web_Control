@@ -152,7 +152,7 @@ function assignRole(server, force, userid) {
 			if (savedata.channels.admin) {
 				let roleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
 				let tag = "<@&" + roleid + ">";
-				bot.guilds.get(guildid).channels.get(savedata.channels.admin.id).sendMessage(tag + ": The role for server *" + server + "*, force *" + force + "* was missing and has been recreated. Please manually correct the channel permissions.");  
+				version_send(bot.guilds.get(guildid).channels.get(savedata.channels.admin.id), tag + ": The role for server *" + server + "*, force *" + force + "* was missing and has been recreated. Please manually correct the channel permissions.");  
 			}
 		});
 	} else if (roleid !== null && !user.roles.has(roleid)) {
@@ -182,6 +182,42 @@ function replaceMentions(message) {
 	return juicy;
 }
 
+//Uses different functions to send a message depending on Discord version
+function version_send(channel, text = null, type = "message", options = {}) {
+	let version_list = Discord.version.split(".");
+	let major = parseInt(version_list[0]);
+	options["split"] = {prepend: "...", append: "..."}
+	if (major < 11) {
+		//Use the now depreciated commands
+		switch (type) {
+			case "message":
+				channel.sendMessage(text, options);
+				break;
+			case "code":
+				channel.sendCode(options["code"], text, options);
+				break;
+			case "embed":
+				let embed = options["embed"];
+				delete options["embed"];
+				channel.sendEmbed(embed, text, options);
+				break;
+			case "file":
+				let file = options["file"];
+				delete options["file"];
+				channel.sendFile(file["attachment"], file["name"], text, options)
+				break;
+			case "files":
+				let files = options["files"];
+				delete options["files"];
+				channel.sendFiles(files, text, options);
+				break;
+		}
+	} else {
+		//Use the new command
+		channel.send(text, options);
+	}
+}
+
 //Creates a new force for a PvP server
 function handleNewForce(serverid, forcename) {
 	let guild = bot.guilds.get(guildid);
@@ -199,7 +235,7 @@ function handleNewForce(serverid, forcename) {
 		let textchannel = values[0];
 		let voicechannel = values[1];
 		let role = values[2];
-		textchannel.sendMessage("Messages from force *" + forcename + "* on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
+		version_send(textchannel, "Messages from force *" + forcename + "* on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "-" + forcename + "].\n");
 		savedata.channels[serverid].forceids.push(pvpid);
 		savedata.channels[serverid].forcenames.push(forcename);
 		//Set up text channel
@@ -262,13 +298,13 @@ function compareArrays(arr1, arr2) {
 var publiccommands = {
 	"players": function (message, command) {
 		if (command.length > 2) {
-			message.channel.sendMessage("::players can be used either alone or with a single optional argument (::players [force])");
+			version_send(message.channel, "::players can be used either alone or with a single optional argument (::players [force])");
 			return;
 		}
 		let force_name = null;
 		let current = getChannelKey(message.channel.id);
 		if (current === null || savedata.channels[current].type == "chat") {
-			message.channel.sendMessage("This channel is not registered to any server!\n");
+			version_send(message.channel, "This channel is not registered to any server!\n");
 			return;
 		}
 		if (command.length == 2) force_name = command[1];
@@ -276,12 +312,12 @@ var publiccommands = {
 		if (savedata.channels[current].type == "pvp") serverid = current.substring(0, current.indexOf("-"));
 		else serverid = current;
 		if (savedata.channels[serverid].status != "started") {
-			message.channel.sendMessage("This server is currently offline.");
+			version_send(message.channel, "This server is currently offline.");
 			return;
 		}
 		let playerlist = savedata.playerlists[serverid];
 		if (Object.keys(playerlist).length === 0) {
-			message.channel.sendMessage("No players are currently online.");
+			version_send(message.channel, "No players are currently online.");
 			return;
 		}
 		let send_message;
@@ -293,36 +329,36 @@ var publiccommands = {
 			}
 		}
 		if (send_message == ("Players currently online on force *" + force_name + "*:\n\n")) {
-			message.channel.sendMessage("No players are currently online for force *" + force_name + "*");
+			version_send(message.channel, "No players are currently online for force *" + force_name + "*");
 			return;
 		}
-		message.channel.sendMessage(send_message);
+		version_send(message.channel, send_message);
 	},
 	"register": function (message, command) {
 		if (command.length != 2) {
-			message.channel.sendMessage("Correct usage: ::register *username*");
+			version_send(message.channel, "Correct usage: ::register *username*");
 			return;
 		}
 		let userid = message.author.id;
 		let username = command[1].toLowerCase();
 		if (getPlayerID(username) !== null) {
-			message.channel.sendMessage("This Factorio username has already been taken! If you believe this to be an error, please contact @Moderators");
+			version_send(message.channel, "This Factorio username has already been taken! If you believe this to be an error, please contact @Moderators");
 			return;
 		}
-		if (savedata.registration[userid]) message.channel.sendMessage("Your previously set Factorio username will be overwritten.");
-		else message.channel.sendMessage("Factorio username updated.");
+		if (savedata.registration[userid]) version_send(message.channel, "Your previously set Factorio username will be overwritten.");
+		else version_send(message.channel, "Factorio username updated.");
 		savedata.registration[userid] = username;
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 		let server = findPlayer(username);
 		if (server !== null && savedata.channels[server].type == "pvp-main") {
-			message.channel.sendMessage("This username was detected in a currently running PvP server. Your role has been assigned to you.");
+			version_send(message.channel, "This username was detected in a currently running PvP server. Your role has been assigned to you.");
 			assignRole(server, savedata.playerlists[server][username].force, userid);
 		}
 	},
 	"servers": function (message, command) {
 		if (Object.keys(savedata.channels).length === 0) {
-			message.channel.sendMessage("No servers are currently registered. This may be a bug, please tag Moderators.");
+			version_send(message.channel, "No servers are currently registered. This may be a bug, please tag Moderators.");
 			return;
 		}
 		let servers = "List of currently running servers:\n\n";
@@ -336,9 +372,9 @@ var publiccommands = {
 			}
 		}
 		if (servers == "List of currently running servers:\n\n") {
-			message.channel.sendMessage("No servers are currently running.");
+			version_send(message.channel, "No servers are currently running.");
 		} else {
-			message.channel.sendMessage(servers);
+			version_send(message.channel, servers);
 		}
 	},
 	"listservers": function (message, command) {
@@ -353,10 +389,10 @@ var publiccommands = {
 			let current = savedata.channels[serverid];
 			if (current.type == "server" || current.type == "pvp-main") registered_servers++;
 		}
-		message.channel.sendMessage("3Ra Factorio Bot is running. There are currently " + registered_servers + " servers registered.");
+		version_send(message.channel, "3Ra Factorio Bot is running. There are currently " + registered_servers + " servers registered.");
 	},
 	"help": function (message, command) {
-		message.channel.sendMessage("**::players** *[force]* - Get a list of all currently connected players, must be run in a registered channel. If the optional argument force is provided, it will print players only on that force.\n\n" +
+		version_send(message.channel, "**::players** *[force]* - Get a list of all currently connected players, must be run in a registered channel. If the optional argument force is provided, it will print players only on that force.\n\n" +
 			"**::register** *username* - Register your Factorio username to your Discord account. This is required for PvP roles to be added to your account.\n\n" +
 			"**::servers** - Get a list of all currently running servers, as well as the amount of players currently connected to each.\n" +
 			"**::listservers** and **::serverlist** - Same function as **::servers**, included because of how often they're used as well.\n\n" + 
@@ -371,19 +407,19 @@ var publiccommands = {
 var admincommands = {
 	"setserver": function (message, command) {
 		if (command.length < 3) {
-			message.channel.sendMessage("The setserver command requires 2 arguments. ::setserver serverid servername");
+			version_send(message.channel, "The setserver command requires 2 arguments. ::setserver serverid servername");
 			return;
 		}
 		//Check to see if serverid is already registered
 		let serverid = command[1];
 		if (savedata.channels[serverid]) {
-			message.channel.sendMessage("Server " + serverid + " is already registered to another Discord channel! Please go ::unset the original first.\n");
+			version_send(message.channel, "Server " + serverid + " is already registered to another Discord channel! Please go ::unset the original first.\n");
 			return;
 		}
 		//Check to see if this channel is already registered
 		let current = getChannelKey(message.channel.id);
 		if (current !== null) {
-			message.channel.sendMessage("This channel is already registered! Please use ::unset first if you want to change this.\n");
+			version_send(message.channel, "This channel is already registered! Please use ::unset first if you want to change this.\n");
 			return;
 		}
 		//Get the name to tag the server as
@@ -396,23 +432,23 @@ var admincommands = {
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 		savedata.playerlists[serverid] = {};
-		message.channel.sendMessage("Messages from server " + serverid + " will now be sent to this channel with the prefix [" + servername + "].\n");
+		version_send(message.channel, "Messages from server " + serverid + " will now be sent to this channel with the prefix [" + servername + "].\n");
 	},
 	"setchannel": function (message, command) {
 		if (command.length < 3) {
-			message.channel.sendMessage("The setchannel command requires 2 arguments. ::setchannel channelid channelname");
+			version_send(message.channel, "The setchannel command requires 2 arguments. ::setchannel channelid channelname");
 			return;
 		}
 		//Check to see if channelid is already registered
 		let channelid = command[1];
 		if (savedata.channels[channelid]) {
-			message.channel.sendMessage("Channel " + channelid + " is already registered to another Discord channel! Please go ::unset the original first.\n");
+			version_send(message.channel, "Channel " + channelid + " is already registered to another Discord channel! Please go ::unset the original first.\n");
 			return;
 		}
 		//Check to see if this channel is already registered
 		let current = getChannelKey(message.channel.id);
 		if (current !== null) {
-			message.channel.sendMessage("This channel is already registered! Please use ::unset first if you want to change this.\n");
+			version_send(message.channel, "This channel is already registered! Please use ::unset first if you want to change this.\n");
 			return;
 		}
 		//Get the name to tag the server as
@@ -420,29 +456,29 @@ var admincommands = {
 		savedata.channels[channelid] = { id: message.channel.id, name: channelname, type: "chat" };
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
-		message.channel.sendMessage("Messages from channel " + channelid + " will now be sent to this channel with the prefix [" + channelname + "].\n");
+		version_send(message.channel, "Messages from channel " + channelid + " will now be sent to this channel with the prefix [" + channelname + "].\n");
 	},
 	"setpvp": function (message, command) {
 		if (command.length < 3) {
-			message.channel.sendMessage("The setpvp command requires 2 arguments. ::setpvp serverid servername");
+			version_send(message.channel, "The setpvp command requires 2 arguments. ::setpvp serverid servername");
 			return;
 		}
 		//Check to see if pvpid is already registered
 		let serverid = command[1];
 		if (savedata.channels[serverid] && savedata.channels[serverid].type != "registered") {
-			message.channel.sendMessage("This server is already registered to another Discord channel! Please go ::unset the original first.");
+			version_send(message.channel, "This server is already registered to another Discord channel! Please go ::unset the original first.");
 			return;
 		}
 		//Check to see if this channel is already registered
 		let current = getChannelKey(message.channel.id);
 		if (current !== null) {
-			message.channel.sendMessage("This channel is already registered! Please use ::unset first if you want to change this.\n");
+			version_send(message.channel, "This channel is already registered! Please use ::unset first if you want to change this.\n");
 			return;
 		}
 		//Get the name to tag the server as
 		let servername = command.slice(2).join(" ");
 		savedata.channels[serverid] = { id: message.channel.id, name: servername, type: "pvp-main", forceids: [], forcenames: [] };
-		message.channel.sendMessage("Shouts from any force on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "].\n");
+		version_send(message.channel, "Shouts from any force on server *" + serverid + "* will now be sent to this channel with the prefix [" + servername + "].\n");
 		if (!savedata.playerlists[serverid]) savedata.playerlists[serverid] = {};
 		let name_changed = message.channel.setName("factorio-" + servername);
 		name_changed.then(() => {
@@ -454,13 +490,13 @@ var admincommands = {
 	"changename": function (message, command) {
 		//Change the name of a server
 		if (command.length != 2) {
-			message.channel.sendMessage("The changename command requires one argument. ::changename newname\n");
+			version_send(message.channel, "The changename command requires one argument. ::changename newname\n");
 			return;
 		}
 		let newname = command.slice(1).join(" ");
 		let current = getChannelKey(message.channel.id);
 		if (current === null) {
-			message.channel.sendMessage("This channel is not registered to any server!\n");
+			version_send(message.channel, "This channel is not registered to any server!\n");
 			return;
 		}
 		if (savedata.channels[current].type == "pvp") {
@@ -483,11 +519,11 @@ var admincommands = {
 		//Check to see if the server is registered to a channel
 		let remove = getChannelKey(message.channel.id);
 		if (remove === null) {
-			message.channel.sendMessage("There is nothing registered to this channel");
+			version_send(message.channel, "There is nothing registered to this channel");
 			return;
 		}
 		if (savedata.channels[remove].type == "pvp") {
-			message.channel.sendMessage("PvP force channels are automatically managed by the bot. Unsetting a PvP force channel is not allowed.");
+			version_send(message.channel, "PvP force channels are automatically managed by the bot. Unsetting a PvP force channel is not allowed.");
 			return;
 		}
 		if (savedata.channels[remove].type == "pvp-main") {
@@ -501,7 +537,7 @@ var admincommands = {
 		if (savedata.playerlists[remove]) delete savedata.playerlists[remove];
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
-		message.channel.sendMessage("Successfully unregistered.\n");
+		version_send(message.channel, "Successfully unregistered.\n");
 		let name_changed = message.channel.setName("factorio-unset");
 		name_changed.then(() => {
 			if (update_descriptions) message.channel.setTopic("::unset was used here");
@@ -510,17 +546,17 @@ var admincommands = {
 	"setadmin": function (message, command) {
 		//Set the admin warning messages to be delivered to this current channel
 		let current = getChannelKey(message.channel.id);
-		if (current !== null) message.channel.sendMessage("The admin channel is currently already set. This command will overwrite the previous admin channel.\n");
+		if (current !== null) version_send(message.channel, "The admin channel is currently already set. This command will overwrite the previous admin channel.\n");
 		savedata.channels.admin = { id: message.channel.id, name: "Admin", type: "admin" };
 		fs.unlinkSync("savedata.json");
 		fs.writeFileSync("savedata.json", JSON.stringify(savedata));
-		message.channel.sendMessage("All Admin warnings and messages will now be sent here.\n");
+		version_send(message.channel, "All Admin warnings and messages will now be sent here.\n");
 	},
 	"sendadmin": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
 				if (command.length < 3) {
-					message.channel.sendMessage("Correct usage: ::sendadmin [serverid/all] command");
+					version_send(message.channel, "Correct usage: ::sendadmin [serverid/all] command");
 					return;
 				} 
 				let server = command[1];
@@ -529,18 +565,18 @@ var admincommands = {
 					let sendstring = "admin$" + server + "$/silent-command local s,e = pcall(loadstring('" + clean_message(sendcommand) + "')) e = e ~= nil and print('output$ ' .. tostring(e))\n";
 					safeWrite(sendstring);
 				} else {
-					message.channel.sendMessage("Serverid is not a registered server or 'all'.");
+					version_send(message.channel, "Serverid is not a registered server or 'all'.");
 				}
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"adminannounce": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
 				if (command.length < 3) {
-					message.channel.sendMessage("Correct usage: ::adminannounce [serverid/all] announcement");
+					version_send(message.channel, "Correct usage: ::adminannounce [serverid/all] announcement");
 					return;
 				}
 				let server = command[1];
@@ -549,50 +585,50 @@ var admincommands = {
 					let sendstring = "admin$" + server + "$/silent-command game.print('[ANNOUNCEMENT] " + clean_message(announcement) + "')" + "\n";
 					safeWrite(sendstring);
 				} else {
-					message.channel.sendMessage("Serverid is not a registered server or 'all'.");
+					version_send(message.channel, "Serverid is not a registered server or 'all'.");
 				}
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"registerserver": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
 				if (command.length != 2) {
-					message.channel.sendMessage("Correct usage: ::registerserver serverid");
+					version_send(message.channel, "Correct usage: ::registerserver serverid");
 					return;
 				}
 				let serverid = command[1];
 				if (savedata.channels[serverid]) {
-					message.channel.sendMessage("This server is already registered!");
+					version_send(message.channel, "This server is already registered!");
 				} else {
 					savedata.channels[serverid] = { id: null, name: null, type: "registered" };
-					message.channel.sendMessage("Server " + serverid + " has been registered.");
+					version_send(message.channel, "Server " + serverid + " has been registered.");
 					fs.unlinkSync("savedata.json");
 					fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 				}
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"unregister": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
 				if (command.length != 2) {
-					message.channel.sendMessage("Correct usage: ::unregister serverid");
+					version_send(message.channel, "Correct usage: ::unregister serverid");
 					return;
 				}
 				let serverid = command[1];
 				if (!savedata.channels[serverid]) {
-					message.channel.sendMessage("This server is not registered!");
+					version_send(message.channel, "This server is not registered!");
 				} else {
 					if (savedata.channels[serverid].type != "registered") {
-						message.channel.sendMessage("This server was not registered with ::registerserver. This command will not work for this server.");
+						version_send(message.channel, "This server was not registered with ::registerserver. This command will not work for this server.");
 					} else {
 						delete savedata.channels[serverid];
-						message.channel.sendMessage("Server " + serverid + " has been unregistered.");
+						version_send(message.channel, "Server " + serverid + " has been unregistered.");
 						fs.unlinkSync("savedata.json");
 						fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 					}
@@ -600,13 +636,13 @@ var admincommands = {
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"banhammer": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
 				if (command.length < 2) {
-					message.channel.sendMessage("Correct usage: ::banhammer username [reason]");
+					version_send(message.channel, "Correct usage: ::banhammer username [reason]");
 					return;
 				}
 				let username = command[1];
@@ -615,27 +651,27 @@ var admincommands = {
 				else reason = "Speak to us at www.3ragaming.com/Discord to request an appeal";
 				let sendstring = "admin$all$/ban " + username + " '" + reason + "'\n";
 				safeWrite(sendstring);
-				message.channel.sendMessage("Player " + username + " has been banned from all currently running 3Ra servers.\n");
+				version_send(message.channel, "Player " + username + " has been banned from all currently running 3Ra servers.\n");
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"unban": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
 				if (command.length != 2) {
-					message.channel.sendMessage("Correct usage: ::unban username");
+					version_send(message.channel, "Correct usage: ::unban username");
 					return;
 				}
 				let username = command[1];
 				let sendstring = "admin$all$/unban " + username + "\n";
 				safeWrite(sendstring);
-				message.channel.sendMessage("Player " + username + " has been unbanned from all currently running 3Ra servers.\n");
+				version_send(message.channel, "Player " + username + " has been unbanned from all currently running 3Ra servers.\n");
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"restart": function (message, command) {
 		if (savedata.channels.admin) {
@@ -644,7 +680,7 @@ var admincommands = {
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"clearservers": function (message, command) {
 		if (savedata.channels.admin) {
@@ -655,52 +691,52 @@ var admincommands = {
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"removeregistration": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
 				if (command.length != 2) {
-					message.channel.sendMessage("Correct usage: ::removeregistration *Factorio_username*");
+					version_send(message.channel, "Correct usage: ::removeregistration *Factorio_username*");
 					return;
 				}
 				let username = command[1];
 				let userid = getPlayerID(username);
 				if (userid === null) {
-					message.channel.sendMessage("That username is not registered!");
+					version_send(message.channel, "That username is not registered!");
 				} else {
 					delete savedata.registration[userid];
-					message.channel.sendMessage("Username is now unregistered.");
+					version_send(message.channel, "Username is now unregistered.");
 					fs.unlinkSync("savedata.json");
 					fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 				}
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"viewregistration": function (message, command) {
 		if (savedata.channels.admin) {
 			if (savedata.channels.admin.id == message.channel.id) {
 				if (command.length != 2) {
-					message.channel.sendMessage("Correct usage: ::viewregistration *Factorio_username*");
+					version_send(message.channel, "Correct usage: ::viewregistration *Factorio_username*");
 					return;
 				}
 				let username = command[1];
 				let userid = getPlayerID(username);
 				if (userid === null) {
-					message.channel.sendMessage("That username is not registered!");
+					version_send(message.channel, "That username is not registered!");
 				} else {
 					let tag = "<@" + userid + ">";
-					message.channel.sendMessage("That username is registered to " + tag);
+					version_send(message.channel, "That username is registered to " + tag);
 				}
 				return;
 			}
 		}
-		message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+		version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 	},
 	"serverhelp": function (message, command) {
-		message.channel.sendMessage("***SERVER/CHANNEL MANAGEMENT:*** \n\n\n" +
+		version_send(message.channel, "***SERVER/CHANNEL MANAGEMENT:*** \n\n\n" +
 			"**::setserver** *serverid servername* - Any messages internally tagged with serverid will be sent to the channel this command is run in, prefixed with '[servername]'.\n\n" +
 			"**::setchannel** *channelid channelname* - Same as above, but using chat channels (coded by Articulating) rather than servers.\n\n" +
 			"**::setpvp** *serverid* *servername* - Set the main channel for a PvP server. If the bot interface is used in-game, it will auto-create any force specific channels as needed at the beginning of each round.\n\n" +
@@ -710,10 +746,10 @@ var admincommands = {
 	},
 	"adminhelp": function (message, command) {
 		if (savedata.channels.admin && savedata.channels.admin.id != message.channel.id) {
-			message.channel.sendMessage("Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+			version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 			return;
 		}
-		message.channel.sendMessage("***ADMIN CHANNEL COMMANDS:*** \n (All commands must be run in the registered admin channel) \n\n\n" +
+		version_send(message.channel, "***ADMIN CHANNEL COMMANDS:*** \n (All commands must be run in the registered admin channel) \n\n\n" +
 			"**::setadmin** - Sets the channel that all admin warnings and messages are to be delivered to.\n\n" +
 			"**::sendadmin** *[serverid/all] command* - Sends 'command' to 'serverid' as if you were typing directly into the console (/silent-command will automatically be attached to the beginning). " +
 			"Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
@@ -784,7 +820,7 @@ function handleInput(input) {
 		let roleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
 		let tag = "<@&" + roleid + ">";
 		let new_input = input.substring(separator + 1);
-		bot.channels.get(savedata.channels.admin.id).sendMessage(tag + " The bot has crashed! The crash was detected and the bot restarted at " + new_input + "\n");
+		version_send(bot.channels.get(savedata.channels.admin.id), tag + " The bot has crashed! The crash was detected and the bot restarted at " + new_input + "\n");
 	} else if (channelid == "crashreport") {
 		//Bot crashed, must restart
 		if (!savedata.channels.admin) return;
@@ -792,8 +828,8 @@ function handleInput(input) {
 		let tag = "<@&" + roleid + ">";
 		let servername = input.substring(separator + 1);
 		if (!savedata.channels[servername]) return;
-		bot.channels.get(savedata.channels.admin.id).sendMessage(tag + " Server *" + servername + "* (" + savedata.channels[servername].name + ") has crashed!\n");
-		let message_sent = bot.channels.get(savedata.channels[servername].id).sendMessage("**Server crash was detected. Moderators have been notified. Please wait for restart.**");
+		version_send(bot.channels.get(savedata.channels.admin.id), tag + " Server *" + servername + "* (" + savedata.channels[servername].name + ") has crashed!\n");
+		let message_sent = version_send(bot.channels.get(savedata.channels[servername].id), "**Server crash was detected. Moderators have been notified. Please wait for restart.**");
 		//message_sent.then((message) => {
 		//	message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 		//});
@@ -811,7 +847,7 @@ function handleInput(input) {
 		channelid = new_input.substring(0, separator);
 		let channelname = savedata.channels[channelid].name;
 		let message = new_input.substring(separator + 1);
-		bot.channels.get(savedata.channels.admin.id).sendMessage(
+		version_send(bot.channels.get(savedata.channels.admin.id), 
 			tag + "\n" +
 			"**Admin Warning System was set off!**\n" +
 			"Server ID: " + channelid + "\n" +
@@ -822,7 +858,7 @@ function handleInput(input) {
 		//Requested output from server being returned
 		if (!savedata.channels.admin) return;
 		let message = input.substring(separator + 1);
-		bot.channels.get(savedata.channels.admin.id).sendMessage("Response: " + message + "\n");
+		version_send(bot.channels.get(savedata.channels.admin.id), "Response: " + message + "\n");
 	} else if (channelid == "query") {
 		let new_input = input.substring(separator + 1);
 		separator = new_input.indexOf("$");
@@ -892,12 +928,12 @@ function handleInput(input) {
 					}
 				}
 				updateDescription(channelid);
-				bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
+				version_send(bot.channels.get(savedata.channels[channelid].id), message);
 				channelid = channelid + "-" + force_name;
 				if (!savedata.channels[channelid]) return;
 			}
 			updateDescription(channelid);
-			bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
+			version_send(bot.channels.get(savedata.channels[channelid].id), message);
 		}
 	} else if (channelid == "PVPROUND") {
 		let new_input = input.substring(separator + 1);
@@ -952,7 +988,7 @@ function handleInput(input) {
 			}
 			fs.unlinkSync("savedata.json");
 			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
-			bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
+			version_send(bot.channels.get(savedata.channels[channelid].id), message);
 		}
 		return;
 	} else if (savedata.channels[channelid]) {
@@ -965,7 +1001,7 @@ function handleInput(input) {
 				let mainserver = channelid;
 				let open_server = bot.channels.get(savedata.channels[mainserver].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 				open_server.then(() => {
-					bot.channels.get(savedata.channels[mainserver].id).sendMessage(message);
+					version_send(bot.channels.get(savedata.channels[mainserver].id), message);
 				});
 				if (update_descriptions) bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
 				let forceids = savedata.channels[channelid].forceids;
@@ -973,7 +1009,7 @@ function handleInput(input) {
 					let insideid = forceids[i];
 					let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 					open_server.then(() => {
-						bot.channels.get(savedata.channels[insideid].id).sendMessage(message);
+						version_send(bot.channels.get(savedata.channels[insideid].id), message);
 					});
 					let force_name = insideid.substring(insideid.indexOf("-") + 1);
 					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
@@ -986,14 +1022,14 @@ function handleInput(input) {
 			} else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
 				//Close the channel for chat if the server is stopped
 				let mainserver = channelid;
-				let message_sent = bot.channels.get(savedata.channels[mainserver].id).sendMessage(message);
+				let message_sent = version_send(bot.channels.get(savedata.channels[mainserver].id), message);
 				message_sent.then((message) => {
 					//message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 				});
 				let forceids = savedata.channels[channelid].forceids;
 				for (let i = 0; i < forceids.length; i++) {
 					let insideid = forceids[i];
-					let message_sent = bot.channels.get(savedata.channels[insideid].id).sendMessage(message);
+					let message_sent = version_send(bot.channels.get(savedata.channels[insideid].id), message);
 					message_sent.then((message) => {
 						//message.channel.overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 					});
@@ -1007,7 +1043,7 @@ function handleInput(input) {
 				//Server is a PvP server, send to correct channel
 				if (message.charAt(0) == "[") {
 					//Message is from the web, send it to the main channel.
-					bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
+					version_send(bot.channels.get(savedata.channels[channelid].id), message);
 				} else {
 					message = replaceMentions(message);
 					separator = message.indexOf(":");
@@ -1015,12 +1051,12 @@ function handleInput(input) {
 					message = message.replace(/_/g, "\\_");
 					if (message.charAt(0) == '[') {
 						//If message is from web, send it to main channel
-						bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
+						version_send(bot.channels.get(savedata.channels[channelid].id), message);
 					} else if (username.indexOf(" (shout)") > 0) {
 						//If message is a shout, send it to main channel
 						username = username.replace(" (shout)", "");
 						let shoutless = message.replace(" (shout):", ":");
-						bot.channels.get(savedata.channels[channelid].id).sendMessage("[" + savedata.channels[channelid].name + "] " + shoutless);
+						version_send(bot.channels.get(savedata.channels[channelid].id), "[" + savedata.channels[channelid].name + "] " + shoutless);
 					} else {
 						//Send non-shout message to force specific channel
 						if (username.indexOf("[") != -1) username = username.substring(0, username.indexOf("[") - 1); //Remove any tag on the username
@@ -1029,7 +1065,7 @@ function handleInput(input) {
 						let force_name = savedata.playerlists[channelid][username].force;
 						let pvp_channelid = channelid + "-" + force_name;
 						if (savedata.channels[pvp_channelid]) {
-							bot.channels.get(savedata.channels[pvp_channelid].id).sendMessage("[" + savedata.channels[pvp_channelid].name + "] " + message);
+							version_send(bot.channels.get(savedata.channels[pvp_channelid].id), "[" + savedata.channels[pvp_channelid].name + "] " + message);
 						}
 					}
 				}
@@ -1042,7 +1078,7 @@ function handleInput(input) {
 				//Open the channel for chat if the server is running
 				let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 				open_server.then(() => {
-					bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
+					version_send(bot.channels.get(savedata.channels[channelid].id), message);
 				});
 				savedata.channels[channelid].status = "started";
 				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
@@ -1052,19 +1088,19 @@ function handleInput(input) {
 				fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			} else if (message == "**[ANNOUNCEMENT]** Server has stopped!") {
 				//Close the channel for chat if the server is stopped
-				let message_sent = bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
+				let message_sent = version_send(bot.channels.get(savedata.channels[channelid].id), message);
 				message_sent.then((message) => {
 					//bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': false });
 				});
 				savedata.channels[channelid].status = "stopped";
-				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
+				if (update_descriptions) version_send(bot.channels.get(savedata.channels[channelid].id).setTopic("Server offline");
 				delete savedata.playerlists[channelid];
 				fs.unlinkSync("savedata.json");
 				fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			} else {
 				message = message.replace(/_/g, "\\_");
-				if (message.charAt(0) == '[') bot.channels.get(savedata.channels[channelid].id).sendMessage(message);
-				else bot.channels.get(savedata.channels[channelid].id).sendMessage("[" + savedata.channels[channelid].name + "] " + message);
+				if (message.charAt(0) == '[') version_send(bot.channels.get(savedata.channels[channelid].id), message);
+				else version_send(bot.channels.get(savedata.channels[channelid].id), "[" + savedata.channels[channelid].name + "] " + message);
 			}
 		}
 	} else return;
@@ -1101,7 +1137,7 @@ bot.on('message', (message) => {
 			return;
 		}
 		if (admincommands[command[0].toLowerCase()] && !message.member.roles.has(message.guild.roles.find("name", modrole).id)) {
-			message.channel.sendMessage("You do not have permission to use this command!");
+			version_send(message.channel, "You do not have permission to use this command!");
 			return;
 		}
 		if (admincommands[command[0].toLowerCase()]) {
@@ -1110,7 +1146,7 @@ bot.on('message', (message) => {
 		}
 		if (command[0].toLowerCase() == "eval" && message.author.id != "129357924324605952" && !message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
 			//Not zackman0010 or an Admin
-			message.channel.sendMessage("You do not have permission to use this command!");
+			version_send(message.channel, "You do not have permission to use this command!");
 			return;
 		}
 		if (command[0].toLowerCase() == "eval") {
@@ -1118,13 +1154,13 @@ bot.on('message', (message) => {
 				var code = command.splice(1).join(" ");
 				var evaled = eval(code);
 				if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
-				if (evaled != "undefined") message.channel.sendCode("javascript", evaled.replace(new RegExp(token, 'g'), "TOKEN").replace(new RegExp(config.clientsecret, 'g'), "CLIENT_SECRET"));
+				if (evaled != "undefined" && evaled != "Promise { <pending> }") version_send(message.channel, evaled.replace(new RegExp(token, 'g'), "TOKEN").replace(new RegExp(config.clientsecret, 'g'), "CLIENT_SECRET"), "code", { "code": "javascript" });
 			} catch (err) {
-				message.channel.sendMessage(`\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
+				version_send(message.channel, `\`ERROR\` \`\`\`xl\n${err}\n\`\`\``);
 			}
 			return;
 		}
-		message.channel.sendMessage("That command does not exist. Please use ::help to see the list of commands.");
+		version_send(message.channel, "That command does not exist. Please use ::help to see the list of commands.");
 		return;
 	} else {
 		//Get the server that matches this channel. If this channel is unregistered, the result will be null.
