@@ -16,14 +16,38 @@ var failure = false;
 try {
 	config = JSON.parse(fs.readFileSync("./config.json", "utf8"));
 } catch (err) {
-	failure = true;
-}
-if (failure || !config.token || !config.guildid || !config.modrole || !config.adminrole || !config.gamemessage) {
 	console.log("DEBUG$Critical failure! Config file was not able to load successfully!");
 	process.exit(1);
 }
+
+//Check if any specific config settings are missing, using default values if so.
+if (!config.token) {
+	console.log("DEBUG$(Config Error) 'token' not found, using default value. (This one will cause the bot to crash)");
+	config.token = "PUT_YOUR_BOT_TOKEN_HERE";
+}
+if (!config.guildid) {
+	console.log("DEBUG$(Config Error) 'guildid' not found, using default value. (268610395088879616)");
+	config.guildid = "268610395088879616"; //3Ra's Test Server
+}
+if (!config.modrole) {
+	console.log("DEBUG$(Config Error) 'modrole' not found, using default value. (Moderators)");
+	config.modrole = "Moderators";
+}
+if (!config.adminrole) {
+	console.log("DEBUG$(Config Error) 'adminrole' not found, using default value. (Admin)");
+	config.adminrole = "Admin";
+}
+if (!config.gamemessage) {
+	console.log("DEBUG$(Config Error) 'gamemessage' not found, using default value (Use ::help for commands)");
+	config.gamemessage = "Use ::help for commands";
+}
+if (!config.banreason) {
+	console.log("DEBUG$(Config Error) 'banreason' not found, using default value (Contact the server owner to appeal your ban)");
+	config.banreason = "Contact the server owner to appeal your ban";
+}
+
 if (config.token == "PUT_YOUR_BOT_TOKEN_HERE") {
-	console.log("DEBUG$Critical failure! The config file was not set up!");
+	console.log("DEBUG$Critical failure! The config file was not set up properly!");
 	process.exit(1);
 }
 
@@ -33,6 +57,7 @@ var guildid = config.guildid;
 var modrole = config.modrole;
 var adminrole = config.adminrole;
 var gamemessage = config.gamemessage;
+var banreason = config.banreason
 
 //Temporary Global Variable to disable channel updates
 var update_descriptions = false;
@@ -389,7 +414,7 @@ var publiccommands = {
 			let current = savedata.channels[serverid];
 			if (current.type == "server" || current.type == "pvp-main") registered_servers++;
 		}
-		version_send(message.channel, "3Ra Factorio Bot is running. There are currently " + registered_servers + " servers registered.");
+		version_send(message.channel, "Factorio Bot is running. There are currently " + registered_servers + " servers registered.");
 	},
 	"help": function (message, command) {
 		version_send(message.channel, "**::players** *[force]* - Get a list of all currently connected players, must be run in a registered channel. If the optional argument force is provided, it will print players only on that force.\n\n" +
@@ -647,11 +672,11 @@ var admincommands = {
 				}
 				let username = command[1];
 				var reason;
-				if (command.length > 2) reason = command.slice(2).join(" ") + " - Speak to us at www.3ragaming.com/Discord to request an appeal";
-				else reason = "Speak to us at www.3ragaming.com/Discord to request an appeal";
+				if (command.length > 2) reason = command.slice(2).join(" ") + " - " + banreason;
+				else reason = banreason;
 				let sendstring = "admin$all$/ban " + username + " '" + reason + "'\n";
 				safeWrite(sendstring);
-				version_send(message.channel, "Player " + username + " has been banned from all currently running 3Ra servers.\n");
+				version_send(message.channel, "Player " + username + " has been banned from all currently running servers.\n");
 				return;
 			}
 		}
@@ -667,7 +692,7 @@ var admincommands = {
 				let username = command[1];
 				let sendstring = "admin$all$/unban " + username + "\n";
 				safeWrite(sendstring);
-				version_send(message.channel, "Player " + username + " has been unbanned from all currently running 3Ra servers.\n");
+				version_send(message.channel, "Player " + username + " has been unbanned from all currently running servers.\n");
 				return;
 			}
 		}
@@ -1189,7 +1214,7 @@ bot.on('message', (message) => {
 	}
 });
 
-//Leaves any server that isn't 3Ra
+//Leaves any server that isn't registered
 bot.on('ready', () => {
 	bot.user.setGame(gamemessage);
 	//bot.guilds.forEach((guildobj, guildid, collection) => {
@@ -1205,7 +1230,7 @@ bot.on('ready', () => {
 	safeWrite("ready$\n");
 });
 
-//If the bot joins a server that isn't 3Ra, immediately leave it
+//If the bot joins a server that isn't registered, immediately leave it
 bot.on('guildCreate', (guild) => {
 	if (guild.id != guildid) guild.leave();
 });
