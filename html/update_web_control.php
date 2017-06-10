@@ -1,21 +1,23 @@
 <?php
-	if(!isset($_SESSION)) { session_start(); }
+	if(session_status()!=2) { session_start(); }
 	if(!isset($_SESSION['login'])) {
 		header("Location: ./login.php");
 		die();
 	} else {
-		if(isset($_SERVER["HTTPS"]) == false)
+		$session = $_SESSION;
+		session_write_close();
+		if($_SERVER["HTTPS"] != "on")
 		{
 			header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
 			die();
 		}
 	}
+
 	header( 'Content-type: text/html; charset=utf-8' );
 
-	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
-	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
-	session_write_close();
-	
+	if(isset($session['login']['level'])) { $user_level = $session['login']['level']; }  else { $user_level = "viewonly"; }
+	if(isset($session['login']['user'])) { $user_name = $session['login']['user']; }  else { $user_name = "guest"; }
+
 	if($user_level=="admin") {
 		if(isset($_POST['update'])) {
 			echo "<span id=\"result\"></span>";
@@ -28,8 +30,22 @@
 				ob_flush();
 				flush();
 				//we loop here so we can flush the output and view the update progress in the web control.
+				$file_name = "";
 				for($n=1; $n<=$count[0]; $n++) {
-					system('bash update.sh '.$n.'');
+					if($n == 2) {
+						exec('bash update.sh '.$n.'', $file_name);
+						$file_name = str_replace('.zip', '', $file_name[0]);
+						if($file_name == "404") {
+							echo "Repo not found. Halting update.\r\n";
+							echo "\r\n-----------\r\n\r\n";
+							break;
+						} else {
+							echo "filename:$file_name.zip downloaded\r\n";
+							echo "\r\n-----------\r\n\r\n";
+						}
+					} else {
+						system('bash update.sh '.$n.' '.$file_name.'');
+					}
 					ob_flush();
 					flush();
 				}
@@ -39,11 +55,9 @@
 				flush();
 			}
 		} else {
-			header("Location: ./login.php?POSTnotset");
-			die();
+			die('No post data sent');
 		}
 	} else {
-		header("Location: ./login.php?notadmin");
-		die();
+		die('Not Admin');
 	}
 ?>

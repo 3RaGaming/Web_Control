@@ -13,56 +13,84 @@ if [ "${args[0]}" ]; then
 	case "${args[0]}" in
 		'count')
 			#ensure total number of steps is echoed here! PHP uses this to know how many times to loop		
-			echo "6"
+			echo "7"
 			exit 1
 			;;
 
 		'1')
 			printf "Detected \"$result\" branch \r\n";
 			printf "Step ${args[0]} - Downloading latest updates \r\n";
+			;;
+		#DO NOT CHANGE THIS STEP
+		#unless... you want to change update_web_control.php also
+		'2')
 			#wget -q https://github.com/3RaGaming/Web_Control/archive/$result.zip -O $tmp_dir/$result.zip
-			wget -t 1 -T 5 https://github.com/3RaGaming/Web_Control/archive/$result.zip -O $tmp_dir/$result.zip && wget_result=true || wget_result=false
-			#wget -t 1 -T 5 https://gitlab.com/3RaGaming/Web_Control/repository/archive.zip?ref=$result -O $tmp_dir/$result.zip && wget_result=true || wget_result=false
-			if [ "$wget_result" = true ]; then
-					printf "Download Completed \r\n"
+			remoteCheck=$(curl -s --head https://gitlab.com/3RaGaming/Web_Control/repository/archive.zip?ref=$result | head -n 1);
+			if [ "${remoteCheck}" == "HTTP/1.1 404 Not Found" ]; then
+				echo "404"
 			else
-					printf "Download Failed. Halting update \r\n"
-					exit
+				download=$(cd $tmp_dir && { curl -JLO# https://gitlab.com/3RaGaming/Web_Control/repository/archive.zip?ref=$result ; cd -; })
+				download=$(echo $download | awk '{ print $5 }' | tr -d "'")
+				if [ "${download}" ]; then
+						echo "$download"
+				else
+						echo "failed"
+				fi
+			fi
+			;;
+
+		'3')
+			if [ "${args[1]}" ]; then
+				printf "Step ${args[0]} - Unzipping updates \r\n";
+				unzip -u $tmp_dir/${args[1]}.zip -d $tmp_dir/
+			else
+				printf "Step ${args[0]} - SKIPPED - Unzipping updates \r\n";
 			fi
 			printf "\r\n-----------\r\n\r\n";
 			;;
 
-		'2')
-			printf "Step ${args[0]} - Unzipping updates \r\n";
-			unzip -u $tmp_dir/$result.zip -d $tmp_dir/
-			printf "\r\n-----------\r\n\r\n";
-			;;
-
-		'3')
-			printf "Step ${args[0]} - Updating files \r\n";
-			rsync -a -v $tmp_dir/Web_Control-$result/html/* ./
-			rsync -a -v $tmp_dir/Web_Control-$result/factorio/manage.c /var/www/factorio/
-			rsync -a -v $tmp_dir/Web_Control-$result/factorio/manage.sh /var/www/factorio/
-			rsync -a -v $tmp_dir/Web_Control-$result/factorio/3RaFactorioBot.js /var/www/factorio/
-			printf "\r\n-----------\r\n\r\n";
-			;;
-
 		'4')
-			printf "Step ${args[0]} - Compiling updated manage.c \r\n";
-			gcc -o /var/www/factorio/managepgm -pthread /var/www/factorio/manage.c
+			if [ "${args[1]}" ]; then
+				printf "Step ${args[0]} - Updating files \r\n";
+				rsync -a -v $tmp_dir/${args[1]}/html/* ./
+				rsync -a -v $tmp_dir/${args[1]}/factorio/manage.c /var/www/factorio/
+				rsync -a -v $tmp_dir/${args[1]}/factorio/manage.sh /var/www/factorio/
+				rsync -a -v $tmp_dir/${args[1]}/factorio/3RaFactorioBot.js /var/www/factorio/
+			else
+				printf "Step ${args[0]} - SKIPPED - Updating files \r\n";
+			fi
 			printf "\r\n-----------\r\n\r\n";
 			;;
 
 		'5')
-			printf "Step ${args[0]} - Deleting temporary files \r\n";
-			rm -Rf $tmp_dir/$result.zip $tmp_dir/Web_Control-$result/
+			if [ "${args[1]}" ]; then
+				printf "Step ${args[0]} - Compiling updated manage.c \r\n";
+				gcc -o /var/www/factorio/managepgm -pthread /var/www/factorio/manage.c
+			else
+				printf "Step ${args[0]} - SKIPPED - Compiling updated manage.c \r\n";
+			fi
 			printf "\r\n-----------\r\n\r\n";
 			;;
 
 		'6')
+			if [ "${args[1]}" ]; then
+				printf "Step ${args[0]} - Deleting temporary files \r\n";
+				rm -Rf $tmp_dir/${args[1]}.zip $tmp_dir/${args[1]}/
+			else
+				printf "Step ${args[0]} - SKIPPED - Deleting temporary files \r\n";
+			fi
+			printf "\r\n-----------\r\n\r\n";
+			;;
+
+		'7')
+			if [ "${args[1]}" ]; then
 			printf "Step ${args[0]} - forcing file permissions to www-data user \r\n";
 			sudo chown -R www-data:www-data /var/www/
 			sudo chown -R www-data:www-data /usr/share/factorio/
+			else
+				printf "Step ${args[0]} - SKIPPED - forcing file permissions to www-data user \r\n";
+			fi
+			printf "\r\n-----------\r\n\r\n";
 			;;
 
 		*)
