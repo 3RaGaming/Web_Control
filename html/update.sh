@@ -49,7 +49,7 @@ if [ "${args[0]}" ]; then
 
 		'4')
 			printf "Step ${args[0]} - Compiling updated manage.c \r\n";
-			gcc -o /var/www/factorio/managepgm -pthread /var/www/factorio/manage.c
+			gcc -o /var/www/factorio/managepgm -std=gnu99 -pthread /var/www/factorio/manage.c
 			printf "\r\n-----------\r\n\r\n";
 			;;
 
