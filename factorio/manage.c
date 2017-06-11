@@ -384,7 +384,7 @@ void * input_monitoring(void * server_ptr) {
 			free(message);
 			free(new_data);
 		} else if (strstr(data, " (shout):") != NULL && strstr(data, "[DISCORD]") == NULL) {
-			if (data[2] == ':' && data[20] == ' ') {
+			if (data[4] == '-' && data[20] == ' ') {
 				//Check for a timestamp, added in Factorio 0.15
 				//Bug in earlier 0.15 versions had no space between timestamp and username
 				//This finds the unbugged version
@@ -393,7 +393,7 @@ void * input_monitoring(void * server_ptr) {
 				sprintf(message, "%s$%s\n", server->name, data + 20);
 				send_threaded_chat("bot", message);
 				free(message);
-			} else if (data[2] == ':') {
+			} else if (data[4] == '-') {
 				//Check for a timestamp, added in Factorio 0.15
 				//Bug in earlier 0.15 versions had no space between timestamp and username
 				//This finds the bugged version
