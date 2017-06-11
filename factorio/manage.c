@@ -384,7 +384,7 @@ void * input_monitoring(void * server_ptr) {
 			free(message);
 			free(new_data);
 		} else if (strstr(data, " (shout):") != NULL && strstr(data, "[DISCORD]") == NULL) {
-			if (data[4] == '-' && data[20] == ' ') {
+			if (data[4] == '-' && data[19] == ' ') {
 				//Check for a timestamp, added in Factorio 0.15
 				//Bug in earlier 0.15 versions had no space between timestamp and username
 				//This finds the unbugged version
