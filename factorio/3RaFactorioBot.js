@@ -216,30 +216,30 @@ function version_send(channel, text = null, type = "message", options = {}) {
 		//Use the now depreciated commands
 		switch (type) {
 			case "message":
-				channel.sendMessage(text, options);
+				return channel.sendMessage(text, options);
 				break;
 			case "code":
-				channel.sendCode(options["code"], text, options);
+				return channel.sendCode(options["code"], text, options);
 				break;
 			case "embed":
 				let embed = options["embed"];
 				delete options["embed"];
-				channel.sendEmbed(embed, text, options);
+				return channel.sendEmbed(embed, text, options);
 				break;
 			case "file":
 				let file = options["file"];
 				delete options["file"];
-				channel.sendFile(file["attachment"], file["name"], text, options)
+				return channel.sendFile(file["attachment"], file["name"], text, options)
 				break;
 			case "files":
 				let files = options["files"];
 				delete options["files"];
-				channel.sendFiles(files, text, options);
+				return channel.sendFiles(files, text, options);
 				break;
 		}
 	} else {
 		//Use the new command
-		channel.send(text, options);
+		return channel.send(text, options);
 	}
 }
 
