@@ -45,6 +45,14 @@ if (!config.banreason) {
 	console.log("DEBUG$(Config Error) 'banreason' not found, using default value (Contact the server owner to appeal your ban)");
 	config.banreason = "Contact the server owner to appeal your ban";
 }
+if (!config.update_descriptions && typeof config.update_descriptions == 'undefined') {
+    console.log("DEBUG$(Config Error) 'update_descriptions' not found, using default value (false)");
+    config.update_descriptions = false;
+} else if (config.update_descriptions && config.update_descriptions == 'false') {
+    config.update_descriptions = false;
+} else if (config.update_descriptions) {
+    config.update_descriptions = true;
+}
 
 if (config.token == "PUT_YOUR_BOT_TOKEN_HERE") {
 	console.log("DEBUG$Critical failure! The config file was not set up properly!");
@@ -57,10 +65,8 @@ var guildid = config.guildid;
 var modrole = config.modrole;
 var adminrole = config.adminrole;
 var gamemessage = config.gamemessage;
-var banreason = config.banreason
-
-//Temporary Global Variable to disable channel updates
-var update_descriptions = false;
+var banreason = config.banreason;
+var update_descriptions = config.update_descriptions;
 
 //Load the persistent save data
 var savedata;
