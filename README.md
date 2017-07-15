@@ -71,6 +71,10 @@ Then you can use the following config:
         fastcgi_buffer_size  128k;
       }
 
+      location /update.sh {
+        deny all;
+      }
+
       # SSL
       ssl_certificate /etc/letsencrypt/live/factorio.example.com/fullchain.pem;
       ssl_certificate_key /etc/letsencrypt/live/factorio.example.com/privkey.pem;
