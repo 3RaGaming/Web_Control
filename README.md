@@ -35,6 +35,50 @@ crontab (apt install cron, specifically)
 
 Node.js v6.9.5 or higher (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
 
+# NGINX instead of Apache2
+
+To use NGINX instead of Apache2, you need to have a cgi version of PHP installed (like PHP-FPM).
+
+Then you can use the following config:
+
+    # Redirect to SSL
+    server {
+      server_name factorio.example.com;
+      listen 80;
+
+      return 301 https://factorio.example.com$request_uri;
+    }
+
+    # SSL server
+    server {
+      listen 443 ssl http2;
+
+      server_name factorio.example.com;
+
+      root /var/www/html;
+      index index.php;
+      autoindex off;
+      include fastcgi_params;
+
+      # Pass PHP scripts
+      location ~ \.php$ {
+        try_files            $uri =404;
+        include              fastcgi_params;
+        fastcgi_pass         unix:/dev/shm/php-fpm.factorio_web_control.sock;
+        fastcgi_param        SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        fastcgi_read_timeout 120;
+        fastcgi_buffers      8 256k;
+        fastcgi_buffer_size  128k;
+      }
+
+      # SSL
+      ssl_certificate /etc/letsencrypt/live/factorio.example.com/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/factorio.example.com/privkey.pem;
+
+      # Enable the following line to only allow SSL traffic
+      # add_header Strict-Transport-Security "max-age=63072000";
+    }
+
 # Manual Installation
 
 If you prefer to do it manually, here are the steps.
