@@ -21,7 +21,7 @@ This will run you through the entire setup process. Once the program is installe
 
 Ubuntu 16.04 (or any other linux of your choosing, if you have the know-how to figure it out)
 
-Apache2 with SSL Enabled. (Web Control is currently set to only work on a an https connection)
+Apache2 with SSL Enabled and mod_rewrite. (Web Control is currently set to only work on a an https connection)
 
 php7 with cURL
 
