@@ -3,11 +3,6 @@
 	if(!isset($_SESSION['login'])) {
 		header("Location: ./login.php");
 		die();
-	} else {
-		if(isset($_SERVER["HTTPS"]) == false)
-		{
-			die('Must use HTTPS');
-		}
 	}
 
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }

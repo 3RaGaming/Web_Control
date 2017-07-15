@@ -2,11 +2,6 @@
 if(!isset($_SESSION)) { session_start(); }
 if(!isset($_SESSION['login'])) {
 	die('Please sign in');
-} else {
-	if(isset($_SERVER["HTTPS"]) == false)
-	{
-		die('Must use HTTPS');
-	}
 }
 
 if(!isset($base_dir)) { die(); }
