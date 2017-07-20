@@ -100,5 +100,5 @@ To compile the manage.c program, you must install gcc.
 
 3) Run the command `npm i --save --no-optional discord.js` (If a message appears saying missing requirements, ignore it. It's only the voice server parts, which are not used in this program)
 
-Once the server files are all installed, and you have web access, there is a button at the top of the page to update from the master repo. This will easily keep your server up to date.
+Once the server files are all installed, and you have web access, there is a button at the top of the page to update from the master repo. This will easily keep your server up to date, but may cause problems if you have customized your installation.
 We recommend following our updates, as if a recompile of the manage.c is ever necessary, you may need to restart your factorio server(s).
