@@ -1010,7 +1010,7 @@ function handleInput(input) {
 					let roundnum = data[1]; //Have to use a different name for some reason, not sure why
 					let winner = data[2];
 					if (data.length > 3) {
-						let time = data[3].replace(";", ",");
+						let time = data.slice(2).join(" ").replace(";", ",");
 						message = "**[ROUND END] Round " + roundnum + " has ended after " + time + "! Winner: Team " + winner + "!**";
 					} else {
 						message = "**[ROUND END] Round " + roundnum + " has ended! Winner: Team " + winner + "!**";
