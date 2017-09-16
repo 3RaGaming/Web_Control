@@ -3,12 +3,6 @@
 	if(!isset($_SESSION['login'])) {
 		header("Location: ./login.php");
 		die();
-	} else {
-		if(isset($_SERVER["HTTPS"]) == false)
-		{
-			header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-			die();
-		}
 	}
 	header( 'Content-type: text/html; charset=utf-8' );
 

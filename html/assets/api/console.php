@@ -2,11 +2,6 @@
 if(!isset($_SESSION)) { session_start(); }
 if(!isset($_SESSION['login'])) {
 	die('Please sign in');
-} else {
-	if($_SERVER["HTTPS"] != "on")
-	{
-		die('Must use HTTPS');
-	}
 }
 session_write_close();
 
