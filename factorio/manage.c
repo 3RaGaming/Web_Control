@@ -384,11 +384,32 @@ void * input_monitoring(void * server_ptr) {
 			free(message);
 			free(new_data);
 		} else if (strstr(data, " (shout):") != NULL && strstr(data, "[DISCORD]") == NULL) {
-			log_chat(server->name, data);
-			message = (char *) malloc((strlen(server->name) + strlen(data) + 6)*sizeof(char));
-			sprintf(message, "%s$%s\n", server->name, data);
-			send_threaded_chat("bot", message);
-			free(message);
+			if (data[4] == '-' && data[19] == ' ') {
+				//Check for a timestamp, added in Factorio 0.15
+				//Bug in earlier 0.15 versions had no space between timestamp and username
+				//This finds the unbugged version
+				log_chat(server->name, data + 20);
+				message = (char *) malloc((strlen(server->name) + strlen(data + 20) + 6) * sizeof(char));
+				sprintf(message, "%s$%s\n", server->name, data + 20);
+				send_threaded_chat("bot", message);
+				free(message);
+			} else if (data[4] == '-') {
+				//Check for a timestamp, added in Factorio 0.15
+				//Bug in earlier 0.15 versions had no space between timestamp and username
+				//This finds the bugged version
+				log_chat(server->name, data + 19);
+				message = (char *) malloc((strlen(server->name) + strlen(data + 19) + 6) * sizeof(char));
+				sprintf(message, "%s$%s\n", server->name, data + 19);
+				send_threaded_chat("bot", message);
+				free(message);
+			} else {
+				//Factorio 0.14 or lower
+				log_chat(server->name, data);
+				message = (char *) malloc((strlen(server->name) + strlen(data) + 6) * sizeof(char));
+				sprintf(message, "%s$%s\n", server->name, data);
+				send_threaded_chat("bot", message);
+				free(message);
+			}
 		}
 	}
 	//After server is closed, free memory and close file streams

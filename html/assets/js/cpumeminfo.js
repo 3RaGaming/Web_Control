@@ -31,7 +31,7 @@ $( document ).ready(function() {
 
 
         var cpu = Math.round(100 - parseInt(data.cpu.idle));
-        var mempercentage = parseInt(data.mem.split("/")[0]) / 100 * parseInt(data.mem.split("/")[1]);
+        var mempercentage = parseFloat(data.mem.split("/")[0] / data.mem.split("/")[1]).toFixed(2);
 
         cpuElem.text(cpu+" %");
         cpuElem.css("background-color", getColor(cpu / 100));

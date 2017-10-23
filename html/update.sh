@@ -25,9 +25,10 @@ if [ "${args[0]}" ]; then
 		#unless... you want to change update_web_control.php also
 		'2')
 			#wget -q https://github.com/3RaGaming/Web_Control/archive/$result.zip -O $tmp_dir/$result.zip
-			remoteCheck=$(curl -s --head https://gitlab.com/3RaGaming/Web_Control/repository/archive.zip?ref=$result | head -n 1);
-			if [ "${remoteCheck}" == "HTTP/1.1 404 Not Found" ]; then
-				echo "404"
+			wget -t 1 -T 5 https://github.com/3RaGaming/Web_Control/archive/$result.zip -O $tmp_dir/$result.zip && wget_result=true || wget_result=false
+			#wget -t 1 -T 5 https://gitlab.com/3RaGaming/Web_Control/repository/archive.zip?ref=$result -O $tmp_dir/$result.zip && wget_result=true || wget_result=false
+			if [ "$wget_result" = true ]; then
+					printf "Download Completed \r\n"
 			else
 				download=$(cd $tmp_dir && { curl -JLO# https://gitlab.com/3RaGaming/Web_Control/repository/archive.zip?ref=$result ; cd -; })
 				download=$(echo $download | awk '{ print $5 }' | tr -d "'")
@@ -50,15 +51,8 @@ if [ "${args[0]}" ]; then
 			;;
 
 		'4')
-			if [ "${args[1]}" ]; then
-				printf "Step ${args[0]} - Updating files \r\n";
-				rsync -a -v $tmp_dir/${args[1]}/html/* ./
-				rsync -a -v $tmp_dir/${args[1]}/factorio/manage.c /var/www/factorio/
-				rsync -a -v $tmp_dir/${args[1]}/factorio/manage.sh /var/www/factorio/
-				rsync -a -v $tmp_dir/${args[1]}/factorio/3RaFactorioBot.js /var/www/factorio/
-			else
-				printf "Step ${args[0]} - SKIPPED - Updating files \r\n";
-			fi
+			printf "Step ${args[0]} - Compiling updated manage.c \r\n";
+			gcc -o /var/www/factorio/managepgm -std=gnu99 -pthread /var/www/factorio/manage.c
 			printf "\r\n-----------\r\n\r\n";
 			;;
 

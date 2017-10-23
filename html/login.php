@@ -124,7 +124,7 @@ if(isset($_GET['code'])) {
 				$roleobject = curl_exec($curlrqst3);
 				$rolejson = json_decode($roleobject, true);
 
-				/* DEBUG */if(isset(isset($debug))) {	$debugArr[][__LINE__." RolesJson"] = array(print_r($rolejson, true), curl_error($curlrqst3)); }
+				/* DEBUG */if(isset($debug)) {	$debugArr[][__LINE__." RolesJson"] = array(print_r($rolejson, true), curl_error($curlrqst3)); }
 
 				curl_close($curlrqst3);
 
