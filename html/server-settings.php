@@ -101,7 +101,7 @@
 										echo "$display:$col<select name=\"$key\"><option value=admins-only selected>Admins Only</option><option value=true>True</option><option value=false>False</option></select>";
 									}
 								} else {
-									//ghetto way to add version selection to this page
+									//ghetto way to add version selection and port config to this page
 									if($key == "max_players") {
 										echo "Server Version:$col<select name=\"s_version\">";
 										foreach($server_installed_versions as $version => $path) {
@@ -112,6 +112,9 @@
 											}
 										}
 										echo "</select> <a href=\"./version_manager.php?d=".$server_select."\">Version Manager</a>";
+										echo "</td></tr>";
+										echo "<tr><td>";
+										echo "Port Selection:$col<input type=text name=\"port\" value=\"$value\" /><br />";
 										echo "</td></tr>";
 										echo "<tr><td>";
 									}
