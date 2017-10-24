@@ -114,7 +114,7 @@
 										echo "</select> <a href=\"./version_manager.php?d=".$server_select."\">Version Manager</a>";
 										echo "</td></tr>";
 										echo "<tr><td>";
-										echo "Port Selection:$col<input type=text name=\"port\" value=\"$value\" /><br />";
+										echo "Port Selection:$col<input type=text name=\"port\" value=\"$value\" size=\"5\" /><br />";
 										echo "</td></tr>";
 										echo "<tr><td>";
 									}
@@ -171,7 +171,7 @@
 			$total_array = array();
 			$ignore_array = array("d","server_select");
 			$settype_string = array("name","description","game_password","allow_commands");
-			$settype_integers = array("max_players","max_upload_in_kilobytes_per_second","autosave_interval","autosave_slots","afk_autokick_interval","minimum_latency_in_ticks");
+			$settype_integers = array("max_players","port","max_upload_in_kilobytes_per_second","autosave_interval","autosave_slots","afk_autokick_interval","minimum_latency_in_ticks");
 			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game","autosave_only_on_server");
 			$settype_array = array("tags","admins");
 			$check_array_admin = array("true","false","admins-only");
@@ -249,6 +249,8 @@
 							foreach($lines as $line) {
 								if(substr($line, 0, 10) == 'read-data=') {
 									$new_config[] = "read-data=".$server_installed_versions[$s_version]."/data\n";
+								} elseif (substr($line, 0, 5) == 'port=') {
+									$new_config[] = "port=".$verified_data["port"];
 								} else {
 									$new_config[] = $line;
 								}
