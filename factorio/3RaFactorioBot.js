@@ -29,6 +29,10 @@ if (!config.guildid) {
 	console.log("DEBUG$(Config Error) 'guildid' not found, using default value. (268610395088879616)");
 	config.guildid = "268610395088879616"; //3Ra's Test Server
 }
+if (!config.smallmodrole) {
+	console.log("DEBUG$(Config Error) 'smallmodrole' not found, using default value. (GameMods)");
+	config.smallmodrole = "GameMods"
+}
 if (!config.modrole) {
 	console.log("DEBUG$(Config Error) 'modrole' not found, using default value. (Moderators)");
 	config.modrole = "Moderators";
@@ -62,6 +66,7 @@ if (config.token == "PUT_YOUR_BOT_TOKEN_HERE") {
 //Pull the config values
 var token = config.token;
 var guildid = config.guildid;
+var smallmodrole = config.smallmodrole;
 var modrole = config.modrole;
 var adminrole = config.adminrole;
 var gamemessage = config.gamemessage;
@@ -204,10 +209,18 @@ function removeRole(server, force, userid) {
 
 //Replace any mentions with an actual tag
 function replaceMentions(message) {
-	let roleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
-	let tag = "<@&" + roleid + ">";
-	let moderators = message.replace(/@moderators/ig, tag);
-	let zackman = moderators.replace(/@zackman0010/ig, "<@129357924324605952>");
+	//Replace @modrole with a Discord ping
+	let modroleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
+	let modtag = "<@&" + modroleid + ">";
+	let modreg = new RegExp(modrole, "ig");
+	let moderators = message.replace(modreg, modtag);
+	//Replace @smallmodrole with a Discord ping
+	let smallmodroleid = bot.guilds.get(guildid).roles.find("name", smallmodrole).id;
+	let smallmodtag = "<@&" + smallmodroleid + ">";
+	let smallmodreg = new RegExp(smallmodrole, "ig");
+	let smallmods = moderators.replace(smallmodreg, smallmodtag);
+	//Replace individual users
+	let zackman = smallmods.replace(/@zackman0010/ig, "<@129357924324605952>");
 	let arty = zackman.replace(/@articulating/ig, "<@180898179502309376>");
 	let juicy = arty.replace(/@juicyjuuce/ig, "<@143539331615817729>");
 	return juicy;
@@ -797,6 +810,32 @@ var admincommands = {
 	}
 };
 
+//Commands available to the smallmodrole
+var limitedadmincommands = {
+	"banhammer": function (message, command) {
+		admincommands.banhammer(message, command);
+	},
+	"sendadmin": function (message, command) {
+		admincommands.sendadmin(message, command)
+	},
+	"adminhelp": function (message, command) {
+		if (savedata.channels.admin && savedata.channels.admin.id != message.channel.id) {
+			version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
+			return;
+		}
+		if (hasRole(message, modrole)) {
+			admincommands.adminhelp(message, command);
+			return;
+		}
+		version_send(message.channel, "***ADMIN CHANNEL COMMANDS:*** \n (All commands must be run in the registered admin channel) \n" +
+			"As you are a limited admin user, you only have access to a subset of the full admin commands:\n\n\n" +
+			"**::sendadmin** *[serverid/all] command* - Sends 'command' to 'serverid' as if you were typing directly into the console (/silent-command will automatically be attached to the beginning). " +
+			"Replace serverid with \"all\" to send to all running servers. Serverid must be registered.\n\n" +
+			"**::banhammer** *username* - Bans a player from all running servers at once.\n\n"
+		);
+	}
+};
+
 //Update channel description with current list of players
 function updateDescription(channelid) {
 	if (!update_descriptions) return;
@@ -1151,6 +1190,10 @@ process.stdin.on('readable', () => {
 	}
 });
 
+function hasRole(message, role) {
+	return message.member.roles.has(message.guild.roles.find("name", role).id);
+}
+
 //Receive input from Discord
 bot.on('message', (message) => {
 	//Ignore own messages
@@ -1167,7 +1210,15 @@ bot.on('message', (message) => {
 			publiccommands[command[0].toLowerCase()](message, command);
 			return;
 		}
-		if (admincommands[command[0].toLowerCase()] && !message.member.roles.has(message.guild.roles.find("name", modrole).id)) {
+		if (limitedadmincommands[command[0].toLowerCase()] && !hasRole(message, smallmodrole) && !hasRole(message, modrole) && !hasRole(message, adminrole)) {
+			version_send(message.channel, "You do not have permission to use this command!");
+			return;
+		}
+		if (limitedadmincommands[command[0].toLowerCase()]) {
+			limitedadmincommands[command[0].toLowerCase()](message, command)
+			return;
+		}
+		if (admincommands[command[0].toLowerCase()] && !hasRole(message, modrole) && !hasRole(message, adminrole)) {
 			version_send(message.channel, "You do not have permission to use this command!");
 			return;
 		}
@@ -1175,7 +1226,7 @@ bot.on('message', (message) => {
 			admincommands[command[0].toLowerCase()](message, command);
 			return;
 		}
-		if (command[0].toLowerCase() == "eval" && message.author.id != "129357924324605952" && !message.member.roles.has(message.guild.roles.find("name", adminrole).id)) {
+		if (command[0].toLowerCase() == "eval" && message.author.id != "129357924324605952" && !hasRole(message, adminrole)) {
 			//Not zackman0010 or an Admin
 			version_send(message.channel, "You do not have permission to use this command!");
 			return;
