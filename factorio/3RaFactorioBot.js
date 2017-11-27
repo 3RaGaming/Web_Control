@@ -878,7 +878,7 @@ function handleInput(input) {
 		channelid = new_input.substring(0, separator);
 		let channelname = savedata.channels[channelid].name;
 		let message = new_input.substring(separator + 1);
-		version_send(bot.channels.get(savedata.channels.admin.id), 
+		version_send(bot.channels.get(savedata.channels.admin.id),
 			tag + "\n" +
 			"**Admin Warning System was set off!**\n" +
 			"Server ID: " + channelid + "\n" +
@@ -897,6 +897,13 @@ function handleInput(input) {
 		if (!queryResponse[uid]) return;
 		let response = new_input.substring(separator + 1);
 		resolveQuery(uid, response);
+	} else if (channelid == "BAN") {
+		//Player was banned in server, forward it to other servers
+		let new_input = input.substring(separator + 1);
+		separator = new_input.indexOf("$");
+		channelid = new_input.substring(0, separator);
+		let message = new_input.substring(separator + 1);
+		safeWrite("BAN$" + channelid + "$/ban " + message);
 	} else if (channelid == "PLAYER") {
 		//Player Update
 		let new_input = input.substring(separator + 1);

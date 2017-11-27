@@ -302,12 +302,12 @@ void * input_monitoring(void * server_ptr) {
 					//Bot is sending a command or announcement to a server
 					separator_index = strchr(new_data, '$') - new_data;
 					new_data[separator_index] = '\0';
-					actual_server_name = (char *) malloc((strlen(new_data)+3)*sizeof(char));
+					actual_server_name = (char *) malloc((strlen(new_data) + 3) * sizeof(char));
 					strcpy(actual_server_name, new_data);
-					command = (char *) malloc((strlen(new_data + separator_index + 1) + 4)*sizeof(char));
+					command = (char *) malloc((strlen(new_data + separator_index + 1) + 4) * sizeof(char));
 					strcpy(command, new_data + separator_index + 1);
 					strcat(command, "\n");
-					if (strcmp(actual_server_name,"all") == 0) {
+					if (strcmp(actual_server_name, "all") == 0) {
 						for (int i = 1; i < servers; i++) {
 							send_threaded_chat(server_list[i]->name, command);
 						}
@@ -318,8 +318,32 @@ void * input_monitoring(void * server_ptr) {
 					free(command);
 				} else {
 					//Admin Warning System is being sent back to the bot
-					message = (char *) malloc((strlen("admin$") + strlen(server->name) + strlen(new_data) + 6)*sizeof(char));
+					message = (char *) malloc((strlen("admin$") + strlen(server->name) + strlen(new_data) + 6) * sizeof(char));
 					sprintf(message, "admin$%s$%s\n", server->name, new_data);
+					send_threaded_chat("bot", message);
+					free(message);
+				}
+			} else if (strcmp(servername, "BAN") == 0) {
+				if (strcmp(server->name, "bot") == 0) {
+					//Bot is forwarding ban to other servers
+					separator_index = strchr(new_data, '$') - new_data;
+					new_data[separator_index] = '\0';
+					actual_server_name = (char *) malloc((strlen(new_data) + 3) * sizeof(char));
+					strcpy(actual_server_name, new_data);
+					command = (char *) malloc((strlen(new_data + separator_index + 1) + 4) * sizeof(char));
+					strcpy(command, new_data + separator_index + 1);
+					strcat(command, "\n");
+					for (int i = 1; i < servers; i++) {
+						if (strcmp(server_list[i]->name, actual_server_name) != 0) {
+							send_threaded_chat(server_list[i]->name, command);
+						}
+					}
+					free(actual_server_name);
+					free(command);
+				} else {
+					//Server is transmitting ban to the bot
+					message = (char *) malloc((strlen("BAN$") + strlen(server->name) + strlen(new_data) + 6) * sizeof(char));
+					sprintf(message, "BAN$%s$%s\n", server->name, new_data);
 					send_threaded_chat("bot", message);
 					free(message);
 				}
