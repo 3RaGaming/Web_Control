@@ -12,7 +12,6 @@ var fs = require("fs");
 
 //Get the config, fail if unable to or if config is not set up
 var config;
-var failure = false;
 try {
 	config = JSON.parse(fs.readFileSync("./config.json", "utf8"));
 } catch (err) {
@@ -56,6 +55,36 @@ if (!config.update_descriptions && typeof config.update_descriptions == 'undefin
     config.update_descriptions = false;
 } else if (config.update_descriptions) {
     config.update_descriptions = true;
+}
+
+//Begin Global Banlist Management
+if (!config.global_banlist && typeof config.global_banlist == 'undefined') {
+	console.log("DEBUG$(Config Error) 'global_banlist' not found, using default value (false)");
+	config.global_banlist = false;
+} else if (config.global_banlist && config.global_banlist == 'false') {
+	config.global_banlist = false;
+} else if (config.global_banlist) {
+	config.global_banlist = true;
+}
+var global_banlist = config.global_banlist;
+
+var ban_token;
+if (global_banlist) {
+	//Load config for the global banlist
+	var ban_config;
+	try {
+		ban_config = JSON.parse(fs.readFileSync("./ban_config.json", "utf8"));
+	} catch (err) {
+		console.log("DEBUG$Critical failure! Global banlist is enabled, but ban config file could not load!");
+		process.exit(1);
+	}
+
+	if (!ban_config.token || ban_config.token == "ADD_BAN_TOKEN_HERE") {
+		console.log("DEBUG$Critical failure! Global banlist is enabled, but the token could not be loaded!");
+		process.exit(1);
+	}
+
+	ban_token = ban_config.token;
 }
 
 if (config.token == "PUT_YOUR_BOT_TOKEN_HERE") {
