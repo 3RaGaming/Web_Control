@@ -347,7 +347,7 @@ var publiccommands = {
 		}
 		let force_name = null;
 		let current = getChannelKey(message.channel.id);
-		if (current === null || savedata.channels[current].type == "chat") {
+		if (current === null || savedata.channels[current].type == "chat" || savedata.channels[current].type == "admin") {
 			version_send(message.channel, "This channel is not registered to any server!\n");
 			return;
 		}
