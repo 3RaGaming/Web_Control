@@ -1379,6 +1379,7 @@ bot.on('ready', () => {
 				fs.unlinkSync("global_banlist.json");
 				fs.writeFileSync("global_banlist.json", JSON.stringify(data));
 				safeWrite("ready$\n");
+				response.destroy();
 			});
 		}).on("timeout", () => {
 			//Request to retrieve the banlist timed out, disable global banlist and print warning

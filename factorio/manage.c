@@ -615,7 +615,7 @@ char * start_server(char * name, char * input) {
 	char *token;
 	char *delim = ",\n\t";
 	char **args = (char **) malloc(6*sizeof(char *));
-	char **launchargs = (char **) malloc(10*sizeof(char *));
+	char **launchargs = (char **) malloc(12*sizeof(char *));
 	int i = 0;
 	int j = 0;
 
@@ -648,6 +648,8 @@ char * start_server(char * name, char * input) {
 	strcpy(launchargs[i], args[j]);
 	strcat(launchargs[i], "/server-settings.json\0");
 	i++;
+	launchargs[i++] = "--server-banlist";
+	launchargs[i++] = "/var/www/factorio/global_banlist.json";
 	launchargs[i] = (char *) NULL;
 	launchargs[0] = args[j + 1];
 
