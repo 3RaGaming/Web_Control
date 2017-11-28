@@ -71,6 +71,7 @@ var global_banlist = config.global_banlist;
 var ban_token;
 if (global_banlist) {
 	//Load config for the global banlist
+	//Currently only the ban token, but can be expanded later if necessary
 	var ban_config;
 	try {
 		ban_config = JSON.parse(fs.readFileSync("./ban_config.json", "utf8"));
@@ -289,6 +290,20 @@ function version_send(channel, text = null, type = "message", options = {}) {
 		//Use the new command
 		return channel.send(text, options);
 	}
+}
+
+//Form the POST request for banning/unbanning
+function buildPost(action, data) {
+	//Action will be either ban or unban
+	return {
+		"host": "TBD",
+		"method": "POST",
+		"path": "/" + action + "?token=" + ban_token,
+		"headers": {
+			"Content-Type": "application/json",
+			"Content-Length": Buffer.byteLength(data)
+		}
+	};
 }
 
 //Creates a new force for a PvP server
@@ -725,6 +740,16 @@ var admincommands = {
 				let sendstring = "admin$all$/ban " + username + " '" + reason + "'\n";
 				safeWrite(sendstring);
 				version_send(message.channel, "Player " + username + " has been banned from all currently running servers.\n");
+				if (global_banlist) {
+					//Code to send ban to the global banlist
+					let data = JSON.stringify({
+						"player-name": username,
+						"reason": reason,
+						"issuer": message.author.username
+					});
+					let post = buildPost("ban", data);
+					require("https").request(post).end(data);
+				}
 				return;
 			}
 		}
@@ -741,6 +766,14 @@ var admincommands = {
 				let sendstring = "admin$all$/unban " + username + "\n";
 				safeWrite(sendstring);
 				version_send(message.channel, "Player " + username + " has been unbanned from all currently running servers.\n");
+				if (global_banlist) {
+					//Code to send ban to the global banlist
+					let data = JSON.stringify({
+						"player-name": username
+					});
+					let post = buildPost("unban", data);
+					require("https").request(post).end(data);
+				}
 				return;
 			}
 		}
