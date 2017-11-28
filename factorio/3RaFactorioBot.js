@@ -1,6 +1,17 @@
 //Set up the Discord bot interface
 var Discord = require("discord.js");
-var bot = new Discord.Client({fetchAllMembers: true});
+var bot = new Discord.Client({ fetchAllMembers: true });
+
+//Function to safely handle writing to stdout
+function safeWrite(sendstring) {
+	if (!process.stdout.write(sendstring)) {
+		safe = false;
+		process.stdout.once('drain', safeWrite(sendstring));
+	} else {
+		safe = true;
+	}
+}
+var safe = true;
 
 //Set up code to get line number of Promise Rejections
 process.on("unhandledRejection", (err) => {
@@ -15,41 +26,41 @@ var config;
 try {
 	config = JSON.parse(fs.readFileSync("./config.json", "utf8"));
 } catch (err) {
-	console.log("DEBUG$Critical failure! Config file was not able to load successfully!");
+	safeWrite("DEBUG$Critical failure! Config file was not able to load successfully!");
 	process.exit(1);
 }
 
 //Check if any specific config settings are missing, using default values if so.
 if (!config.token) {
-	console.log("DEBUG$(Config Error) 'token' not found, using default value. (This one will cause the bot to crash)");
+	safeWrite("DEBUG$(Config Error) 'token' not found, using default value. (This one will cause the bot to crash)");
 	config.token = "PUT_YOUR_BOT_TOKEN_HERE";
 }
 if (!config.guildid) {
-	console.log("DEBUG$(Config Error) 'guildid' not found, using default value. (268610395088879616)");
+	safeWrite("DEBUG$(Config Error) 'guildid' not found, using default value. (268610395088879616)");
 	config.guildid = "268610395088879616"; //3Ra's Test Server
 }
 if (!config.smallmodrole) {
-	console.log("DEBUG$(Config Error) 'smallmodrole' not found, using default value. (GameMods)");
+	safeWrite("DEBUG$(Config Error) 'smallmodrole' not found, using default value. (GameMods)");
 	config.smallmodrole = "GameMods"
 }
 if (!config.modrole) {
-	console.log("DEBUG$(Config Error) 'modrole' not found, using default value. (Moderators)");
+	safeWrite("DEBUG$(Config Error) 'modrole' not found, using default value. (Moderators)");
 	config.modrole = "Moderators";
 }
 if (!config.adminrole) {
-	console.log("DEBUG$(Config Error) 'adminrole' not found, using default value. (Admin)");
+	safeWrite("DEBUG$(Config Error) 'adminrole' not found, using default value. (Admin)");
 	config.adminrole = "Admin";
 }
 if (!config.gamemessage) {
-	console.log("DEBUG$(Config Error) 'gamemessage' not found, using default value (Use ::help for commands)");
+	safeWrite("DEBUG$(Config Error) 'gamemessage' not found, using default value (Use ::help for commands)");
 	config.gamemessage = "Use ::help for commands";
 }
 if (!config.banreason) {
-	console.log("DEBUG$(Config Error) 'banreason' not found, using default value (Contact the server owner to appeal your ban)");
+	safeWrite("DEBUG$(Config Error) 'banreason' not found, using default value (Contact the server owner to appeal your ban)");
 	config.banreason = "Contact the server owner to appeal your ban";
 }
 if (!config.update_descriptions && typeof config.update_descriptions == 'undefined') {
-    console.log("DEBUG$(Config Error) 'update_descriptions' not found, using default value (false)");
+    safeWrite("DEBUG$(Config Error) 'update_descriptions' not found, using default value (false)");
     config.update_descriptions = false;
 } else if (config.update_descriptions && config.update_descriptions == 'false') {
     config.update_descriptions = false;
@@ -59,7 +70,7 @@ if (!config.update_descriptions && typeof config.update_descriptions == 'undefin
 
 //Begin Global Banlist Management
 if (!config.global_banlist && typeof config.global_banlist == 'undefined') {
-	console.log("DEBUG$(Config Error) 'global_banlist' not found, using default value (false)");
+	safeWrite("DEBUG$(Config Error) 'global_banlist' not found, using default value (false)");
 	config.global_banlist = false;
 } else if (config.global_banlist && config.global_banlist == 'false') {
 	config.global_banlist = false;
@@ -69,27 +80,33 @@ if (!config.global_banlist && typeof config.global_banlist == 'undefined') {
 var global_banlist = config.global_banlist;
 
 var ban_token;
+var update_interval;
 if (global_banlist) {
 	//Load config for the global banlist
-	//Currently only the ban token, but can be expanded later if necessary
 	var ban_config;
 	try {
 		ban_config = JSON.parse(fs.readFileSync("./ban_config.json", "utf8"));
 	} catch (err) {
-		console.log("DEBUG$Critical failure! Global banlist is enabled, but ban config file could not load!");
+		safeWrite("DEBUG$Critical failure! Global banlist is enabled, but ban config file could not load!");
 		process.exit(1);
 	}
 
 	if (!ban_config.token || ban_config.token == "ADD_BAN_TOKEN_HERE") {
-		console.log("DEBUG$Critical failure! Global banlist is enabled, but the token could not be loaded!");
+		safeWrite("DEBUG$Critical failure! Global banlist is enabled, but the token could not be loaded!");
 		process.exit(1);
 	}
 
+	if (!ban_config.update_interval) {
+		safeWrite("DEBUG$(Ban Config Error) Global banlist is enabled, but the update interval could not be loaded. Using default value (10)")
+		ban_config.update_interval = 10;
+	}
+
 	ban_token = ban_config.token;
+	update_interval = ban_config.update_interval;
 }
 
 if (config.token == "PUT_YOUR_BOT_TOKEN_HERE") {
-	console.log("DEBUG$Critical failure! The config file was not set up properly!");
+	safeWrite("DEBUG$Critical failure! The config file was not set up properly!");
 	process.exit(1);
 }
 
@@ -115,7 +132,7 @@ try {
 }
 if (!savedata) {
 	savedata = {};
-	console.log("DEBUG$Non-critical failure! Unknown bug caused savedata not to load. Please investigate.");
+	safeWrite("DEBUG$Non-critical failure! Unknown bug caused savedata not to load. Please investigate.");
 }
 if (!savedata.channels) savedata.channels = {};
 if (!savedata.playerlists) savedata.playerlists = {};
@@ -144,17 +161,6 @@ function getPlayerID(username) {
 	}
 	return null;
 }
-
-//Function to safely handle writing to stdout
-function safeWrite(sendstring) {
-	if (!process.stdout.write(sendstring)) {
-		safe = false;
-		process.stdout.once('drain', safeWrite(sendstring));
-	} else {
-		safe = true;
-	}
-}
-var safe = true;
 
 //Find the server a player is in
 function findPlayer(username) {
@@ -1353,7 +1359,37 @@ bot.on('ready', () => {
 	}
 	fs.unlinkSync("savedata.json");
 	fs.writeFileSync("savedata.json", JSON.stringify(savedata));
-	safeWrite("ready$\n");
+
+	//If the global banlist is enabled, you need to download the most recent copy of the global banlist before the servers should be allowed to launch
+	if (global_banlist) {
+		//Send the request to receive the most recent banlist, with a 15 second timeout
+		let request = require("https").get({
+			"host": "TBD",
+			"path": "/bans",
+			"timeout": 15000
+		}, (response) => {
+			response.setEncoding("utf8");
+			let data = "";
+			response.on("data", (chunk) => {
+				//The banlist will likely be very large, so retrieve it as chunked data
+				data += chunk;
+			});
+			response.on("end", () => {
+				//When all data is retrieved, rewrite the global banlist and signal the management program that you're ready
+				fs.unlinkSync("global_banlist.json");
+				fs.writeFileSync("global_banlist.json", JSON.stringify(data));
+				safeWrite("ready$\n");
+			});
+		}).on("timeout", () => {
+			//Request to retrieve the banlist timed out, disable global banlist and print warning
+			global_banlist = false;
+			safeWrite("DEBUG$The request to retrieve the global banlist timed out. Please contact the administrators at DISCORDLINKHERE. Using the last version of the banlist.");
+			safeWrite("ready$\n");
+			request.abort();
+		});
+	} else {
+		safeWrite("ready$\n");
+	}
 });
 
 //If the bot joins a server that isn't registered, immediately leave it
