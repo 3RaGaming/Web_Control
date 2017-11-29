@@ -1,6 +1,6 @@
 //Set up the Discord bot interface
 var Discord = require("discord.js");
-var bot = new Discord.Client({fetchAllMembers: true});
+var bot = new Discord.Client({fetchAllMembers: true, disableEveryone: true});
 
 //Set up code to get line number of Promise Rejections
 process.on("unhandledRejection", (err) => {
