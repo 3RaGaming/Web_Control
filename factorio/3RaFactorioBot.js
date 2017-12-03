@@ -1,6 +1,6 @@
 //Set up the Discord bot interface
 var Discord = require("discord.js");
-var bot = new Discord.Client({ fetchAllMembers: true });
+var bot = new Discord.Client({fetchAllMembers: true, disableEveryone: true});
 
 //Function to safely handle writing to stdout
 function safeWrite(sendstring) {
@@ -1056,6 +1056,7 @@ function handleInput(input) {
 					savedata.playerlists[channelid][player_name] = { "name": cap_name, "force": force_name }
 					return;
 			}
+			message = message.replace(/_/g, "\\_");
 			fs.unlinkSync("savedata.json");
 			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			if (savedata.channels[channelid].type == "pvp-main") {
