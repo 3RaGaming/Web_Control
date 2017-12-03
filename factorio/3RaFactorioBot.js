@@ -981,6 +981,7 @@ function handleInput(input) {
 					savedata.playerlists[channelid][player_name] = { "name": cap_name, "force": force_name }
 					return;
 			}
+			message = message.replace(/_/g, "\\_");
 			fs.unlinkSync("savedata.json");
 			fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			if (savedata.channels[channelid].type == "pvp-main") {
