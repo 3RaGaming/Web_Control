@@ -386,7 +386,7 @@
 				//print_r($server_installed_versions);
 				echo "<br /><br />";
 				$urls = array(
-					"https://www.factorio.com/download-headless/stable",
+					"https://www.factorio.com/download-headless",
 					"https://www.factorio.com/download-headless/experimental"
 				);
 				foreach($urls as $url) {
