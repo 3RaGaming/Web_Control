@@ -102,7 +102,7 @@
 			return "Install failed. Directory exists.";
 		} else {
 			$urls = array(
-				"https://www.factorio.com/download-headless/stable",
+				"https://www.factorio.com/download-headless",
 				"https://www.factorio.com/download-headless/experimental"
 			);
 			foreach($urls as $url) {
