@@ -401,6 +401,7 @@
 							//var_dump($output[1]);
 							//get the experimental or stable tag from the url
 							$branch = substr($url, strrpos($url, '/') + 1);
+							if($branch=="download-headless") $branch = "stable";
 							//create array to work with later
 							$server_available_versions[$output[1]] = array(0=>$value,1=>$branch);
 							//add to total versions to compare against installed versions
