@@ -753,7 +753,7 @@ var admincommands = {
 				if (global_banlist) {
 					//Code to send ban to the global banlist
 					let data = JSON.stringify({
-						"player-name": username,
+						"player_name": username,
 						"reason": reason,
 						"issuer": message.author.username
 					});
@@ -779,7 +779,7 @@ var admincommands = {
 				if (global_banlist) {
 					//Code to send ban to the global banlist
 					let data = JSON.stringify({
-						"player-name": username
+						"player_name": username
 					});
 					let post = buildPost("unban", data);
 					require("https").request(post).end(data);
