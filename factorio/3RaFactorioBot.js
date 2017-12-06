@@ -253,12 +253,12 @@ function replaceMentions(message) {
 	let moderators = message.replace(modreg, modtag);
 	//Replace @smallmodrole with a Discord ping
 	let smallmods = moderators;
-    if (smallmodrole) {
-        let smallmodroleid = bot.guilds.get(guildid).roles.find("name", smallmodrole).id;
-        let smallmodtag = "<@&" + smallmodroleid + ">";
-        let smallmodreg = new RegExp(smallmodrole, "ig");
-        smallmods = moderators.replace(smallmodreg, smallmodtag);
-    }
+	if (smallmodrole) {
+		let smallmodroleid = bot.guilds.get(guildid).roles.find("name", smallmodrole).id;
+		let smallmodtag = "<@&" + smallmodroleid + ">";
+		let smallmodreg = new RegExp(smallmodrole, "ig");
+		smallmods = moderators.replace(smallmodreg, smallmodtag);
+	}
 	//Replace individual users
 	let zackman = smallmods.replace(/@zackman0010/ig, "<@129357924324605952>");
 	let arty = zackman.replace(/@articulating/ig, "<@180898179502309376>");
