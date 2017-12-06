@@ -4,6 +4,7 @@ var bot = new Discord.Client({fetchAllMembers: true, disableEveryone: true});
 
 //Function to safely handle writing to stdout
 function safeWrite(sendstring) {
+	if (sendstring[sendstring.length - 1] != '\n') sendstring = sendstring + '\n';
 	if (!process.stdout.write(sendstring)) {
 		safe = false;
 		process.stdout.once('drain', safeWrite(sendstring));
@@ -305,9 +306,9 @@ function version_send(channel, text = null, type = "message", options = {}) {
 function buildPost(action, data) {
 	//Action will be either ban or unban
 	return {
-		"host": "TBD",
+		"host": "banlist.aerith.ovh",
 		"method": "POST",
-		"path": "/" + action + "?token=" + ban_token,
+		"path": "/" + action + "/?token=" + ban_token,
 		"headers": {
 			"Content-Type": "application/json",
 			"Content-Length": Buffer.byteLength(data)
@@ -1368,8 +1369,8 @@ bot.on('ready', () => {
 	if (global_banlist) {
 		//Send the request to receive the most recent banlist, with a 15 second timeout
 		let request = require("https").get({
-			"host": "TBD",
-			"path": "/bans",
+			"host": "banlist.aerith.ovh",
+			"path": "/bans/",
 			"timeout": 15000
 		}, (response) => {
 			response.setEncoding("utf8");
