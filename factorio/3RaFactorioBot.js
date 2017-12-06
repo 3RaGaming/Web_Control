@@ -40,8 +40,8 @@ if (!config.guildid) {
 	config.guildid = "268610395088879616"; //3Ra's Test Server
 }
 if (!config.smallmodrole) {
-	safeWrite("DEBUG$(Config Error) 'smallmodrole' not found, using default value. (GameMods)");
-	config.smallmodrole = "GameMods"
+	console.log("DEBUG$(Config Error) 'smallmodrole' not found, using default value. (false)");
+	config.smallmodrole = false;
 }
 if (!config.modrole) {
 	safeWrite("DEBUG$(Config Error) 'modrole' not found, using default value. (Moderators)");
@@ -251,10 +251,13 @@ function replaceMentions(message) {
 	let modreg = new RegExp(modrole, "ig");
 	let moderators = message.replace(modreg, modtag);
 	//Replace @smallmodrole with a Discord ping
-	let smallmodroleid = bot.guilds.get(guildid).roles.find("name", smallmodrole).id;
-	let smallmodtag = "<@&" + smallmodroleid + ">";
-	let smallmodreg = new RegExp(smallmodrole, "ig");
-	let smallmods = moderators.replace(smallmodreg, smallmodtag);
+	let smallmods = moderators;
+    if (smallmodrole) {
+        let smallmodroleid = bot.guilds.get(guildid).roles.find("name", smallmodrole).id;
+        let smallmodtag = "<@&" + smallmodroleid + ">";
+        let smallmodreg = new RegExp(smallmodrole, "ig");
+        smallmods = moderators.replace(smallmodreg, smallmodtag);
+    }
 	//Replace individual users
 	let zackman = smallmods.replace(/@zackman0010/ig, "<@129357924324605952>");
 	let arty = zackman.replace(/@articulating/ig, "<@180898179502309376>");
@@ -1286,11 +1289,11 @@ bot.on('message', (message) => {
 			publiccommands[command[0].toLowerCase()](message, command);
 			return;
 		}
-		if (limitedadmincommands[command[0].toLowerCase()] && !hasRole(message, smallmodrole) && !hasRole(message, modrole) && !hasRole(message, adminrole)) {
+		if (smallmodrole && limitedadmincommands[command[0].toLowerCase()] && !hasRole(message, smallmodrole) && !hasRole(message, modrole) && !hasRole(message, adminrole)) {
 			version_send(message.channel, "You do not have permission to use this command!");
 			return;
 		}
-		if (limitedadmincommands[command[0].toLowerCase()]) {
+		if (smallmodrole && limitedadmincommands[command[0].toLowerCase()]) {
 			limitedadmincommands[command[0].toLowerCase()](message, command)
 			return;
 		}
