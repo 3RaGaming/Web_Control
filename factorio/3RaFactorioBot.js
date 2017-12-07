@@ -1351,6 +1351,74 @@ bot.on('message', (message) => {
 	}
 });
 
+var previous_update; //Time of the previous banlist update
+
+//Function to update the previous_update variable, used to get new bans from the banlist
+//This is set to run on an interval
+function update_server_time() {
+	let request = require("https").get({
+		"host": "banlist.aerith.ovh",
+		"path": "/time/",
+		"timeout": 15000
+	}, (response) => {
+		response.setEncoding("utf8");
+		let data = "";
+		response.on("data", (chunk) => {
+			//The banlist will likely be very large, so retrieve it as chunked data
+			data += chunk;
+		});
+		response.on("end", () => {
+			//When all data is retrieved, rewrite the global banlist and signal the management program that you're ready
+			previous_update = JSON.parse(data)["time"];
+			response.destroy();
+		});
+	}).on("timeout", () => {
+		//Request to retrieve the time timed out, disable global banlist and print warning
+		global_banlist = false;
+		safeWrite("DEBUG$The request to retrieve the banlist server time timed out. Please contact the administrators at DISCORDLINKHERE. Disabling the global banlist");
+		safeWrite("ready$\n");
+		request.abort();
+	});
+}
+
+//Download only the bans that have happened since the last banlist update
+function update_banlist() {
+	if (true) return; //Function is not yet ready, do not let it be run
+	if (!global_banlist) return;
+	let previous_time = previous_update;
+	update_server_time();
+	let request = require("https").get({
+		"host": "banlist.aerith.ovh",
+		"path": "/bans/?" + querystring.stringify({"after": previous_time}),
+		"timeout": 15000
+	}, (response) => {
+		response.setEncoding("utf8");
+		let data = "";
+		response.on("data", (chunk) => {
+			//The banlist will likely be very large, so retrieve it as chunked data
+			data += chunk;
+		});
+		response.on("end", () => {
+			//When all data is retrieved, ban all the newly banned players.
+			let recent_bans = JSON.parse(data);
+			for (let i = 0; i < recent_bans.length; i++) {
+				let username = recent_bans[i]["nickname"];
+				let reason = recent_bans[i]["reason"];
+				let sendstring = "admin$all$/ban " + username + " '" + reason + "'\n";
+				safeWrite(sendstring);
+			}
+			let sendstring = "admin$all$/ban " + username + " '" + reason + "'\n";
+			safeWrite(sendstring);
+			response.destroy();
+		});
+	}).on("timeout", () => {
+		//Request to retrieve the banlist timed out, disable global banlist and print warning
+		global_banlist = false;
+		safeWrite("DEBUG$The request to retrieve the global banlist timed out. Please contact the administrators at DISCORDLINKHERE. Updates will no longer be fetched from the server.");
+		request.abort();
+	});
+}
+
 //Leaves any server that isn't registered
 bot.on('ready', () => {
 	bot.user.setGame(gamemessage);
@@ -1368,6 +1436,7 @@ bot.on('ready', () => {
 	//If the global banlist is enabled, you need to download the most recent copy of the global banlist before the servers should be allowed to launch
 	if (global_banlist) {
 		//Send the request to receive the most recent banlist, with a 15 second timeout
+		update_server_time();
 		let request = require("https").get({
 			"host": "banlist.aerith.ovh",
 			"path": "/bans/",
@@ -1383,6 +1452,7 @@ bot.on('ready', () => {
 				//When all data is retrieved, rewrite the global banlist and signal the management program that you're ready
 				fs.unlinkSync("global_banlist.json");
 				fs.writeFileSync("global_banlist.json", JSON.stringify(data));
+				setInterval(update_banlist, update_interval * 60 * 1000).unref(); //Start the interval timer to update the banlist
 				safeWrite("ready$\n");
 				response.destroy();
 			});
