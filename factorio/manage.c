@@ -619,7 +619,7 @@ char * start_server(char * name, char * input) {
 	strcpy(launchargs[i], args[j]);
 	strcat(launchargs[i], "/config/config.ini");
 	i++;
-	launchargs[i++] = "--server-setting";
+	launchargs[i++] = "--server-settings";
 	launchargs[i] = (char *) malloc((strlen(args[j]) + strlen("/server-settings.json") + 1)*sizeof(char));
 	strcpy(launchargs[i], args[j]);
 	strcat(launchargs[i], "/server-settings.json\0");
