@@ -17,13 +17,13 @@ function dropdown(){
 	$server_select = $GLOBALS['server_select'];
 	$base_dir = $GLOBALS['base_dir'];
 	$dir = $GLOBALS['dir'];
-	$url = url('index.php?d=', true);
+	$url = url("index.php?d=", true);
 	if(!isset($base_dir)) { die(); }
 	if(isset($_REQUEST['d'])) {
 		$temp_select=$_REQUEST['d'];
 	}
 	else {
-		$temp_select="server2";
+		$temp_select="server1";
 	}
 	foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 		$dir = str_replace($base_dir, '', $dir);
@@ -37,7 +37,6 @@ function dropdown(){
 		}
 	}
 }
-
 
 $server_tab_list = "\t\t\t$( function() { $( \"#server_list\" ).tabs(); } );";
 foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {

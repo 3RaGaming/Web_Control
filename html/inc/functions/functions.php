@@ -1,7 +1,7 @@
 <?php
 require($_SERVER['DOCUMENT_ROOT']."/inc/config/config.php");
 function url($path, $return) {
-  if ($return =! true) {
+  if ($return != true) {
     $return = '';
   }
   $scheme = $_SERVER['REQUEST_SCHEME']."://".$_SERVER ['SERVER_NAME'];
