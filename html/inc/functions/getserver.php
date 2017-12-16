@@ -9,6 +9,10 @@ if(!isset($_SESSION['login'])) {
 	}
 }
 
+if(isset($_SESSION['login']['cmd_history'][$server_select])) {
+	$session['login']['cmd_history'][$server_select] = $_SESSION['login']['cmd_history'][$server_select];
+}
+
 function dropdown(){
 	$server_select = $GLOBALS['server_select'];
 	$base_dir = $GLOBALS['base_dir'];

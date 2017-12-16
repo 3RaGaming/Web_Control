@@ -24,9 +24,7 @@ if ($currentpage == 'login') {
     $session['login']['reload_report'] = $_SESSION['login']['reload_report'];
     unset($_SESSION['login']['reload_report']);
   }
-  if(isset($_SESSION['login']['cmd_history'][$server_select])) {
-  	$session['login']['cmd_history'][$server_select] = $_SESSION['login']['cmd_history'][$server_select];
-  }
+
 
   require($_SERVER['DOCUMENT_ROOT'].'/'.$folder.'getserver.php');
   if(!isset($server_select)) {

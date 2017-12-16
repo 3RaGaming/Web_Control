@@ -14,7 +14,7 @@ require($_SERVER['DOCUMENT_ROOT'].'/'.$folder.'inc/functions/index-info.php');
 	<div class="collapse navbar-collapse" id="navbarNav">
 		<ul class="navbar-nav mr-auto">
 			<li class="nav-item">
-				<a class="nav-link" href="<?php url('server-settings.php'); ?>">
+				<a class="nav-link" href="<?php url('server-settings.php', false); ?>">
 					<button class="btn" type="button" name="button">config</button>
 				</a>
 			</li>
