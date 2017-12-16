@@ -8,44 +8,27 @@ if(!isset($_SESSION['login'])) {
 		die('Must use HTTPS');
 	}
 }
-if(!isset($base_dir)) { die(); }
-if(isset($_REQUEST['d'])) {
-	$temp_select=$_REQUEST['d'];
-}
-else {
-	$temp_select="servertest";
-}
 
-$server_select_dropdown = "toSelect = document.getElementById(\"server_select\");";
-print_r(glob("$base_dir*", GLOB_ONLYDIR));
-foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
-	$dir = str_replace($base_dir, '', $dir);
-	if($dir!="node_modules"&&$dir!="logs") {
-		if($temp_select=="$dir") {
-			$server_select = $dir;
-			$server_select_dropdown = $server_select_dropdown . '
-			var opt = document.createElement("option");
-			opt.value = "'.$server_select.'";
-			opt.innerHTML = "'.$server_select.'";
-			opt.selected = true;
-			toSelect.add(opt);';
-		} else {
-			$server_select_dropdown = $server_select_dropdown . '
-			var opt = document.createElement("option");
-			opt.innerHTML = "'.$dir.'";
-			opt.value = "'.$dir.'";
-			toSelect.appendChild(opt);';
-		}
-	}
-}
 function dropdown(){
-	$server_select_dropdown = array();
+	$server_select = $GLOBALS['server_select'];
+	$base_dir = $GLOBALS['base_dir'];
+	$dir = $GLOBALS['dir'];
+	$url = url('index.php?d=', true);
+	if(!isset($base_dir)) { die(); }
+	if(isset($_REQUEST['d'])) {
+		$temp_select=$_REQUEST['d'];
+	}
+	else {
+		$temp_select="server2";
+	}
 	foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 		$dir = str_replace($base_dir, '', $dir);
 		if($dir!="node_modules"&&$dir!="logs") {
 			if($temp_select=="$dir") {
 				$server_select = $dir;
-				echo "<a class="dropdown-item" href="$server_select">$server_select</a>";
+				echo "<a class='dropdown-item active' href='$url$server_select'>$server_select</a>";
+			} else {
+				echo "<a class='dropdown-item' href='$url$dir'>$dir</a>";
 			}
 		}
 	}

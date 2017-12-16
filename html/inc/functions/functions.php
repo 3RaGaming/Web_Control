@@ -1,25 +1,28 @@
 <?php
 require($_SERVER['DOCUMENT_ROOT']."/inc/config/config.php");
-function url($path) {
-  echo $_SERVER ['REQUEST_SCHEME'];
-  echo "://";
-  echo $_SERVER ['SERVER_NAME'];
+function url($path, $return) {
+  if ($return == null) {
+    $return = '';
+  }
+  $scheme = $_SERVER['REQUEST_SCHEME']."://".$_SERVER ['SERVER_NAME'];
   if ($_SERVER['SERVER_PORT'] == 80) {
     ;
   } elseif ($_SERVER['SERVER_PORT'] == 443) {
     ;
   } else {
-    echo ":";
-    echo $_SERVER['SERVER_PORT'];
+    $port = ":".$_SERVER['SERVER_PORT'];
   }
-  echo "/";
+  $slash = "/";
   if (!empty($GLOBALS["folder"])) {
-    echo _GLOBALS["folder"];
-    echo "/";
+    $folder = $GLOBALS["folder"]."/";
   } else {
     ;
   }
-  echo $path;
+  if ($return == true) {
+    return($scheme.$port.$slash.$folder.$path);
+  } else {
+    echo $scheme.$port.$slash.$folder.$path;
+  }
 };
 
 function themepath() {

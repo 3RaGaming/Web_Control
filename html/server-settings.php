@@ -18,18 +18,18 @@
 		unset($_SESSION['login']['reload_report']);
 	}
 	session_write_close();
-	
+
 	if($user_level=="viewonly") {
 		die('Not allowed for view only');
 	}
-	
+
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
 	if(!isset($server_select)) {
-		$server_select = "servertest";
+		$server_select = "server1";
 	}
-	
+
 	//available exe versions
 	$program_dir = "/usr/share/factorio/";
 	foreach(glob("$program_dir*", GLOB_ONLYDIR) as $dir) {
@@ -39,12 +39,12 @@
 			$server_default_version = $dir;
 		}
 	}
-	
+
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
 				$server_dir = $base_dir . $server_select . "/";
-				
+
 				$server_config_path = $server_dir . "config/config.ini";
 				$server_settings_path = $server_dir . "server-settings.json";
 				$server_settings_web_path = $server_dir . "server-settings-web.json";
@@ -233,7 +233,7 @@
 				$server_settings_run_path = $server_dir . "running-server-settings.json";
 				$server_log_loc = $server_dir . "logs/";
 				$server_log_path = $server_dir . "logs/server-settings-update-$date.log";
-				
+
 				if(isset($s_version)) {
 					if(isset($server_installed_versions[$s_version])) {
 						$server_settings_web['version']=$s_version;
@@ -299,7 +299,7 @@
 			var err = 0;
 			var rdy = 0;
 			var Form = document.getElementById(leForm);
-			console.log(document.getElementById(leForm).elements);     
+			console.log(document.getElementById(leForm).elements);
 			for (var i = 0; i < Form.length; i++) {
 				$('[name="'+Form[i].name+'"]').css("background-color", "white");
 				if (Form[i].value === "" && Form[i].name != "game_password") {
@@ -367,7 +367,7 @@
 				//var serverSettings = $.map(html, function(el) { return el });
 				return false;
 			});
-			
+
 			$('#link_home').attr('href',"index.php?d=" + server);
 			$('#link_logs').attr('href',"logs.php?d=" + server + "#server_list-" + server);
 		}

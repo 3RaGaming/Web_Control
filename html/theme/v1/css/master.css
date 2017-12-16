@@ -10,6 +10,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*navbar*/
+.server-name {
+  font-size: 1.3rem;
+}
+
+.server-info {
+  color: #888888;
+  padding: 10px;
+  background-color: rgb(102, 255, 0);
+}
+
 /*footer*/
 .footer {
   position:fixed;
@@ -23,6 +34,24 @@ body {
 /*debug_text*/
 .debug_text {
   text-align: center;
+}
+
+/*index.php*/
+.game-info {
+  width: 98%;
+  height: 300px;
+}
+
+.console-container {
+  margin-top: 20px;
+}
+
+.btn-room {
+  width: 24%;
+}
+
+#command_button {
+  margin-top: 2%;
 }
 
 /*login*/

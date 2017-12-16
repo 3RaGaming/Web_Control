@@ -22,7 +22,7 @@
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
 	if(!isset($server_select)&&!isset($_REQUEST['d'])) {
-		$server_select = "servertest";
+		$server_select = "server1";
 	}
 	session_write_close();
 
