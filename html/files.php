@@ -189,6 +189,14 @@ if(isset($_REQUEST['archive'])) {
 	if($user_level=="viewonly") {
 		die('You have read only access.');
 	} else {
+		
+		//Check for error
+		if(isset($_FILES['file']['error']) && $_FILES['file']['error'] > 1) {
+			die('Error n'.__LINE__.': Upload error');
+		} else {
+			//we good
+		}
+		
 		//Valdidate name
 		if(isset($_FILES['file']['name'])) {
 			$filename = strtolower($_FILES['file']['name']);
