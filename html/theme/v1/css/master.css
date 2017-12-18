@@ -10,15 +10,30 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#fileTable td{
+    border:1px solid #222222;
+}
+
 /*navbar*/
 .server-name {
   font-size: 1.3rem;
+  vertical-align: center;
 }
 
 .server-info {
   color: #888888;
   padding: 10px;
   background-color: rgb(102, 255, 0);
+}
+
+.dropdown-menu {
+  min-width: 1rem;
+}
+
+.nav-tabs a{
+  color: rgba(50,50,50,.5);
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 /*footer*/
@@ -29,6 +44,7 @@ body {
   padding: 10px;
   line-height: 1;
   background-color: #999999;
+  opacity:0.8;
 }
 
 /*debug_text*/
@@ -37,9 +53,13 @@ body {
 }
 
 /*index.php*/
-.game-info {
+.console-info {
   width: 98%;
-  height: 300px;
+  height: 50vh;
+}
+.chat-info {
+  width: 98%;
+  height: 20vh;
 }
 
 .console-container {

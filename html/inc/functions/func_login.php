@@ -241,7 +241,7 @@ function debug(){
   }
 
 };
-
+session_write_close();
 function logged_out(){
   //If logged in, and requested to logout... log them out and show login screen
   if(isset($_SESSION['login'])) {

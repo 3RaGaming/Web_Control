@@ -1,6 +1,6 @@
 <?php
 $currentpage = 'login';
-require('header.php');
+require 'header.php';
 require($_SERVER['DOCUMENT_ROOT'].'/'.$folder.'inc/functions/func_login.php');
 ?>
 <script>
