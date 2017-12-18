@@ -1,8 +1,9 @@
 <?php
-if(!isset($_REQUEST['d'])) {
-  echo "Please select a server";
-} else {
+if(isset($_REQUEST['d'])) {
   $server_select=$_REQUEST['d'];
+} else {
+  $server_select='server1';
+  }
   if (!isset($_REQUEST['sort'])) {
     sort_date();
   } else {
@@ -17,16 +18,13 @@ if(!isset($_REQUEST['d'])) {
       echo "Wrong way of sorting selected";
     }
   }
-}
+
 function savelist(){
   $server_select = $GLOBALS['server_select'];
   $base_dir = $GLOBALS['base_dir'];
   $saves = array();
   $server_dir = $base_dir . $server_select . "/";
-  if(isset($_REQUEST['d'])) {
-    if($_REQUEST['d']!==$server_select||$server_select=="failed") {
-      die('Error in check');
-    }
+  if(isset($server_select)) {
     $full_dir = $server_dir . "saves";
     foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
       $file_full_path = "$full_dir/$file";
