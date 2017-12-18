@@ -38,7 +38,7 @@ require 'header.php';
 			<table class="tablesorter">
 				<thead>
 					<tr>
-						<th><input type="checkbox" style="margin: 0; padding: 0; height:13px;" checked="false" /></th>
+						<th><input type="checkbox" checked="false" /></th>
 						<th><a href="index.php?d=<?php echo $server_select ?>&sort=name" id="file"><h5>File</h5><a></th>
 							<th><a href="index.php?d=<?php echo $server_select ?>&sort=size" id="size"><h5>Size</h5><a></th>
 								<th><a href="index.php?d=<?php echo $server_select ?>&sort=date" id="date"><h5>Creation</h5><a></th>

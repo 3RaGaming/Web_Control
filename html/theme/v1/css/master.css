@@ -1,5 +1,6 @@
 
 body {
+  padding-bottom: 60px;
   background: #76b852; /* fallback for old browsers */
   background: -webkit-linear-gradient(right, #76b852, #8DC26F);
   background: -moz-linear-gradient(right, #76b852, #8DC26F);
@@ -10,13 +11,39 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+th {
+  padding-top: 5px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.form-check-input{
+  position: relative;
+  margin: 0;
+}
+
 .tablesorter {
-  width: 100%; 
+  width: 100%;
+  margin-top: 10px;
+}
+
+.tablesorter th{
+  border:1px solid #666666;
+  padding: 4px;
 }
 
 .tablesorter td{
-  border:1px solid #222222;
+  border:1px solid #666666;
   padding: 4px;
+}
+
+.tablesorter a {
+  color: #222299;
 }
 
 /*navbar*/

@@ -4,7 +4,7 @@ if(!isset($_REQUEST['d'])) {
 } else {
   $server_select=$_REQUEST['d'];
   if (!isset($_REQUEST['sort'])) {
-    echo "Please select a way to sort this";
+    sort_date();
   } else {
     $sort = $_REQUEST['sort'];
     if ($sort == 'name') {
