@@ -29,6 +29,5 @@ foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
 	$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
 	echo " <a href='files.php?s=$server_select&f=$file&l=logs'>$file</a> - $size - $date <br />";
 }
-die(); ?>
-<?php require 'footer.php';
+require 'footer.php';
 die(); ?>
