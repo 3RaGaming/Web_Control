@@ -28,8 +28,6 @@ require 'header.php';
 		<div class="col-md-6 console-container">
 			<div>
 				<input type="file" name="upload_file" id="upload_file" style="display: none;">
-				<input type="hidden" name="upload_max_filesize_m" id="upload_max_filesize_m" />
-				<input type="hidden" name="upload_max_filesize_b" id="upload_max_filesize_b" />
 				<button class="btn btn-room btn-light" id="upload_button" name="upload_button">Upload</button>
 				<button class="btn btn-room btn-light" id="Transfer">Transfer</button>
 				<button class="btn btn-room btn-light" id="archive">Archive</button>
@@ -41,16 +39,15 @@ require 'header.php';
 				<thead>
 					<tr>
 						<th><input type="checkbox" style="margin: 0; padding: 0; height:13px;" checked="false" /></th>
-						<th><a href="#" onclick="sort('name')"><h5>File</h5><a></th>
-							<th><a href="#" onclick="sort('size')"><h5>Size</h5><a></th>
-								<th><a href="#" onclick="sort('date')"><h5>Creation</h5><a></th>
+						<th><a href="index.php?d=<?php echo $server_select ?>&sort=name" id="file"><h5>File</h5><a></th>
+							<th><a href="index.php?d=<?php echo $server_select ?>&sort=size" id="size"><h5>Size</h5><a></th>
+								<th><a href="index.php?d=<?php echo $server_select ?>&sort=date" id="date"><h5>Creation</h5><a></th>
 								</tr>
 							</thead>
-							<tbody id="filetable">
-
+							<tbody>
+								<?php include './inc/functions/func_filetable.php'; ?></td>
 							</tbody>
 						</table>
-						<iframe id="file_iframe" style="display:none;"></iframe>
 					</div>
 				</div>
 			</div>

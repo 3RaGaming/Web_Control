@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <?php require('./inc/functions/functions.php');
 if ($currentpage != 'login') {
-
   require($_SERVER['DOCUMENT_ROOT'].'/'.$folder.'inc/functions/func_session.php');
 }
 ?>
