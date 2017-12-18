@@ -9,14 +9,20 @@ if (isset($_REQUEST['s'])) {
 	if (isset($_REQUEST['f'])) {
 		$file_name = $_REQUEST['f'];
 		$ext = pathinfo($_REQUEST['f'], PATHINFO_EXTENSION);
-		if ($ext == '0' || $ext == 'log') {
-			if ($_REQUEST['l'] == 'true') {
-				$logs = 'logs/';
-			}else {
-				$logs = '';
+		if ($ext == '0' || $ext == 'log' || $ext == 'zip') {
+			if ($_REQUEST['l'] == 'logs') {
+				$folder = 'logs/';
+			}elseif ($_REQUEST['l'] == 'saves') {
+				$folder = 'saves/';
+			}
+			else {
+				$folder = '';
+			}
+			if (!file_exists($directory.'tmp/')) {
+				mkdir($directory.'tmp/', 0777);
 			}
 			$paste = $directory.'tmp/'.$file_name;
-			$file = $base_dir . $server_select . $logs . $file_name;
+			$file = $base_dir . $server_select . $folder . $file_name;
 			shell_exec("cp $file $paste");
 			if (file_exists('./tmp/'.$file_name)){
 				echo "Downloading". $file_name;
@@ -33,7 +39,7 @@ if (isset($_REQUEST['s'])) {
 				shell_exec("rm $paste");
 				exit;
 			} else {
-				echo "File doesn't exist";
+				echo "File wasn't able to be pasted";
 			}
 		}else {
 			echo "File not correct";

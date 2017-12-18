@@ -37,25 +37,24 @@ require 'header.php';
 				<a id="fileStatus"></a>
 				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 			</div>
-			<table id="fileTable" class="tablesorter">
+			<table class="tablesorter">
 				<thead>
 					<tr>
 						<th><input type="checkbox" style="margin: 0; padding: 0; height:13px;" checked="false" /></th>
-						<th><h5>File</h5></th>
-						<th><h5>Size</h5></th>
-						<th><h5>Creation</h5></th>
-						<th><h5>Originator</h5></th>
-					</tr>
-				</thead>
-				<tbody>
+						<th><a href="#" onclick="sort('name')"><h5>File</h5><a></th>
+							<th><a href="#" onclick="sort('size')"><h5>Size</h5><a></th>
+								<th><a href="#" onclick="sort('date')"><h5>Creation</h5><a></th>
+								</tr>
+							</thead>
+							<tbody id="filetable">
 
-				</tbody>
-			</table>
-			<iframe id="file_iframe" style="display:none;"></iframe>
-		</div>
-	</div>
-</div>
-<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
-	<input type="hidden" id="update" name="update" value="yes" />
-</form>
-<?php require 'footer.php';?>
+							</tbody>
+						</table>
+						<iframe id="file_iframe" style="display:none;"></iframe>
+					</div>
+				</div>
+			</div>
+			<form action="./update_web_control.php" method="POST" id="update_web_control" style="display: none;">
+				<input type="hidden" id="update" name="update" value="yes" />
+			</form>
+			<?php require 'footer.php';?>

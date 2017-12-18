@@ -4,7 +4,7 @@ require 'header.php';?>
 <ul class="nav nav-tabs">
 	<?php navbar(); ?>
 </ul>
-<?php $server_select = $server_select ?? "failed";
+<?php
 $server_dir = $base_dir . $server_select . "/";
 if(isset($_REQUEST['d'])) {
 	if($_REQUEST['d']=="managepgm") {
@@ -19,7 +19,7 @@ foreach($current_array as $value) {
 		$file_full_path = "$server_dir/$value";
 		$size = human_filesize("$file_full_path");
 		$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
-		echo " <a href='files.php?d=$base_dir&s=$server_select&f=$value&l=false'>$value</a> - $size - $date <br />";
+		echo " <a href='files.php?s=$server_select&f=$value&l='>$value</a> - $size - $date <br />";
 	}
 }
 $full_dir = $server_dir . "logs";
@@ -27,7 +27,7 @@ foreach(array_diff(scandir("$full_dir"), array('..', '.')) as $file) {
 	$file_full_path = "$full_dir/$file";
 	$size = human_filesize("$file_full_path");
 	$date = date ("Y-m.M-d H:i:s", filemtime("$file_full_path"));
-	echo " <a href='files.php?d=$base_dir&s=$server_select&f=$file&l=true'>$file</a> - $size - $date <br />";
+	echo " <a href='files.php?s=$server_select&f=$file&l=logs'>$file</a> - $size - $date <br />";
 }
 die(); ?>
 <?php require 'footer.php';
