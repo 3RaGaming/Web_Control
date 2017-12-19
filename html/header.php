@@ -17,11 +17,14 @@ if ($currentpage != 'login') {
   <script src="https://use.fontawesome.com/674cd09dad.js"></script>
   <link rel="stylesheet" href="<?php themepath(); ?>/css/master.css">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <script type="text/javascript">
-  var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
-  var user_name = "<?php echo $user_name; ?>";
-  var user_level = "<?php echo $user_level; ?>";
-</script>
+  <?php if ($currentpage != 'login'): ?>
+    <script type="text/javascript">
+    var base = "<?php echo $base_dir ?>";
+    var server_select = "<?php if(isset($server_select)) { echo $server_select; }  else { echo "error"; } ?>";
+    var user_name = "<?php echo $user_name; ?>";
+    var user_level = "<?php echo $user_level; ?>";
+  </script>
+  <?php endif; ?>
 </head>
 <body>
   <?php if ($server_select == 'managepgm') {

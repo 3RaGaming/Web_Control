@@ -29,22 +29,22 @@ require 'header.php';
 			<div>
 				<input type="file" name="upload_file" id="upload_file" style="display: none;">
 				<button class="btn btn-room btn-light" id="upload_button" name="upload_button">Upload</button>
-				<button class="btn btn-room btn-light" id="Transfer">Transfer</button>
+				<button class="btn btn-room btn-light" id="make_latest_">Make latest</button>
 				<button class="btn btn-room btn-light" id="archive">Archive</button>
-				<button class="btn btn-room btn-danger" id="delete_files" name="delete_files">Delete</button>
+				<button class="btn btn-room btn-danger" id="delete_files_" name="delete_files">Delete</button>
 				<a id="fileStatus"></a>
 				<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
 			</div>
 			<table class="tablesorter">
 				<thead>
 					<tr>
-						<th><input type="checkbox" checked="false" /></th>
+						<th><input onclick="toggle()" type="checkbox" checked="false" /></th>
 						<th><a href="index.php?d=<?php echo $server_select ?>&sort=name" id="file"><h5>File</h5><a></th>
 							<th><a href="index.php?d=<?php echo $server_select ?>&sort=size" id="size"><h5>Size</h5><a></th>
 								<th><a href="index.php?d=<?php echo $server_select ?>&sort=date" id="date"><h5>Creation</h5><a></th>
 								</tr>
 							</thead>
-							<tbody>
+							<tbody id="file">
 								<?php include './inc/functions/func_filetable.php'; ?></td>
 							</tbody>
 						</table>
