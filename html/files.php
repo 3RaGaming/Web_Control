@@ -96,30 +96,8 @@ function download(){
 				$file_name = $_REQUEST['latest'];
 				$folder = 'saves/';
 				$file = $base_dir . $server_select . $folder . $file_name;
-				$paste = $directory.'tmp/'.$file_name;
 				if (file_exists($file)) {
-					if (!file_exists($directory.'tmp/')) {
-						mkdir($directory.'tmp/', 0777);
-					}
-					shell_exec("cp $file $paste");
-					if (file_exists($paste)) {
-						shell_exec("rm $file");
-						if (!file_exists($file)) {
-							shell_exec("cp $paste $file");
-							if (file_exists($file)) {
-								shell_exec("rm $paste");
-								if (file_exists($paste)) {
-									echo "Wasn't able to remove temp file";
-								}
-							}else {
-								echo "Wasn't able to copy back";
-							}
-						}else {
-							echo "Wasn't able to remove old file";
-						}
-					}else {
-						echo "Wasn't able to paste file";
-					}
+					shell_exec("touch $file");
 				}else {
 					echo "The file you tried to delete does not exist";
 				}
