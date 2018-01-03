@@ -1,103 +1,103 @@
 /*
- * 
+ *
  * TableSorter 2.0 - Client-side table sorting with ease!
  * Version 2.0.5b
  * @requires jQuery v1.2.3
- * 
+ *
  * Copyright (c) 2007 Christian Bach
  * Examples and docs at: http://tablesorter.com
  * Dual licensed under the MIT and GPL licenses:
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  */
 /**
- * 
+ *
  * @description Create a sortable table with multi-column sorting capabilitys
- * 
+ *
  * @example $('table').tablesorter();
  * @desc Create a simple tablesorter interface.
- * 
+ *
  * @example $('table').tablesorter({ sortList:[[0,0],[1,0]] });
  * @desc Create a tablesorter interface and sort on the first and secound column column headers.
- * 
+ *
  * @example $('table').tablesorter({ headers: { 0: { sorter: false}, 1: {sorter: false} } });
- *          
+ *
  * @desc Create a tablesorter interface and disableing the first and second  column headers.
- *      
- * 
+ *
+ *
  * @example $('table').tablesorter({ headers: { 0: {sorter:"integer"}, 1: {sorter:"currency"} } });
- * 
+ *
  * @desc Create a tablesorter interface and set a column parser for the first
  *       and second column.
- * 
- * 
+ *
+ *
  * @param Object
  *            settings An object literal containing key/value pairs to provide
  *            optional settings.
- * 
- * 
+ *
+ *
  * @option String cssHeader (optional) A string of the class name to be appended
  *         to sortable tr elements in the thead of the table. Default value:
  *         "header"
- * 
+ *
  * @option String cssAsc (optional) A string of the class name to be appended to
  *         sortable tr elements in the thead on a ascending sort. Default value:
  *         "headerSortUp"
- * 
+ *
  * @option String cssDesc (optional) A string of the class name to be appended
  *         to sortable tr elements in the thead on a descending sort. Default
  *         value: "headerSortDown"
- * 
+ *
  * @option String sortInitialOrder (optional) A string of the inital sorting
  *         order can be asc or desc. Default value: "asc"
- * 
+ *
  * @option String sortMultisortKey (optional) A string of the multi-column sort
  *         key. Default value: "shiftKey"
- * 
+ *
  * @option String textExtraction (optional) A string of the text-extraction
  *         method to use. For complex html structures inside td cell set this
  *         option to "complex", on large tables the complex option can be slow.
  *         Default value: "simple"
- * 
+ *
  * @option Object headers (optional) An array containing the forces sorting
  *         rules. This option let's you specify a default sorting rule. Default
  *         value: null
- * 
+ *
  * @option Array sortList (optional) An array containing the forces sorting
  *         rules. This option let's you specify a default sorting rule. Default
  *         value: null
- * 
+ *
  * @option Array sortForce (optional) An array containing forced sorting rules.
  *         This option let's you specify a default sorting rule, which is
  *         prepended to user-selected rules. Default value: null
- * 
+ *
  * @option Boolean sortLocaleCompare (optional) Boolean flag indicating whatever
  *         to use String.localeCampare method or not. Default set to true.
- * 
- * 
+ *
+ *
  * @option Array sortAppend (optional) An array containing forced sorting rules.
  *         This option let's you specify a default sorting rule, which is
  *         appended to user-selected rules. Default value: null
- * 
+ *
  * @option Boolean widthFixed (optional) Boolean flag indicating if tablesorter
  *         should apply fixed widths to the table columns. This is usefull when
  *         using the pager companion plugin. This options requires the dimension
  *         jquery plugin. Default value: false
- * 
+ *
  * @option Boolean cancelSelection (optional) Boolean flag indicating if
  *         tablesorter should cancel selection of the table headers text.
  *         Default value: true
- * 
+ *
  * @option Boolean debug (optional) Boolean flag indicating if tablesorter
  *         should display debuging information usefull for development.
- * 
+ *
  * @type jQuery
- * 
+ *
  * @name tablesorter
- * 
+ *
  * @cat Plugins/Tablesorter
- * 
+ *
  * @author Christian Bach/christian.bach@polyester.se
  */
 
@@ -347,7 +347,7 @@
                             tableBody[0].appendChild(r[pos][j]);
                         }
 
-                        // 
+                        //
                     }
                 }
 
@@ -381,7 +381,7 @@
                 }
 
                 var meta = ($.metadata) ? true : false;
-                
+
                 var header_index = computeTableHeaderCellIndexes(table);
 
                 $tableHeaders = $(table.config.selectorHeaders, table).each(function (index) {
@@ -389,8 +389,8 @@
                     this.column = header_index[this.parentNode.rowIndex + "-" + this.cellIndex];
                     // this.column = index;
                     this.order = formatSortingOrder(table.config.sortInitialOrder);
-                    
-					
+
+
 					this.count = this.order;
 
                     if (checkHeaderMetadata(this) || checkHeaderOptions(table, index)) this.sortDisabled = true;
@@ -493,12 +493,12 @@
                 };
                 return false;
             }
-			
+
 			 function checkHeaderOptionsSortingLocked(table, i) {
                 if ((table.config.headers[i]) && (table.config.headers[i].lockedOrder)) return table.config.headers[i].lockedOrder;
                 return false;
             }
-			
+
             function applyWidget(table) {
                 var c = table.config.widgets;
                 var l = c.length;
@@ -727,7 +727,7 @@
                             this.order = this.count++ % 2;
 							// always sort on the locked order.
 							if(this.lockedOrder) this.order = this.lockedOrder;
-							
+
 							// user only whants to sort on one
                             // column
                             if (!e[config.sortMultiSortKey]) {
@@ -1113,7 +1113,7 @@ $(function() {
 		format: function(table) {
 			if($.browser.msie) {
 				if(!this.init) {
-					$(":checkbox",table).change(function() { this.checkedState = this.checked; });			
+					$(":checkbox",table).change(function() { this.checkedState = this.checked; });
 					this.init = true;
 				}
 				$(":checkbox",table).each(function() {
@@ -1124,80 +1124,6 @@ $(function() {
 	});
 	$("fileTable").tablesorter({widgets: ['iecheckboxes']});
 });
-
-function uploadProgress(evt) {
-	if (evt.lengthComputable) {
-		var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-		document.getElementById('prog').value = percentComplete;
-		if(document.getElementById('prog').value<100) {
-			document.getElementById("prog").style.display = "block";
-		} else {
-			document.getElementById("prog").style.display = "none";
-		}
-	} else {
-		document.getElementById('fileStatus').innerHTML = 'Error in percentage calculation';
-	}
-}
-
-function uploadComplete(evt) {
-	if(evt.target.readyState == 4 && evt.target.status == 200) {
-		document.getElementById('fileStatus').innerHTML = evt.target.responseText;
-		if(evt.target.responseText.includes("complete")) {
-			location.reload();
-		}
-	}
-}
-
-function uploadFailed() {
-	document.getElementById('fileStatus').innerHTML = "There was an error attempting to upload the file.";
-	document.getElementById("prog").style.display = "none";
-}
-
-function uploadCanceled() {
-	document.getElementById('fileStatus').innerHTML = "The upload has been canceled by the user or the browser dropped the connection.";
-	document.getElementById("prog").style.display = "none";
-}
-
-function upload() {
-	if ($('#upload_file').val == "" || user_level == "viewonly") {
-		return;
-	}
-    if ($('#upload_max_filesize_m').val()) {
-		upload_max_filesize_m = $('#upload_max_filesize_m').val();
-	} else {
-        upload_max_filesize_m = "30M";
-    }
-    if ($('#upload_max_filesize_b').val()) {
-		upload_max_filesize_b = $('#upload_max_filesize_b').val();
-	} else {
-        upload_max_filesize_b = 31457280;
-    }
-	var the_file;
-	$('#fileStatus').html("");
-	if ($('#upload_file')[0].files[0]) {
-		the_file = $('#upload_file')[0].files[0];
-		if ( the_file.size > upload_max_filesize_b ) {
-			//This is also a server set limitation
-			$('#fileStatus').html("File is too big. Must be less than " + upload_max_filesize_m);
-			return;
-		}
-	} else {
-		$('#fileStatus').html("Error finding file.");
-		return;
-	}
-	var fd = new FormData();
-	fd.append("file", the_file);
-	var xhr = new XMLHttpRequest();
-	xhr.open('POST', 'files.php?d=' + server_select + '&upload', true);
-
-	xhr.upload.addEventListener("progress", uploadProgress, false);
-	xhr.addEventListener("load", uploadComplete, false);
-	xhr.addEventListener("error", uploadFailed, false);
-	xhr.addEventListener("abort", uploadCanceled, false);
-
-	xhr.send(fd);
-	$('#upload_file').val("");
-}
 
 function command_history(args) {
 	if (typeof his_ind == 'undefined') {
@@ -1230,7 +1156,7 @@ function command_history(args) {
 	} else if (args == "add") {
 		command_history_add();
 	}
-	
+
 	//PHP injecting command history breaks this function. Haven't looked into why yet.
 	function command_history_add() {
 		if (args == "add") {
@@ -1261,7 +1187,7 @@ function hex2bin(hex) {
     for(var i=0; i< hex.length-1; i+=2){
         bytes.push(parseInt(hex.substr(i, 2), 16));
     }
-    
+
     str = String.fromCharCode.apply(String, bytes);
     return str;
 }
@@ -1299,9 +1225,6 @@ function files_delete() {
 $(document).ready(function() {
 	$('#welcome_user').text(user_name);
 	tc_console();
-	$('#upload_file').on('change', function() {
-		upload();
-	});
     $('#delete_files').on('click', function() {
         if(user_level == "viewonly") {
             alert("You have view only access","warning",true);
@@ -1321,21 +1244,14 @@ $(document).ready(function() {
 		$("#fileTable").trigger("update");
 		return false;
 	});
-	//Monitor the table data for updates, and resort the data 
+	//Monitor the table data for updates, and resort the data
 	$('#fileTable').on('update', function(){
 		var sorting = [[3,1]];
 		setTimeout(function() {
 			$("#fileTable").trigger("sorton",[sorting]);
 		},100);
 	});
-	//Upload button click event
-	$('#upload_button').on('click', function() {
-        if(user_level == "viewonly") {
-            alert("You have view only access","warning",true);
-        	return;
-        }
-		$('#upload_file').click();
-	});
+
 	$('#command').keydown(function(event) {
 		if (event.keyCode == 13) command();
         if (user_level == "viewonly") { return; }

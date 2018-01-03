@@ -58,7 +58,7 @@ function sort_name(){
     echo "<input name='filecheckbox' class='form-check-input file-checkbox' type='checkbox' title='".$value['file']."' value='".$value['file']."'>";
     echo "</td>";
     echo "<td>";
-    echo "<a href='files.php?p=download&s=".$server_select."&f=".$value['file']."&l=saves' title='".$value['file']."' >".$value['name']."</a>";
+    echo "<a href='files.php?p=download&d=".$server_select."&f=".$value['file']."&l=saves' title='".$value['file']."' >".$value['name']."</a>";
     echo "</td>";
     echo "<td>";
     echo $value['humansize'];
@@ -84,7 +84,7 @@ function sort_size(){
     echo "<input name='filecheckbox' class='form-check-input' type='checkbox' title='".$value['file']."' value='".$value['file']."'>";
     echo "</td>";
     echo "<td>";
-    echo "<a href='files.php?p=download&s=".$server_select."&f=".$value['file']."&l=saves' title='".$value['file']."' >".$value['name']."</a>";
+    echo "<a href='files.php?p=download&d=".$server_select."&f=".$value['file']."&l=saves' title='".$value['file']."' >".$value['name']."</a>";
     echo "</td>";
     echo "<td>";
     echo $value['humansize'];
@@ -110,7 +110,7 @@ function sort_date(){
     echo "<input name='filecheckbox' class='form-check-input' type='checkbox'  title='".$value['file']."' value='".$value['file']."'>";
     echo "</td>";
     echo "<td>";
-    echo "<a href='files.php?p=download&s=".$server_select."&f=".$value['file']."&l=saves' title='".$value['file']."' >".$value['name']."</a>";
+    echo "<a href='files.php?p=download&d=".$server_select."&f=".$value['file']."&l=saves' title='".$value['file']."' >".$value['name']."</a>";
     echo "</td>";
     echo "<td>";
     echo $value['humansize'];
