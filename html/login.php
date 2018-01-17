@@ -1,5 +1,6 @@
 <?php
-if(session_status()!=2) { session_start(); }
+    $doc_level_1 = $_SERVER['DOCUMENT_ROOT'];
+    require_once($doc_level_1.'/config.php');
 if(isset($_SERVER["HTTPS"]) == false) {
     header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
 	die();
