@@ -212,14 +212,14 @@ function replaceMentions(message) {
 	//Replace @modrole with a Discord ping
 	let modroleid = bot.guilds.get(guildid).roles.find("name", modrole).id;
 	let modtag = "<@&" + modroleid + ">";
-	let modreg = new RegExp(modrole, "ig");
+	let modreg = new RegExp("@" + modrole, "ig");
 	let moderators = message.replace(modreg, modtag);
 	//Replace @smallmodrole with a Discord ping
 	let smallmods = moderators;
     if (smallmodrole) {
         let smallmodroleid = bot.guilds.get(guildid).roles.find("name", smallmodrole).id;
         let smallmodtag = "<@&" + smallmodroleid + ">";
-        let smallmodreg = new RegExp(smallmodrole, "ig");
+        let smallmodreg = new RegExp("@" + smallmodrole, "ig");
         smallmods = moderators.replace(smallmodreg, smallmodtag);
     }
 	//Replace individual users
