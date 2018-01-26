@@ -2,9 +2,16 @@
 var Discord = require("discord.js");
 var bot = new Discord.Client({fetchAllMembers: true, disableEveryone: true});
 
-//Set up code to get line number of Promise Rejections
+//Set up code for error detections
 process.on("unhandledRejection", (err) => {
 	console.error("Uncaught Promise Error: \n" + err.stack);
+});
+
+bot.on("error", (err) => {
+   let message = "Client threw error. Any known details are listed below: \n";
+   if (err.name) message = message + "Name: " + err.name + "\n";
+   if (err.message) message = message + "Message: " + err.message + "\n";
+   console.error(message);
 });
 
 //Import the file system registration
