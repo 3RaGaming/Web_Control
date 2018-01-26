@@ -1284,7 +1284,15 @@ bot.on('message', (message) => {
 
 //Leaves any server that isn't registered
 bot.on('ready', () => {
-	bot.user.setGame(gamemessage);
+	//setGame was depreciated in 11.3, so this allows the code to remain backwards-compatible
+	let version_list = Discord.version.split(".");
+	let major = parseInt(version_list[0]);
+	let minor = parseInt(version_list[1]);
+	if (major > 11 || (major == 11 && minor >= 3)) {
+		bot.user.setActivity(gamemessage);
+	} else {
+		bot.user.setGame(gamemessage);
+	}
 	//bot.guilds.forEach((guildobj, guildid, collection) => {
 	bot.guilds.forEach((guildobj, lguildid) => {
 		if (lguildid != guildid) guildobj.leave();
