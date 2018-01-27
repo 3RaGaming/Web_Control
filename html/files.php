@@ -81,14 +81,17 @@ if(isset($_REQUEST['archive'])) {
 
 	// file download found on http://www.media-division.com/php-download-script-with-resume-option/
 	// get the file request, throw error if nothing supplied
-	 
+
 	// hide notices
 	@ini_set('error_reporting', E_ALL & ~ E_NOTICE);
-	 
+
 	//- turn off compression on the server
-	@apache_setenv('no-gzip', 1);
+	// if apache
+	if(function_exists( apache_setenv)) {
+        @apache_setenv('no-gzip', 1); 
+    }
 	@ini_set('zlib.output_compression', 'Off');
-	 
+
 	// sanitize the file request, keep just the name and extension
 	// also, replaces the file location with a preset one ('./myfiles/' in this example)
 	$file_path = $_REQUEST['download'];
