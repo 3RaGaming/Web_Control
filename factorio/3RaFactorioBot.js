@@ -297,12 +297,14 @@ function handleNewForce(serverid, forcename) {
 		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
 		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
+		if (smallmodrole) textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", smallmodrole).id), { 'READ_MESSAGES': true }); //Allow SmallMods to read
 		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
 		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
 		//Set up voice channel
 		voicechannel.setPosition(2);
 		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
 		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'CONNECT': true }); //Allow Moderators to connect
+		if (smallmodrole) voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", smallmodrole).id), { 'CONNECT': true }); //Allow SmallMods to connect
 		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }); //Allow force to connect
 		voicechannel.overwritePermissions(guild.roles.get(guildid), { 'CONNECT': false }); //Don't allow anyone else to connect
 		savedata.channels[pvpid] = { id: textchannel.id, name: pvpname, type: "pvp", main: serverid, role: role.id, voiceid: voicechannel.id, status: "alive" };
@@ -1080,18 +1082,18 @@ function handleInput(input) {
 			if (message == "**[ANNOUNCEMENT]** Server has started!") {
 				//Open the channel for chat if the server is running
 				let mainserver = channelid;
-				let open_server = bot.channels.get(savedata.channels[mainserver].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+				/*let open_server = bot.channels.get(savedata.channels[mainserver].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 				open_server.then(() => {
 					version_send(bot.channels.get(savedata.channels[mainserver].id), message);
-				});
+				});*/
 				if (update_descriptions) bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
 				let forceids = savedata.channels[channelid].forceids;
 				for (let i = 0; i < forceids.length; i++) {
 					let insideid = forceids[i];
-					let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+					/*let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 					open_server.then(() => {
 						version_send(bot.channels.get(savedata.channels[insideid].id), message);
-					});
+					});*/
 					let force_name = insideid.substring(insideid.indexOf("-") + 1);
 					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
 				}
@@ -1157,10 +1159,10 @@ function handleInput(input) {
 			if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) message = message.replace(" (shout):", ":");
 			if (message == "**[ANNOUNCEMENT]** Server has started!") {
 				//Open the channel for chat if the server is running
-				let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+				/*let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 				open_server.then(() => {
 					version_send(bot.channels.get(savedata.channels[channelid].id), message);
-				});
+				});*/
 				savedata.channels[channelid].status = "started";
 				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
 				if (savedata.playerlists[channelid]) delete savedata.playerlists[channelid];
