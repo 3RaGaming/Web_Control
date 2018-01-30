@@ -32,7 +32,7 @@ require 'header.php';
 		<div class="col-md-6 console-container">
 			<div class="btn-group w-100" role="group" aria-label="File Button Group">
 				<button class="btn btn-secondary w-25" id="upload_button" name="upload_button"><i class="fa fa-upload" aria-hidden="true"></i> Upload</button>
-				<button class="btn btn-secondary w-25" id="make_latest_"><i class="fa fa-clock-o" aria-hidden="true"></i> Make latest</button>
+				<button class="btn btn-secondary w-25" id="make_latest_"><i class="far fa-clock"></i> Make latest</button>
 				<button class="btn btn-secondary w-25" id="archive"><i class="fa fa-archive" aria-hidden="true"></i> Archive</button>
 				<button class="btn btn-danger w-25" id="delete_files_" name="delete_files"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
 			</div>
