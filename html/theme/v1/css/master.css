@@ -1,14 +1,14 @@
 
 body {
   padding-bottom: 60px;
-  background: #76b852; /* fallback for old browsers */
-  background: -webkit-linear-gradient(right, #76b852, #8DC26F);
-  background: -moz-linear-gradient(right, #76b852, #8DC26F);
-  background: -o-linear-gradient(right, #76b852, #8DC26F);
-  background: linear-gradient(to left, #76b852, #8DC26F);
+  background: #36393e; /* fallback for old browsers */
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+/* doesnt work without the stupid !important - badgamernl */
+.bg-dark {
+  background-color: #202225 !important;
 }
 
 th {
@@ -32,25 +32,16 @@ td {
   margin-top: 10px;
 }
 
-.tablesorter th{
-  border:1px solid #666666;
-  padding: 4px;
-}
-
-.tablesorter td{
-  border:1px solid #666666;
-  padding: 4px;
-}
-
 .tablesorter a {
-  color: #222299;
+  color: #737377;
 }
 
+/* disabled by badgamer dont see a need for it :3 - badgamernl */
 /*navbar*/
-.server-name {
+/* .server-name {
   font-size: 1.3rem;
   vertical-align: center;
-}
+} */
 
 .server-info {
   color: #888888;
@@ -62,11 +53,12 @@ td {
   min-width: 1rem;
 }
 
-.nav-tabs a{
+/* disabled by badgamer dont see a need for it :3 - badgamernl */
+/* .nav-tabs a{
   color: rgba(50,50,50,.5);
   font-size: 1.2rem;
   font-weight: bold;
-}
+} */
 
 /*footer*/
 .footer {
@@ -75,7 +67,8 @@ td {
   width:100%;
   padding: 10px;
   line-height: 1;
-  background-color: #999999;
+  color: white;
+  background-color: #202225;
   opacity:0.8;
 }
 
@@ -86,28 +79,54 @@ td {
 
 /*index.php*/
 .console-info {
-  width: 98%;
+  width: 100%;
   height: 50vh;
+  padding: 10px;
+  color: hsla(0,0%,100%,.7);
+  background-color: hsla(218,5%,47%,.3);
+  border-radius: 5px;
+  border: 0;
 }
 .chat-info {
-  width: 98%;
+  width: 100%;
   height: 20vh;
+  padding: 10px;
+  color: hsla(0,0%,100%,.7);
+  background-color: hsla(218,5%,47%,.3);
+  border-radius: 5px;
+  border: 0;
+}
+.console-container, .input-group {
+  border-radius: 5px 5px 5px 5px;
+}
+
+.console-container > .input-group, #command {
+  border: 0;
+  border-radius: 5px 0 0 5px;
+  color: hsla(0,0%,100%,.7);
+  background-color: hsla(218,5%,47%,.3);
+}
+.console-container > .input-group, #command_button {
+  border: 0;
+  border-radius: 0 5px 5px 0;
+  color: hsla(0,0%,100%,.7);
+  background-color: hsla(218,5%,47%,.3);
 }
 
 .console-container {
   margin-top: 20px;
 }
 
-.btn-room {
-  width: 24%;
-}
-
-#command_button {
-  margin-top: 2%;
-}
-
 /*login*/
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
+
+.login-logo {
+  height: 50px;
+}
+
+.login-discord {
+  background-color: #7289DA;
+}
 
 .login-page {
   width: 360px;
@@ -117,7 +136,7 @@ td {
 .form {
   position: relative;
   z-index: 1;
-  background: #FFFFFF;
+  background: rgba(0, 0, 0, 0.2);
   max-width: 360px;
   margin: 0 auto 100px;
   padding: 45px;
@@ -125,9 +144,10 @@ td {
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
 }
 .form input {
+  color: white;
   font-family: "Roboto", sans-serif;
   outline: 0;
-  background: #f2f2f2;
+  background:  rgba(0, 0, 0, 0.2);
   width: 100%;
   border: 0;
   margin: 0 0 15px;
