@@ -2,9 +2,16 @@
 var Discord = require("discord.js");
 var bot = new Discord.Client({fetchAllMembers: true, disableEveryone: true});
 
-//Set up code to get line number of Promise Rejections
+//Set up code for error detections
 process.on("unhandledRejection", (err) => {
 	console.error("Uncaught Promise Error: \n" + err.stack);
+});
+
+bot.on("error", (err) => {
+   let message = "Client threw error. Any known details are listed below: \n";
+   if (err.name) message = message + "Name: " + err.name + "\n";
+   if (err.message) message = message + "Message: " + err.message + "\n";
+   console.error(message);
 });
 
 //Import the file system registration
@@ -290,12 +297,14 @@ function handleNewForce(serverid, forcename) {
 		textchannel.setPosition(guild.channels.get(savedata.channels[serverid].id).position);
 		textchannel.overwritePermissions(bot.user.id, { 'READ_MESSAGES': true }); //Allow bot to read
 		textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'READ_MESSAGES': true }); //Allow Moderators to read
+		if (smallmodrole) textchannel.overwritePermissions(guild.roles.get(guild.roles.find("name", smallmodrole).id), { 'READ_MESSAGES': true }); //Allow SmallMods to read
 		textchannel.overwritePermissions(guild.roles.get(role.id), { 'READ_MESSAGES': true }); //Allow force to read
 		textchannel.overwritePermissions(guild.roles.get(guildid), { 'READ_MESSAGES': false }); //Don't allow anyone else to read
 		//Set up voice channel
 		voicechannel.setPosition(2);
 		voicechannel.overwritePermissions(bot.user.id, { 'CONNECT': true }); //Allow bot to connect
 		voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", modrole).id), { 'CONNECT': true }); //Allow Moderators to connect
+		if (smallmodrole) voicechannel.overwritePermissions(guild.roles.get(guild.roles.find("name", smallmodrole).id), { 'CONNECT': true }); //Allow SmallMods to connect
 		voicechannel.overwritePermissions(guild.roles.get(role.id), { 'CONNECT': true }); //Allow force to connect
 		voicechannel.overwritePermissions(guild.roles.get(guildid), { 'CONNECT': false }); //Don't allow anyone else to connect
 		savedata.channels[pvpid] = { id: textchannel.id, name: pvpname, type: "pvp", main: serverid, role: role.id, voiceid: voicechannel.id, status: "alive" };
@@ -1054,9 +1063,11 @@ function handleInput(input) {
 					let winner = data[2];
 					if (data.length > 3) {
 						let time = data.slice(2).join(" ").replace(";", ",");
-						message = "**[ROUND END] Round " + roundnum + " has ended after " + time + "! Winner: Team " + winner + "!**";
+						if (winner == "adminforceend") message = "**[ROUND END] An admin ended round " + roundnum + " after " + time + "!**";
+						else message = "**[ROUND END] Round " + roundnum + " has ended after " + time + "! Winner: Team " + winner + "!**";
 					} else {
-						message = "**[ROUND END] Round " + roundnum + " has ended! Winner: Team " + winner + "!**";
+						if (winner == "adminforceend") message = "**[ROUND END] An admin ended round " + roundnum + "!**";
+						else message = "**[ROUND END] Round " + roundnum + " has ended! Winner: Team " + winner + "!**";
 					}
 					break;
 			}
@@ -1073,18 +1084,18 @@ function handleInput(input) {
 			if (message == "**[ANNOUNCEMENT]** Server has started!") {
 				//Open the channel for chat if the server is running
 				let mainserver = channelid;
-				let open_server = bot.channels.get(savedata.channels[mainserver].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+				/*let open_server = bot.channels.get(savedata.channels[mainserver].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 				open_server.then(() => {
 					version_send(bot.channels.get(savedata.channels[mainserver].id), message);
-				});
+				});*/
 				if (update_descriptions) bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
 				let forceids = savedata.channels[channelid].forceids;
 				for (let i = 0; i < forceids.length; i++) {
 					let insideid = forceids[i];
-					let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+					/*let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 					open_server.then(() => {
 						version_send(bot.channels.get(savedata.channels[insideid].id), message);
-					});
+					});*/
 					let force_name = insideid.substring(insideid.indexOf("-") + 1);
 					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
 				}
@@ -1150,10 +1161,10 @@ function handleInput(input) {
 			if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) message = message.replace(" (shout):", ":");
 			if (message == "**[ANNOUNCEMENT]** Server has started!") {
 				//Open the channel for chat if the server is running
-				let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+				/*let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
 				open_server.then(() => {
 					version_send(bot.channels.get(savedata.channels[channelid].id), message);
-				});
+				});*/
 				savedata.channels[channelid].status = "started";
 				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
 				if (savedata.playerlists[channelid]) delete savedata.playerlists[channelid];
@@ -1277,7 +1288,15 @@ bot.on('message', (message) => {
 
 //Leaves any server that isn't registered
 bot.on('ready', () => {
-	bot.user.setGame(gamemessage);
+	//setGame was depreciated in 11.3, so this allows the code to remain backwards-compatible
+	let version_list = Discord.version.split(".");
+	let major = parseInt(version_list[0]);
+	let minor = parseInt(version_list[1]);
+	if (major > 11 || (major == 11 && minor >= 3)) {
+		bot.user.setActivity(gamemessage);
+	} else {
+		bot.user.setGame(gamemessage);
+	}
 	//bot.guilds.forEach((guildobj, guildid, collection) => {
 	bot.guilds.forEach((guildobj, lguildid) => {
 		if (lguildid != guildid) guildobj.leave();
