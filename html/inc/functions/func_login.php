@@ -4,7 +4,7 @@ if ($currentpage = 'login') {
   $error = logged_out();
 
   /* DEBUG */if(isset($debug)) {
-  $debugArr[][__LINE__." login-get"] = array(print_r($_SESSION, true), print_r($_REQUEST, true));
+  $debugArr[][__LINE__." login-get"] = array(print_r($_SESSION, true), print_r($_GET, true));
 }
 $redirect_url = urlencode("https://" .$_SERVER["HTTP_HOST"] . $_SERVER["SCRIPT_NAME"]);
 
@@ -225,8 +225,8 @@ if(( isset($clientid) && $clientid == "PUT_YOUR_BOT_CLIENT_ID_HERE" )) {
 //devtools
 function debug(){
   //set debug?
-  if(isset($_REQUEST['debug'])) {
-    if($_REQUEST['debug']=="true") {
+  if(isset($_GET['debug'])) {
+    if($_GET['debug']=="true") {
       $_SESSION['debug'] = true;
       $debug = true;
       $debugArr[] = array();
@@ -245,7 +245,7 @@ session_write_close();
 function logged_out(){
   //If logged in, and requested to logout... log them out and show login screen
   if(isset($_SESSION['login'])) {
-    if(isset($_REQUEST['logout'])) {
+    if(isset($_GET['logout'])) {
       unset($_SESSION['login']);
       $error = "logged_out";
     } else {

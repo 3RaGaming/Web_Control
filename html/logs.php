@@ -6,10 +6,10 @@ require 'header.php';?>
 </ul>
 <?php
 $server_dir = $base_dir . $server_select . "/";
-if(isset($_REQUEST['d'])) {
-	if($_REQUEST['d']=="managepgm") {
+if(isset($_GET['d'])) {
+	if($_GET['d']=="managepgm") {
 		$server_dir = $base_dir;
-	} elseif($_REQUEST['d']!==$server_select||$server_select=="failed") {
+	} elseif($_GET['d']!==$server_select||$server_select=="failed") {
 		die('Error in check');
 	}
 }

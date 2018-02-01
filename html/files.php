@@ -1,12 +1,12 @@
 <?php $currentpage = 'files';
 require 'header.php';
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_REQUEST['p'] == 'upload') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_GET['p'] == 'upload') {
 	upload();
-} elseif (isset($_REQUEST['p']) && $_REQUEST['p'] == 'download') {
+} elseif (isset($_GET['p']) && $_GET['p'] == 'download') {
 	download();
-} elseif (isset($_REQUEST['p']) && $_REQUEST['p'] == 'delete') {
+} elseif (isset($_GET['p']) && $_GET['p'] == 'delete') {
 	delete_files();
-} elseif (isset($_REQUEST['p']) && $_REQUEST['p'] == 'latest') {
+} elseif (isset($_GET['p']) && $_GET['p'] == 'latest') {
 	make_latest();
 }
 
@@ -14,10 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_REQUEST['p'] == 'upload') {
 function upload(){
 	$base_dir = $GLOBALS['base_dir'];
 	$directory = $GLOBALS['directory'];
-	if ($_REQUEST['d'] == 'managepgm') {
+	if ($_GET['d'] == 'managepgm') {
 		$server_select = '';
 	}else {
-		$server_select = $_REQUEST['d'].'/';
+		$server_select = $_GET['d'].'/';
 	}
 	//Valdidate name
 	if(isset($_FILES['file']['name'])) {
@@ -135,19 +135,19 @@ function upload(){
 function download(){
 	$base_dir = $GLOBALS['base_dir'];
 	$directory = $GLOBALS['directory'];
-	if (isset($_REQUEST['d'])) {
-		if ($_REQUEST['d'] == 'managepgm') {
+	if (isset($_GET['d'])) {
+		if ($_GET['d'] == 'managepgm') {
 			$server_select = '';
 		}else {
-			$server_select = $_REQUEST['d'].'/';
+			$server_select = $_GET['d'].'/';
 		}
-		if (isset($_REQUEST['f'])) {
-			$file_name = $_REQUEST['f'];
-			$ext = pathinfo($_REQUEST['f'], PATHINFO_EXTENSION);
+		if (isset($_GET['f'])) {
+			$file_name = $_GET['f'];
+			$ext = pathinfo($_GET['f'], PATHINFO_EXTENSION);
 			if ($ext == '0' || $ext == 'log' || $ext == 'zip') {
-				if ($_REQUEST['l'] == 'logs') {
+				if ($_GET['l'] == 'logs') {
 					$folder = 'logs/';
-				}elseif ($_REQUEST['l'] == 'saves') {
+				}elseif ($_GET['l'] == 'saves') {
 					$folder = 'saves/';
 				}
 				else {
@@ -158,7 +158,7 @@ function download(){
 				}
 				$paste = $directory.'tmp/'.$file_name;
 				$file = $base_dir . $server_select . $folder . $file_name;
-				shell_exec("cp $file $paste");
+				copy($file, $paste);
 				if (file_exists('./tmp/'.$file_name)){
 					echo "Downloading". $file_name;
 					header('Content-Description: File Transfer');
@@ -171,7 +171,7 @@ function download(){
 					ob_clean();
 					flush();
 					readfile('./tmp/'.$file_name);
-					shell_exec("rm $paste");
+					unlink($paste);
 					exit;
 				} else {
 					echo "File wasn't able to be pasted";
@@ -187,16 +187,16 @@ function download(){
 	}}
 
 	function delete_files(){
-		if (isset($_REQUEST['d'])) {
-			if (isset($_REQUEST['del'])) {
+		if (isset($_GET['d'])) {
+			if (isset($_GET['del'])) {
 				$base_dir = $GLOBALS['base_dir'];
-				$server_select = $_REQUEST['d'].'/';
-				$file_array = explode(",", $_REQUEST['del']);
+				$server_select = $_GET['d'].'/';
+				$file_array = explode(",", $_GET['del']);
 				$folder = 'saves/';
 				foreach ($file_array as $file_name) {
 					$file = $base_dir . $server_select . $folder . $file_name;
 					if (file_exists($file)) {
-						shell_exec("rm $file");
+						unlink($file);
 					}else {
 						echo "The file you tried to delete does not exist";
 					}
@@ -212,15 +212,15 @@ function download(){
 
 	function make_latest(){
 		$directory = $GLOBALS['directory'];
-		if (isset($_REQUEST['d'])) {
-			if (isset($_REQUEST['latest'])) {
+		if (isset($_GET['d'])) {
+			if (isset($_GET['latest'])) {
 				$base_dir = $GLOBALS['base_dir'];
-				$server_select = $_REQUEST['d'].'/';
-				$file_name = $_REQUEST['latest'];
+				$server_select = $_GET['d'].'/';
+				$file_name = $_GET['latest'];
 				$folder = 'saves/';
 				$file = $base_dir . $server_select . $folder . $file_name;
 				if (file_exists($file)) {
-					shell_exec("touch $file");
+					touch($file);
 				}else {
 					echo "The file you tried to delete does not exist";
 				}

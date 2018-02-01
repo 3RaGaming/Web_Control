@@ -10,8 +10,8 @@ if(!isset($_SESSION['login'])) {
 }
 
 if(!isset($base_dir)) { die(); }
-if(isset($_REQUEST['d'])) {
-	$temp_select=$_REQUEST['d'];
+if(isset($_GET['d'])) {
+	$temp_select=$_GET['d'];
 } else {
 	$temp_select="servertest";
 }

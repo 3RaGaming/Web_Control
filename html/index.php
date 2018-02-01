@@ -37,8 +37,8 @@ require 'header.php';
 				<button class="btn btn-danger w-25" id="delete_files_" name="delete_files"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
 			</div>
 			<input type="file" name="upload_file" id="upload_file" style="display: none;">
-			<a id="fileStatus"></a>
-			<progress id="prog" value="0" max="100.0" style="display: none;"></progress>
+			<a id="fileStatus"></a><br/>
+			<progress class="progress-bar bg-success mt-2" id="prog" value="0" max="100.0" style="display: none;"></progress>
 			<table class="tablesorter table table-dark">
 				<thead>
 					<tr>

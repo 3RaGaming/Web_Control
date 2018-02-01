@@ -20,7 +20,7 @@
 	}
 	session_write_close();
 
-if(isset($_REQUEST['start'])) {
+if(isset($_POST['start'])) {
 	if($user_level=="viewonly") {
 		echo "You have read only access.";
 	} else {
@@ -53,8 +53,8 @@ if(isset($_REQUEST['start'])) {
 				$jsonString = file_get_contents($server_settings_path);
 				$data = json_decode($jsonString, true);
 				if(isset($data["name"])) {
-					if(isset($_REQUEST['server_name'])) {
-						$server_name = $_REQUEST['server_name'];
+					if(isset($_POST['server_name'])) {
+						$server_name = $_POST['server_name'];
 						$server_name = trim ( $server_name , " \t\n\r\0\x0B" );
 					}
 					if($server_name!=""&&$server_name!=$data['name']) {
@@ -76,11 +76,11 @@ if(isset($_REQUEST['start'])) {
 			die('Missing server-settings.json');
 		}
 	}
-} elseif(isset($_REQUEST['status'])) {
+} elseif(isset($_POST['status'])) {
 	echo "Requesting Status of Servers:\n\n";
 	$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "status" "'.$user_name.'"');
 	echo $output;
-} elseif(isset($_REQUEST['stop'])) {
+} elseif(isset($_POST['stop'])) {
 	if($user_level=="viewonly") {
 		echo "You have view only access.";
 	} else {
@@ -88,7 +88,7 @@ if(isset($_REQUEST['start'])) {
 		$output = shell_exec('bash '.$base_dir.'manage.sh "'.$server_select.'" "stop" "'.$user_name.'"');
 		echo $output;
 	}
-} elseif(isset($_REQUEST['forcekill'])) {
+} elseif(isset($_POST['forcekill'])) {
 	if($user_level=="viewonly") {
 		echo "You have view only access.";
 	} else {
@@ -103,12 +103,12 @@ if(isset($_REQUEST['start'])) {
 		#echo $output;
 		echo "Servers killed. You monster.";
 	}
-} elseif(isset($_REQUEST['command'])) {
+} elseif(isset($_POST['command'])) {
 	if($user_level=="viewonly") {
-		echo "You have view only access.";//".$_REQUEST['command'];
+		echo "You have view only access.";//".$_POST['command'];
 	} else {
 		//screen -S factorio1 -X at 0 stuff 'hello\n'
-		$command_decode = trim ( $_REQUEST['command'] , " \t\n\r\0\x0B" );
+		$command_decode = trim ( $_POST['command'] , " \t\n\r\0\x0B" );
 		if(!empty($command_decode)) {
 			$command = $command_decode;
 			//regex to find if server_message was hidden in a custom silent-command.
@@ -127,7 +127,7 @@ if(isset($_REQUEST['start'])) {
 
 			//used for up arrow history
 			$cmd_history = $command_decode;
-			
+
 			if(!isset($_SESSION)) { session_start(); }
 			if(isset($_SESSION['login']['cmd_history'][$server_select])) {
 				array_unshift($_SESSION['login']['cmd_history'][$server_select], $cmd_history);

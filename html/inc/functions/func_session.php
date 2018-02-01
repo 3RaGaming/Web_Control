@@ -19,13 +19,13 @@ if ($currentpage == 'login') {
   }
 
   if(!isset($base_dir)) { die(); }
-  if(isset($_REQUEST['d'])) {
-    $server_select=$_REQUEST['d'];
+  if(isset($_GET['d'])) {
+    $server_select=$_GET['d'];
   }
   else {
     $server_select="server1";
   }
-  
+
   if(isset($_SESSION['login']['cmd_history'][$server_select])) {
     $session['login']['cmd_history'][$server_select] = $_SESSION['login']['cmd_history'][$server_select];
   }

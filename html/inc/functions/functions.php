@@ -66,17 +66,18 @@ function navbar(){
     $url = url("server-settings.php?d=", true);
   } elseif ($GLOBALS['currentpage'] == 'logs') {
     $url = url("logs.php?d=", true);
+    if ($_GET['d'] == 'managepgm') {
+      echo "<li class='nav-item'>
+      <a class='nav-link active' href='$url$server_select'>$server_select</a>
+      </li>";
+    } else {
+      $urlpgm = url("logs.php?d=managepgm", true);
+      echo "<li class='nav-item'>
+      <a class='nav-link' href='$urlpgm'>managepgm</a>
+      </li>";
+    }
   }
-  if ($_REQUEST['d'] == 'managepgm') {
-    echo "<li class='nav-item'>
-    <a class='nav-link active' href='$url$server_select'>$server_select</a>
-    </li>";
-  } else {
-    $urlpgm = url("logs.php?d=managepgm", true);
-    echo "<li class='nav-item'>
-    <a class='nav-link' href='$urlpgm'>managepgm</a>
-    </li>";
-  }
+
   foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
     $dir = str_replace($base_dir, '', $dir);
     if($dir!="node_modules"&&$dir!="logs") {

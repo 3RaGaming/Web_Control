@@ -1,17 +1,17 @@
 <?php
-if(!isset($base_dir) && isset($_REQUEST['base'])){
-  $base_dir = $_REQUEST['base'];
+if(!isset($base_dir) && isset($_GET['base'])){
+  $base_dir = $_GET['base'];
 }
 
-if(isset($_REQUEST['d'])) {
-  $server_select=$_REQUEST['d'];
+if(isset($_GET['d'])) {
+  $server_select=$_GET['d'];
 } else {
   $server_select='server1';
 }
-if (!isset($_REQUEST['sort'])) {
+if (!isset($_GET['sort'])) {
   sort_date();
 } else {
-  $sort = $_REQUEST['sort'];
+  $sort = $_GET['sort'];
   if ($sort == 'name') {
     sort_name();
   } elseif ($sort == 'size') {
