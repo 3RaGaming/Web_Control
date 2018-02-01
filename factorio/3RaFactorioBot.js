@@ -1095,10 +1095,10 @@ function handleInput(input) {
 				let forceids = savedata.channels[channelid].forceids;
 				for (let i = 0; i < forceids.length; i++) {
 					let insideid = forceids[i];
-					/*let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
-					open_server.then(() => {
+					//let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+					//open_server.then(() => {
 						version_send(bot.channels.get(savedata.channels[insideid].id), message);
-					});*/
+					//});
 					let force_name = insideid.substring(insideid.indexOf("-") + 1);
 					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
 				}
@@ -1165,10 +1165,10 @@ function handleInput(input) {
 			if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) message = message.replace(" (shout):", ":");
 			if (message == "**[ANNOUNCEMENT]** Server has started!") {
 				//Open the channel for chat if the server is running
-				/*let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
-				open_server.then(() => {
+				//let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+				//open_server.then(() => {
 					version_send(bot.channels.get(savedata.channels[channelid].id), message);
-				});*/
+				//});
 				savedata.channels[channelid].status = "started";
 				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
 				if (savedata.playerlists[channelid]) delete savedata.playerlists[channelid];
