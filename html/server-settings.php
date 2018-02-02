@@ -169,7 +169,7 @@
 			$ignore_array = array("d","server_select");
 			$settype_string = array("name","description","game_password","allow_commands");
 			$settype_integers = array("max_players","max_upload_in_kilobytes_per_second","autosave_interval","autosave_slots","afk_autokick_interval","minimum_latency_in_ticks");
-			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game","autosave_only_on_server");
+			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game","autosave_only_on_server","non_blocking_saving");
 			$settype_array = array("tags","admins");
 			$check_array_admin = array("true","false","admins-only");
 			foreach($_REQUEST as $key => $value) {
@@ -322,7 +322,7 @@
 						}
 						console.log('Correct str! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
-					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game" || Form[i].name == "autosave_only_on_server") && (Form[i].value == "true" || Form[i].value == "false")) {
+					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game" || Form[i].name == "autosave_only_on_server" || Form[i].name == "non_blocking_saving") && (Form[i].value == "true" || Form[i].value == "false")) {
 						console.log('Correct bln! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
 					} else if((Form[i].name == "allow_commands") && (Form[i].value == "true" || Form[i].value == "false" || Form[i].value == "admins-only")) {
