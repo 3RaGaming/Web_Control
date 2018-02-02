@@ -169,7 +169,7 @@
 			$ignore_array = array("d","server_select");
 			$settype_string = array("name","description","game_password","allow_commands");
 			$settype_integers = array("max_players","max_upload_in_kilobytes_per_second","autosave_interval","autosave_slots","afk_autokick_interval","minimum_latency_in_ticks");
-			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game","autosave_only_on_server");
+			$settype_boolean = array("visibility-public","visibility-lan","require_user_verification","ignore_player_limit_for_returning_players","auto_pause","only_admins_can_pause_the_game","autosave_only_on_server","non_blocking_saving");
 			$settype_array = array("tags","admins");
 			$check_array_admin = array("true","false","admins-only");
 			foreach($_REQUEST as $key => $value) {
