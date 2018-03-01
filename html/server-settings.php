@@ -322,7 +322,7 @@
 						}
 						console.log('Correct str! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
-					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game" || Form[i].name == "autosave_only_on_server") && (Form[i].value == "true" || Form[i].value == "false")) {
+					} else if((Form[i].name == "visibility-public" || Form[i].name == "visibility-lan" || Form[i].name == "require_user_verification" || Form[i].name == "ignore_player_limit_for_returning_players" || Form[i].name == "auto_pause" || Form[i].name == "only_admins_can_pause_the_game" || Form[i].name == "autosave_only_on_server" || Form[i].name == "non_blocking_saving") && (Form[i].value == "true" || Form[i].value == "false")) {
 						console.log('Correct bln! [name="'+Form[i].name+'"]' + " - " + Form[i].value);
 						rdy++;
 					} else if((Form[i].name == "allow_commands") && (Form[i].value == "true" || Form[i].value == "false" || Form[i].value == "admins-only")) {

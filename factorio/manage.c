@@ -7,6 +7,7 @@
 *              allowing multiple Factorio servers, a Discord bot, and our webserver to all communicate with each other
 */
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -14,6 +15,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <time.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -484,7 +486,7 @@ char * launch_server(char * name, char ** args, char * logpath) {
 	int in_pipe[2];
 	int out_pipe[2];
 
-	if (pipe(in_pipe) == -1 || pipe(out_pipe) == -1) {
+	if (pipe2(in_pipe, O_CLOEXEC) == -1 || pipe2(out_pipe, O_CLOEXEC) == -1) {
 		fprintf(stderr, "Failure to create pipes.");
 		exit(1);
 	}

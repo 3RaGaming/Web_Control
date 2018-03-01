@@ -12,6 +12,7 @@ bot.on("error", (err) => {
    if (err.name) message = message + "Name: " + err.name + "\n";
    if (err.message) message = message + "Message: " + err.message + "\n";
    console.error(message);
+   safeWrite("restart$\n");
 });
 
 //Import the file system registration
@@ -965,6 +966,8 @@ function handleInput(input) {
 			if (savedata.playerlists[channelid][player_name]) old_force = savedata.playerlists[channelid][player_name].force;
 			else old_force = null;
 
+			if (savedata.channels[channelid].status != "started") savedata.channels[channelid].status == "started";
+
 			switch (action) {
 				case "join":
 					message = "**Player " + cap_name + " has joined the server!**";
@@ -1092,10 +1095,10 @@ function handleInput(input) {
 				let forceids = savedata.channels[channelid].forceids;
 				for (let i = 0; i < forceids.length; i++) {
 					let insideid = forceids[i];
-					/*let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
-					open_server.then(() => {
+					//let open_server = bot.channels.get(savedata.channels[insideid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+					//open_server.then(() => {
 						version_send(bot.channels.get(savedata.channels[insideid].id), message);
-					});*/
+					//});
 					let force_name = insideid.substring(insideid.indexOf("-") + 1);
 					if (update_descriptions) bot.channels.get(savedata.channels[insideid].id).setTopic("Server online. No players connected (Force " + force_name + ")");
 				}
@@ -1130,6 +1133,7 @@ function handleInput(input) {
 					//Message is from the web, send it to the main channel.
 					version_send(bot.channels.get(savedata.channels[channelid].id), message);
 				} else {
+					if (savedata.channels[channelid].status != "started") savedata.channels[channelid].status = "started";
 					message = replaceMentions(message);
 					separator = message.indexOf(":");
 					let username = message.substring(0, separator);
@@ -1161,10 +1165,10 @@ function handleInput(input) {
 			if (message.indexOf(" (shout):") > 0 && message.indexOf(" (shout)") < message.indexOf(":")) message = message.replace(" (shout):", ":");
 			if (message == "**[ANNOUNCEMENT]** Server has started!") {
 				//Open the channel for chat if the server is running
-				/*let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
-				open_server.then(() => {
+				//let open_server = bot.channels.get(savedata.channels[channelid].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+				//open_server.then(() => {
 					version_send(bot.channels.get(savedata.channels[channelid].id), message);
-				});*/
+				//});
 				savedata.channels[channelid].status = "started";
 				if (update_descriptions) bot.channels.get(savedata.channels[channelid].id).setTopic("Server online. No players connected.");
 				if (savedata.playerlists[channelid]) delete savedata.playerlists[channelid];
@@ -1183,6 +1187,7 @@ function handleInput(input) {
 				fs.unlinkSync("savedata.json");
 				fs.writeFileSync("savedata.json", JSON.stringify(savedata));
 			} else {
+				if (savedata.channels[channelid].status != "started") savedata.channels[channelid].status = "started";
 				message = message.replace(/_/g, "\\_");
 				if (message.charAt(0) == '[') version_send(bot.channels.get(savedata.channels[channelid].id), message);
 				else version_send(bot.channels.get(savedata.channels[channelid].id), "[" + savedata.channels[channelid].name + "] " + message);
