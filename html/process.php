@@ -141,5 +141,3 @@ if(isset($_REQUEST['start'])) {
 		}
 	}
 }
-
-?>
