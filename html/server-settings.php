@@ -257,7 +257,7 @@
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
 					foreach($verified_data as $key => $value) {
-						if($verified_data[$key] == "visibility") {
+						if($verified_data[$key] === "visibility") {
 							if(isset($verified_data[$key]["public"])) {
 								$server_settings[$key]["public"] = $verified_data[$key]["public"];
 							}
