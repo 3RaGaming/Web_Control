@@ -1,5 +1,11 @@
 <!DOCTYPE html>
-<?php require('./inc/functions/functions.php');
+<?php
+if ($currentpage == 'func_settings') {
+  require('../../inc/functions/functions.php');
+} else {
+  require('./inc/functions/functions.php');
+}
+
 if ($currentpage != 'login') {
     require($_SERVER['DOCUMENT_ROOT'].'/'.$folder.'inc/functions/func_session.php');
 }
@@ -27,6 +33,7 @@ if ($currentpage != 'login') {
 } ?>";
     var user_name = "<?php echo $user_name; ?>";
     var user_level = "<?php echo $user_level; ?>";
+    var token = "<?php echo generateJWTToken($user_name, $user_level); ?>";
   </script>
   <?php endif; ?>
 </head>
@@ -36,7 +43,7 @@ if ($currentpage != 'login') {
 } else {
     $link = $server_select;
 }?>
-  <?php if ($currentpage != 'login' && $currentpage != 'files') {
+  <?php if ($currentpage != 'login' && $currentpage != 'files' && $currentpage != 'func_settings') {
     ?>
     <!--menu-->
     <nav class="navbar navbar-expand-xl navbar-dark bg-dark">
@@ -68,7 +75,7 @@ if ($currentpage != 'login') {
             </a>
           </li>
         </ul>
-        <button class="btn btn-outline-success my-2 my-sm-0" type="button" onclick="update_web_control(user_level);">Update Web Control</button>
+        <button class="btn btn-sm btn-outline-success" type="button" onclick="update_web_control(user_level);">Update Web Control</button>
         <ul class="navbar-nav">
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
