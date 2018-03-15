@@ -230,15 +230,15 @@ if(isset($_REQUEST['archive'])) {
 					case ZipArchive::ER_NOZIP:
 						unlink($fileTmp);
 						die('Error z'.__LINE__.': Not a zip archive');
-					case ZipArchive::ER_INCONS :
+					/*case ZipArchive::ER_INCONS :
 						unlink($fileTmp);
-						die('Error z'.__LINE__.': Zip consistency check failed');
+						die('Error z'.__LINE__.': Zip consistency check failed');//*/
 					case ZipArchive::ER_CRC :
 						unlink($fileTmp);
 						die('Error z'.__LINE__.': Zip checksum failed');
-					default:
+					/*default:
 						unlink($fileTmp);
-						die('Error z'.__LINE__.': Zip error ' . $res);
+						die('Error z'.__LINE__.': Zip error ' . $res);//*/
 				}
 			}
 		} else {
