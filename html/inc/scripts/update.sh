@@ -40,7 +40,7 @@ if [ "${args[0]}" ]; then
 
 		'3')
 			printf "Step ${args[0]} - Updating files \r\n";
-			rsync -a -v $tmp_dir/Web_Control-$result/html/* ./
+			rsync -a -v --exclude 'inc/config/config.php' $tmp_dir/Web_Control-$result/html/* ./
 			rsync -a -v $tmp_dir/Web_Control-$result/factorio/manage.c /var/www/factorio/
 			rsync -a -v $tmp_dir/Web_Control-$result/factorio/manage.sh /var/www/factorio/
 			rsync -a -v $tmp_dir/Web_Control-$result/factorio/3RaFactorioBot.js /var/www/factorio/
