@@ -836,7 +836,7 @@ var limitedadmincommands = {
 			version_send(message.channel, "Admin commands can only be done from the registered admin channel. Use ::setadmin to register one if you haven't already.");
 			return;
 		}
-		if (hasRole(message, modrole)) {
+		if (hasRole(message, modrole) || hasRole(message, adminrole)) {
 			admincommands.adminhelp(message, command);
 			return;
 		}
