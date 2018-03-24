@@ -1087,10 +1087,10 @@ function handleInput(input) {
 			if (message == "**[ANNOUNCEMENT]** Server has started!") {
 				//Open the channel for chat if the server is running
 				let mainserver = channelid;
-				/*let open_server = bot.channels.get(savedata.channels[mainserver].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
-				open_server.then(() => {
+				let open_server = bot.channels.get(savedata.channels[mainserver].id).overwritePermissions(bot.guilds.get(guildid).roles.get(guildid), { 'SEND_MESSAGES': true });
+				//open_server.then(() => {
 					version_send(bot.channels.get(savedata.channels[mainserver].id), message);
-				});*/
+				//});
 				if (update_descriptions) bot.channels.get(savedata.channels[mainserver].id).setTopic("Server online. No players connected");
 				let forceids = savedata.channels[channelid].forceids;
 				for (let i = 0; i < forceids.length; i++) {
