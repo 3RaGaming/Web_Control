@@ -4,7 +4,15 @@ function url($path, $return) {
   if ($return != true) {
     $return = '';
   }
-  $scheme = $_SERVER['REQUEST_SCHEME']."://".$_SERVER ['SERVER_NAME'];
+
+  if (isset($_SERVER['HTTPS'])) {
+        $scheme = $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+  } elseif ($_SERVER['REQUEST_SCHEME']) {
+        $scheme = $_SERVER['REQUEST_SCHEME'];
+  } else {
+        $scheme = 'http';
+  }
+  $scheme .= "://".$_SERVER ['SERVER_NAME'];
   if ($_SERVER['SERVER_PORT'] == 80) {
     $port = "";
   } elseif ($_SERVER['SERVER_PORT'] == 443) {
@@ -14,7 +22,7 @@ function url($path, $return) {
   }
   $slash = "/";
   if (!empty($GLOBALS["folder"])) {
-    $folder = $GLOBALS["folder"]."/";
+    $folder = $GLOBALS["folder"];
   } else {
     $folder = "";
   }

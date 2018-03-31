@@ -33,7 +33,6 @@ if ($currentpage != 'login') {
 } ?>";
     var user_name = "<?php echo $user_name; ?>";
     var user_level = "<?php echo $user_level; ?>";
-    var token = "<?php echo generateJWTToken($user_name, $user_level); ?>";
   </script>
   <?php endif; ?>
 </head>
