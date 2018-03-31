@@ -257,16 +257,7 @@
 				if(file_exists($server_settings_path)) {
 					$server_settings = json_decode(file_get_contents("$base_dir$server_select/server-settings.json"), true);
 					foreach($verified_data as $key => $value) {
-						if($verified_data[$key] == "visibility") {
-							if(isset($verified_data[$key]["public"])) {
-								$server_settings[$key]["public"] = $verified_data[$key]["public"];
-							}
-							if(isset($verified_data[$key]["lan"])) {
-								$server_settings[$key]["lan"] = $verified_data[$key]["lan"];
-							}
-						} else {
-							$server_settings[$key] = $verified_data[$key];
-						}
+						$server_settings[$key] = $verified_data[$key];
 					}
 					$newJsonString = json_encode($server_settings, JSON_PRETTY_PRINT);
 					$newJsonStringUgly = json_encode($server_settings);
