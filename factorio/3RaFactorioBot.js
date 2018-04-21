@@ -1067,9 +1067,11 @@ function handleInput(input) {
 					if (data.length > 3) {
 						let time = data.slice(2).join(" ").replace(";", ",");
 						if (winner == "adminforceend") message = "**[ROUND END] An admin ended round " + roundnum + " after " + time + "!**";
+						else if (winner == "nowinner") message = "**[ROUND END] Round " + roundnum + " has ended after " + time + "!**";
 						else message = "**[ROUND END] Round " + roundnum + " has ended after " + time + "! Winner: Team " + winner + "!**";
 					} else {
 						if (winner == "adminforceend") message = "**[ROUND END] An admin ended round " + roundnum + "!**";
+						else if (winner == "nowinner") message = "**[ROUND END] Round " + roundnum + " has ended!**";
 						else message = "**[ROUND END] Round " + roundnum + " has ended! Winner: Team " + winner + "!**";
 					}
 					break;
