@@ -587,7 +587,7 @@ var admincommands = {
 			let forceids = savedata.channels[remove].forceids;
 			let forceamount = forceids.length
 			for (let i = 0; i < forceamount; i++) {
-				deleteForce(forceids[i]);
+				deleteForce(forceids[0]); //As each element 0 is deleted, the next force in line will become the new element 0.
 			}
 		}
 		//Delete the server registration and update the channel_list.json
