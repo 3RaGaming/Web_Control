@@ -585,7 +585,8 @@ var admincommands = {
 		}
 		if (savedata.channels[remove].type == "pvp-main") {
 			let forceids = savedata.channels[remove].forceids;
-			for (let i = 0; i < forceids.length; i++) {
+			let forceamount = forceids.length
+			for (let i = 0; i < forceamount; i++) {
 				deleteForce(forceids[i]);
 			}
 		}
