@@ -144,25 +144,22 @@ else
 						dec) screen_version_mon=12 ;;
 				esac
 				screen_version="$screen_version_yer$screen_version_mon$screen_version_day";
-				if [ "$screen_version" -gt 150628 ]; then
-					#new screen code
+				if [ "$screen_version" -gt 161210 ]; then
+					#Screen 4.6 or newer
+					sudo -u www-data /usr/bin/screen -d -m -L -Logfile screenlog.0 -S manage ./managepgm;
+				elif [ "$screen_version" -gt 150628 ]; then
+					#Screen v4.5
 					sudo -u www-data /usr/bin/screen -d -m -L screenlog.0 -S manage ./managepgm;
-					sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "logfile flush 0^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M";
 				else
-					#legacy screen code
+					#Screen v4.4 or earlier
 					sudo -u www-data /usr/bin/screen -d -m -L -S manage ./managepgm;
-					sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "logfile flush 0^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M";
-					sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M";
 				fi
+				sudo -u www-data /usr/bin/screen -r manage -X colon "log on^M";
+				sudo -u www-data /usr/bin/screen -r manage -X colon "logfile filename screenlog.0^M";
+				sudo -u www-data /usr/bin/screen -r manage -X colon "logfile flush 0^M";
+				sudo -u www-data /usr/bin/screen -r manage -X colon "multiuser on^M";
+				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd root^M";
+				sudo -u www-data /usr/bin/screen -r manage -X colon "acladd user^M";
 
 				if [ "${args[3]}" ]; then
 					sanitize "${args[3]}";
