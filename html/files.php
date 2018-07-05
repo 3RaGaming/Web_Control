@@ -380,5 +380,3 @@ if(isset($_REQUEST['archive'])) {
 } else {
 	die('Error u'.__LINE__.': No action requested');
 }
-
-?>

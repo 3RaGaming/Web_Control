@@ -52,5 +52,3 @@ foreach(glob("$base_dir*", GLOB_ONLYDIR) as $dir) {
 }
 $server_tab_list = $server_tab_list . "
 ";
-
-?>
