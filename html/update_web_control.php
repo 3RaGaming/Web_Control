@@ -46,4 +46,3 @@
 		header("Location: ./login.php?notadmin");
 		die();
 	}
-?>
