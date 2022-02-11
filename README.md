@@ -54,3 +54,9 @@ To compile the manage.c program, you must install gcc.
 
 Once the server files are all installed, and you have web access, there is a button at the top of the page to update from the master repo. This will easily keep your server up to date.
 We recommend following our updates, as if a recompile of the manage.c is ever necessary, you may need to restart your factorio server(s).
+
+# Docker Build Installation
+
+`docker build -t factorio .`
+`docker run -dt -p 8080:80 --name factorio factorio` Substitute 8080:80 for all port mappings you'll need for this server
+`docker exec -it factorio /bin/bash` Login to the server to check things

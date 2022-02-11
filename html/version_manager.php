@@ -6,12 +6,6 @@
 		}
 		header("Location: ./login.php");
 		die();
-	} else {
-		if(isset($_SERVER["HTTPS"]) == false)
-		{
-			header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-			die();
-		}
 	}
 
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
@@ -51,8 +45,8 @@
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$data = curl_exec($ch);
-		preg_match_all('/get-download(.*?)linux64/', $data, $matches);
+		$result = curl_exec($ch);
+		preg_match_all('/get-download(.*?)headless\/linux64/', $result, $matches);
 		return $matches;
 		curl_close($ch);
 	}
@@ -64,12 +58,12 @@
 		curl_setopt($ch, CURLOPT_HEADER, 1);
 		curl_setopt($ch, CURLOPT_NOBODY, 1);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-		$data = curl_exec($ch);
+		$result = curl_exec($ch);
 
-		//echo $data;
-		preg_match("/Content-Disposition: .*filename=([^\n]+)/", $data, $filenames);
-		preg_match("/Location: ([^\n]+)/", $data, $filelocations);
-		return array($filenames[1],  $filelocations[1]);
+		//echo $result;
+		preg_match("/location: ([^\n]+)\?.*/", $result, $filelocation);
+        preg_match("/(factorio_.*)/", $filelocation[1], $filename);
+        return array($filename[1], $filelocation[1]);
 	}
 
 	function move_dir($oldPath,$newPath) {
@@ -101,23 +95,18 @@
 			unlink($tmp_file);
 			return "Install failed. Directory exists.";
 		} else {
-			$urls = array(
-				"https://www.factorio.com/download-headless",
-				"https://www.factorio.com/download-headless/experimental"
-			);
-			foreach($urls as $url) {
-				//run this script on each url in the array until a match is found
-				$server_matched_versions = get_url($url);
-				//if a download link is found, iterate the results
-				if(isset($server_matched_versions[0])) {
-					foreach($server_matched_versions[0] as $key => $value) {
-						//find the verion number in the link
-						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-						//print_r($output);
-						if($output[1]==$version) {
-							$direct_url = "https://www.factorio.com/$value";
-							break 2;
-						}
+			$url = "https://www.factorio.com/download/archive";
+			//run this script on each url in the array until a match is found
+			$server_matched_versions = get_url($url);
+			//if a download link is found, iterate the results
+			if(isset($server_matched_versions[0])) {
+				foreach($server_matched_versions[0] as $key => $value) {
+					//find the verion number in the link
+					preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
+					//print_r($output);
+					if($output[1]==$version) {
+						$direct_url = "https://www.factorio.com/$value";
+						break;
 					}
 				}
 			}
@@ -160,14 +149,16 @@
 					$ch = curl_init();
 					curl_setopt($ch, CURLOPT_URL, $url);
 					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch, CURLOPT_HEADER, true); 
+					curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
 					curl_setopt($ch, CURLOPT_NOPROGRESS, false );
 					curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
 					curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, 'progressCallback' );
 					curl_setopt($ch, CURLOPT_FILE, $targetFile );
-					$data=curl_exec($ch);
+					$result = curl_exec($ch);
 					curl_close($ch);
 					fclose( $targetFile );
-					if($data === false)
+					if($result === false)
 					{
 						return 'Curl error: ' . __LINE__ . ' ' . curl_error($ch);
 					} //continue if successful
@@ -385,29 +376,23 @@
 			if($_REQUEST['show']=="true") {
 				//print_r($server_installed_versions);
 				echo "<br /><br />";
-				$urls = array(
-					"https://www.factorio.com/download-headless",
-					"https://www.factorio.com/download-headless/experimental"
-				);
-				foreach($urls as $url) {
-					//run this script on each url in the array
-					$server_matched_versions = get_url($url);
-					//var_dump($server_available_versions);
-					//if a download link is found, iterate the results
-					if(isset($server_matched_versions[0])) {
-						foreach($server_matched_versions[0] as $key => $value) {
-							//find the verion number in the link
-							preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-							//var_dump($output[1]);
-							//get the experimental or stable tag from the url
-							$branch = substr($url, strrpos($url, '/') + 1);
-							if($branch=="download-headless") $branch = "stable";
-							//create array to work with later
-							$server_available_versions[$output[1]] = array(0=>$value,1=>$branch);
-							//add to total versions to compare against installed versions
-							if(!in_array($output[1], $total_versions)) {
-								$total_versions[]=$output[1];
-							}
+				$url = "https://factorio.com/download/archive";
+				$server_matched_versions = get_url($url);
+				//var_dump($server_available_versions);
+				//if a download link is found, iterate the results
+				if(isset($server_matched_versions[0])) {
+					foreach($server_matched_versions[0] as $key => $value) {
+						//find the verion number in the link
+						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
+						//var_dump($output[1]);
+						//get the experimental or stable tag from the url
+						$branch = substr($url, strrpos($url, '/') + 1);
+						if($branch=="download-headless") $branch = "stable";
+						//create array to work with later
+						$server_available_versions[$output[1]] = array(0=>$value,1=>$branch);
+						//add to total versions to compare against installed versions
+						if(!in_array($output[1], $total_versions)) {
+							$total_versions[]=$output[1];
 						}
 					}
 				}

@@ -1,9 +1,5 @@
 <?php
 if(session_status()!=2) { session_start(); }
-if(isset($_SERVER["HTTPS"]) == false) {
-    header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-	die();
-}
 //set debug?
 if(isset($_REQUEST['debug'])) {
 	if($_REQUEST['debug']=="true") {
