@@ -89,6 +89,7 @@
 		function return_bytes($val) {
 			$val = trim($val);
 			$last = strtolower($val[strlen($val)-1]);
+			$val = filter_var($val, FILTER_SANITIZE_NUMBER_INT);
 			switch($last)
 			{
 				case 'g':
