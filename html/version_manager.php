@@ -354,41 +354,26 @@
 				echo "<br /><br />";
 				$url = "https://factorio.com/download/archive";
 				$server_matched_versions = get_url($url);
-				//var_dump($server_available_versions);
 				//if a download link is found, iterate the results
 				if(isset($server_matched_versions[0])) {
 					foreach($server_matched_versions[0] as $key => $value) {
 						//find the verion number in the link
 						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-						//var_dump($output[1]);
-						//get the experimental or stable tag from the url
-						$branch = substr($url, strrpos($url, '/') + 1);
-						if($branch=="download-headless") $branch = "stable";
 						//create array to work with later
-						$server_available_versions[$output[1]] = array(0=>$value,1=>$branch);
+						$server_available_versions[$output[1]] = $value;
 						//add to total versions to compare against installed versions
 						if(!in_array($output[1], $total_versions)) {
 							$total_versions[]=$output[1];
 						}
 					}
 				}
-				//sort the verion numbers with a fancy smart sorting function built in to php
-				natsort($total_versions);
-				//var_dump($server_available_versions);
-				//var_dump($total_versions);
 				//display the table for installed and available versions
 				echo "<table><tr><td>Version</td><td></td><td>Control</td>\xA";
 				foreach($total_versions as $value) {
 					$js_value = preg_replace('#\.#', '_', $value);
 					echo "<tr><td>$value</td><td>";
-					if(isset($server_available_versions[$value])) {
-						//display different colors for versions
-						if($server_available_versions[$value][1]=="stable") {
-							echo "<font color=green>";
-						} elseif($server_available_versions[$value][1]=="experimental") {
-							echo "<font color=orange>";
-						}
-						echo "<span id=\"dev-$js_value\">".$server_available_versions[$value][1]."</span></td><td>";
+					if(!isset($server_available_versions[$value])) {
+						echo "<span id=\"dev-$js_value\">".$server_available_versions[$value]."</span></td><td>";
 					} else {
 						echo "<font color=red><span id=\"dev-$js_value\">depreciated</span></font></td><td>";
 					}
