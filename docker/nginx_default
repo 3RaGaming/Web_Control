@@ -9,9 +9,9 @@ server {
 	# listen [::]:443 ssl default_server;
 	root /var/www/html;
 	index index.html index.php;
-	
-	access_log /var/log/all.log;
-	error_log /var/log/all.log;
+
+	access_log /var/log/nginx/all.log;
+	error_log /var/log/nginx/all.log;
 
 	server_name _;
 

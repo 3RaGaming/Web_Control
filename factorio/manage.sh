@@ -219,9 +219,10 @@ else
 
 		'status')
 			get_status "$server";
-			if [ "$check" == "Server Running" ]; then 
-				#echo -e "${check}"
+			if [ "$check" == "Server Running" ]; then
 				echo "Server is Running" ;
+            elif [ "$check" == "Manage Stopped" ]; then
+                echo "Server Manager Not Running";
 			else
 				echo "Server is Stopped";
 			fi
