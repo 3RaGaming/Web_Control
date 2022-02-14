@@ -4,7 +4,7 @@ FROM ubuntu
 RUN apt update
 RUN apt upgrade -y
 RUN DEBIAN_FRONTEND=noninteractive TZ="US/Mountain" apt-get -y install tzdata
-RUN apt install -y sudo apt-utils curl wget zip nano gcc tar xz-utils screen cron nginx php7.4-fpm php-curl php-json
+RUN apt install -y sudo apt-utils curl wget zip nano gcc tar xz-utils screen cron nginx php7.4-fpm php-curl php-json php-zip
 #
 # install node
 RUN curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
