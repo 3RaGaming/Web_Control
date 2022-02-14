@@ -17,6 +17,7 @@ COPY nginx_default /etc/nginx/sites-enabled/default
 COPY start.sh /tmp/start.sh
 COPY cronjob.txt /tmp/cronjob.txt
 COPY php.ini /etc/php/7.4/fpm/php.ini
+COPY sudoers /etc/sudoers
 RUN chmod +x /tmp/start.sh
 #
 # create folders
