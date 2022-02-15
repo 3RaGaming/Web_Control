@@ -38,10 +38,10 @@ RUN mkdir -p /var/log/nginx
 RUN touch /var/log/nginx/all.log
 #
 # download, extract and install repo
-RUN wget https://gitlab.com/3RaGaming/Web_Control/-/archive/docker/Web_Control-docker.zip -O /tmp/master.zip
+RUN wget https://gitlab.com/3RaGaming/Web_Control/-/archive/master/Web_Control-master.zip -O /tmp/master.zip
 RUN unzip /tmp/master.zip -d /tmp/
-RUN mv /tmp/Web_Control-docker/* /var/www/
-RUN rm -Rf /tmp/master.zip /tmp/Web_Control-docker/
+RUN mv /tmp/Web_Control-master/* /var/www/
+RUN rm -Rf /tmp/master.zip /tmp/Web_Control-master/
 RUN cd /var/www/factorio && gcc -o managepgm -std=gnu99 -pthread manage.c
 RUN cd /var/www/factorio && npm i --save --no-optional discord.js
 #
