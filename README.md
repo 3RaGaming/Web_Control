@@ -58,5 +58,5 @@ We recommend following our updates, as if a recompile of the manage.c is ever ne
 
 `docker build -t factorio .`  
 `docker run -dt --restart unless-stopped --name factorio factorio` Exposed ports are set in the docker file. If you need alternate ones, edit the docker file, or add them individually via `-p 8080:80/tcp` with the correct ports needed  
-Nginx runs on port 8080 by default, so you'll need another proxy or port forward to expose this. This docker build uses 80 for unencrypted traffic only. If you want ssl, it's suggested to use an nginx reverse proxy that will handle the ssl.
+Nginx runs on port 8080 by default, so you'll need another proxy or port forward to expose this. This docker build uses 80 for unencrypted traffic only. If you want ssl, it's suggested to use an nginx reverse proxy that will handle the ssl. You'll also want to set the `client_max_body_size 100M;` setting in your config to allow large files to be uploaded.
 `docker exec -it factorio /bin/bash` Login to the server to check things  

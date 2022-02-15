@@ -9,7 +9,7 @@ server {
 	# listen [::]:443 ssl default_server;
 	root /var/www/html;
 	index index.html index.php;
-
+	client_max_body_size 250M;
 	access_log /var/log/nginx/all.log;
 	error_log /var/log/nginx/all.log;
 
