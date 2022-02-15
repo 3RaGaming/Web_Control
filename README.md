@@ -37,8 +37,7 @@ Node.js v6.9.5 or higher (https://nodejs.org/en/download/package-manager/#debian
 
 # Manual Installation
 
-If you prefer to do it manually, here are the steps.
-Right now the file path dependencies are as follows:  
+If you prefer to do it manually, here are the steps. Right now the file path dependencies are as follows:  
 /var/www/html for the web files  
 /var/www/factorio for the server save locations.  
 /usr/share/factorio/0.12.34 for the factorio instance itself
@@ -57,6 +56,7 @@ We recommend following our updates, as if a recompile of the manage.c is ever ne
 
 # Docker Build Installation
 
-`docker build -t factorio .`
-`docker run -dt -p 8080:80 --name factorio factorio` Substitute 8080:80 for all port mappings you'll need for this server
-`docker exec -it factorio /bin/bash` Login to the server to check things
+`docker build -t factorio .`  
+`docker run -dt --restart unless-stopped --name factorio factorio` Exposed ports are set in the docker file. If you need alternate ones, edit the docker file, or add them individually via `-p 8080:80/tcp` with the correct ports needed  
+Nginx runs on port 8080 by default, so you'll need another proxy or port forward to expose this. This docker build uses 80 for unencrypted traffic only. If you want ssl, it's suggested to use an nginx reverse proxy that will handle the ssl.
+`docker exec -it factorio /bin/bash` Login to the server to check things  

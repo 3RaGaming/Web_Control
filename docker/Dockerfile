@@ -1,4 +1,14 @@
 FROM ubuntu
+EXPOSE 8080/tcp
+EXPOSE 34291/udp
+EXPOSE 34292/udp
+EXPOSE 34293/udp
+EXPOSE 34294/udp
+EXPOSE 34295/udp
+EXPOSE 34296/udp
+EXPOSE 34297/udp
+EXPOSE 34298/udp
+EXPOSE 34299/udp
 #
 # apt updates
 RUN apt update
@@ -32,7 +42,6 @@ RUN wget https://gitlab.com/3RaGaming/Web_Control/-/archive/docker/Web_Control-d
 RUN unzip /tmp/master.zip -d /tmp/
 RUN mv /tmp/Web_Control-docker/* /var/www/
 RUN rm -Rf /tmp/master.zip /tmp/Web_Control-docker/
-RUN mv /var/www/factorio/serverexample /var/www/factorio/server1
 RUN cd /var/www/factorio && gcc -o managepgm -std=gnu99 -pthread manage.c
 RUN cd /var/www/factorio && npm i --save --no-optional discord.js
 #
