@@ -1,4 +1,4 @@
-<?php	
+<?php
 	if(!isset($_SESSION)) { session_start(); }
 	if(!isset($_SESSION['login'])) {
 		if( isset($_REQUEST['install']) || isset($_REQUEST['delete']) || isset($_REQUEST['show']) ) {
@@ -6,14 +6,7 @@
 		}
 		header("Location: ./login.php");
 		die();
-	} else {
-		if(isset($_SERVER["HTTPS"]) == false)
-		{
-			header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-			die();
-		}
 	}
-
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
 	if(isset($_SESSION['login']['user'])) { $user_name = $_SESSION['login']['user']; }  else { $user_name = "guest"; }
 	if(isset($_SESSION['login']['reload_report'])) {
@@ -21,18 +14,15 @@
 		unset($_SESSION['login']['reload_report']);
 	}
 	session_write_close();
-	
 	if($user_level=="viewonly") {
 		die('Not allowed for view only');
 	}
-
 	//Set the base directory the factorio servers will be stored
 	$base_dir="/var/www/factorio/";
 	include('./getserver.php');
 	if(!isset($server_select)) {
 		$server_select = "servertest";
 	}
-
 	//available exe versions
 	$program_dir = "/usr/share/factorio/";
 	//directory of installed
@@ -51,31 +41,28 @@
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$data = curl_exec($ch);
-		preg_match_all('/get-download(.*?)linux64/', $data, $matches);
+		$result = curl_exec($ch);
+		preg_match_all('/get-download(.*?)headless\/linux64/', $result, $matches);
 		return $matches;
 		curl_close($ch);
 	}
-
 	function getFilename($url){
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_NOBODY, 1);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		curl_setopt($ch, CURLOPT_NOBODY, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		$data = curl_exec($ch);
-
 		//echo $data;
-		preg_match("/Content-Disposition: .*filename=([^\n]+)/", $data, $filenames);
-		preg_match("/Location: ([^\n]+)/", $data, $filelocations);
-		return array($filenames[1],  $filelocations[1]);
+		preg_match("/location: (.*)\n/", $data, $filelocation);
+		preg_match("/(factorio_.*)\?.*/", trim($filelocation[1]), $filename);
+		$filename = preg_replace('/\.(?=.*\.)/', '_', preg_replace("/[^a-zA-Z0-9.-_]+/", "", $filename[1]));
+		return array(trim($filelocation[1]), $filename);
 	}
-
 	function move_dir($oldPath,$newPath) {
 		exec("mv ".escapeshellarg($oldPath)." ".escapeshellarg($newPath));
 	}
-
 	function rrmdir($src) {
 		$dir = opendir($src);
 		while(false !== ( $file = readdir($dir)) ) {
@@ -92,7 +79,6 @@
 		closedir($dir);
 		rmdir($src);
 	}
-
 	function install($version, $program_dir, $tmp_file) {
 		global $progress_file;
 		$progress_file = "/tmp/factorio-version-manager_progress.".$version.".txt";
@@ -101,34 +87,26 @@
 			unlink($tmp_file);
 			return "Install failed. Directory exists.";
 		} else {
-			$urls = array(
-				"https://www.factorio.com/download-headless",
-				"https://www.factorio.com/download-headless/experimental"
-			);
-			foreach($urls as $url) {
-				//run this script on each url in the array until a match is found
-				$server_matched_versions = get_url($url);
-				//if a download link is found, iterate the results
-				if(isset($server_matched_versions[0])) {
-					foreach($server_matched_versions[0] as $key => $value) {
-						//find the verion number in the link
-						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-						//print_r($output);
-						if($output[1]==$version) {
-							$direct_url = "https://www.factorio.com/$value";
-							break 2;
-						}
+			$url = "https://www.factorio.com/download/archive";
+			//run this script on each url in the array until a match is found
+			$server_matched_versions = get_url($url);
+			//if a download link is found, iterate the results
+			if(isset($server_matched_versions[0])) {
+				foreach($server_matched_versions[0] as $key => $value) {
+					//find the verion number in the link
+					preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
+					//print_r($output);
+					if($output[1]==$version) {
+						$direct_url = "https://www.factorio.com/$value";
+						break;
 					}
 				}
 			}
-			
 			if(isset($direct_url)) {
 				//create status files periodically so other users know whats going on. Should be able to use this for active user status updates as well
 				file_put_contents($tmp_file, json_encode(array("action" => "downloading", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
-				
 				//get's filename and download url, actually...
 				$file = getFilename($direct_url);
-				
 				//make sure we get both in return
 				if(isset($file[0])&&isset($file[1])) {
 					//define the function so we can get download status as we download
@@ -136,12 +114,10 @@
 					{
 						global $progress_file;
 						static $previousProgress = 0;
-						
 						if ( $download_size == 0 )
 							$progress = 0;
 						else
 							$progress = round( $downloaded_size * 100 / $download_size );
-							
 						if ( $progress > $previousProgress)
 						{
 							$previousProgress = $progress;
@@ -149,25 +125,24 @@
 							file_put_contents( $progress_file, "$progress" );
 						}
 					}
-					
 					//clean up the URL, filename and set the temporary path
-					$url = trim($file[1]);
-					$filename = preg_replace('/\.(?=.*\.)/', '_', preg_replace("/[^a-zA-Z0-9.-_]+/", "", $file[0]));
-					$filename_loc = "/tmp/".$filename;
-					
+					$url = $file[0];
+					$filename_loc = "/tmp/".$file[1];
 					file_put_contents( $progress_file, '0' );
 					$targetFile = fopen( $filename_loc, 'w' );
 					$ch = curl_init();
 					curl_setopt($ch, CURLOPT_URL, $url);
 					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+					curl_setopt($ch, CURLOPT_HEADER, false);
+					curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
 					curl_setopt($ch, CURLOPT_NOPROGRESS, false );
-					curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+					curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 					curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, 'progressCallback' );
 					curl_setopt($ch, CURLOPT_FILE, $targetFile );
-					$data=curl_exec($ch);
+					$result = curl_exec($ch);
 					curl_close($ch);
 					fclose( $targetFile );
-					if($data === false)
+					if($result === false)
 					{
 						return 'Curl error: ' . __LINE__ . ' ' . curl_error($ch);
 					} //continue if successful
@@ -187,9 +162,8 @@
 								}
 								mkdir($tar_dir);
 								exec("tar -xf $filename_loc -C $tar_dir");
-								
 								function is_dir_empty($dir) {
-									if (!is_readable($dir)) return NULL; 
+									if (!is_readable($dir)) return NULL;
 									$handle = opendir($dir);
 									while (false !== ($entry = readdir($handle))) {
 										if ($entry != "." && $entry != "..") {
@@ -200,7 +174,7 @@
 								}
 								unlink($filename_loc);
 								if(is_dir_empty($tar_dir)) {
-									return "install fail. 'tar_dir' is empty";
+									return "install fail. 'tar_dir' is empty $tar_dir";
 								} else {
 									$files_dir = $tar_dir."factorio";
 									move_dir($files_dir, $program_dir);
@@ -211,8 +185,6 @@
 										return "Install Successfull! $program_dir";
 									}
 								}
-								
-								
 								break;
 							case "application/x-gzip";
 								$filename_tar = pathinfo( $filename_loc, PATHINFO_FILENAME ).".tar";
@@ -247,9 +219,8 @@
 									return "tar extract failure: $e";
 									// handle errors
 								}
-								
 								function is_dir_empty($dir) {
-									if (!is_readable($dir)) return NULL; 
+									if (!is_readable($dir)) return NULL;
 									$handle = opendir($dir);
 									while (false !== ($entry = readdir($handle))) {
 										if ($entry != "." && $entry != "..") {
@@ -271,7 +242,6 @@
 										return "success";
 									}
 								}
-								
 								break;
 							default:
 								return "unsupported filetyle: $fileType";
@@ -285,7 +255,6 @@
 			}
 		}
 	}
-	
 	function delete($version, $program_dir, $tmp_file) {
 		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
 		rrmdir($program_dir);
@@ -297,12 +266,10 @@
 			return "success";
 		}
 	}
-	
 	$date = date('Y-m-d');
 	$time = date('H:i:s');
 	$log_dir = "/var/www/factorio/logs";
 	$log_path = "$log_dir/version-manager-$date.log";
-	
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['status'])&&$_REQUEST['status']!="") {
 			if( $user_level == "viewonly" ) {
@@ -385,54 +352,31 @@
 			if($_REQUEST['show']=="true") {
 				//print_r($server_installed_versions);
 				echo "<br /><br />";
-				$urls = array(
-					"https://www.factorio.com/download-headless",
-					"https://www.factorio.com/download-headless/experimental"
-				);
-				foreach($urls as $url) {
-					//run this script on each url in the array
-					$server_matched_versions = get_url($url);
-					//var_dump($server_available_versions);
-					//if a download link is found, iterate the results
-					if(isset($server_matched_versions[0])) {
-						foreach($server_matched_versions[0] as $key => $value) {
-							//find the verion number in the link
-							preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-							//var_dump($output[1]);
-							//get the experimental or stable tag from the url
-							$branch = substr($url, strrpos($url, '/') + 1);
-							if($branch=="download-headless") $branch = "stable";
-							//create array to work with later
-							$server_available_versions[$output[1]] = array(0=>$value,1=>$branch);
-							//add to total versions to compare against installed versions
-							if(!in_array($output[1], $total_versions)) {
-								$total_versions[]=$output[1];
-							}
+				$url = "https://factorio.com/download/archive";
+				$server_matched_versions = get_url($url);
+				//if a download link is found, iterate the results
+				if(isset($server_matched_versions[0])) {
+					foreach($server_matched_versions[0] as $key => $value) {
+						//find the verion number in the link
+						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
+						//create array to work with later
+						$server_available_versions[$output[1]] = $value;
+						//add to total versions to compare against installed versions
+						if(!in_array($output[1], $total_versions)) {
+							$total_versions[]=$output[1];
 						}
 					}
 				}
-				//sort the verion numbers with a fancy smart sorting function built in to php
-				natsort($total_versions);
-				//var_dump($server_available_versions);
-				//var_dump($total_versions);
 				//display the table for installed and available versions
 				echo "<table><tr><td>Version</td><td></td><td>Control</td>\xA";
 				foreach($total_versions as $value) {
 					$js_value = preg_replace('#\.#', '_', $value);
 					echo "<tr><td>$value</td><td>";
-					
-					if(isset($server_available_versions[$value])) {
-						//display different colors for versions
-						if($server_available_versions[$value][1]=="stable") {
-							echo "<font color=green>";
-						} elseif($server_available_versions[$value][1]=="experimental") {
-							echo "<font color=orange>";
-						}
-						echo "<span id=\"dev-$js_value\">".$server_available_versions[$value][1]."</span></td><td>";
+					if(!isset($server_available_versions[$value])) {
+						echo "<span id=\"dev-$js_value\">".$server_available_versions[$value]."</span></td><td>";
 					} else {
 						echo "<font color=red><span id=\"dev-$js_value\">depreciated</span></font></td><td>";
 					}
-					
 					//if the server is working on installing a version, this file will exist and hold the status of the install
 					$tmp_file = "/tmp/factorio-version-manager_status.$value.txt";
 					if(file_exists($tmp_file)) {
@@ -475,12 +419,10 @@
 			});
 		}
 		load_list(false);
-		
 		var s_loc = window.location.pathname;
 		var s_dir = s_loc.substring(0, s_loc.lastIndexOf('/'));
 		var s_refreshtime=200;
 		var versionwork = {};
-		
 		function check_status(e)
 		{
 			if(e === false) return;
@@ -501,7 +443,6 @@
 			}
 		}
 		check_status(false);
-		
 		function w_install(e) {
 			if(e === false) return;
 			var version = e;
@@ -520,7 +461,6 @@
 			});
 		}
 		w_install(false);
-		
 		function w_delete(e) {
 			if(e === false) return;
 			var version = e;
@@ -550,18 +490,15 @@
 			//$('#status-'+version).html("p00t");
 		}
 		w_delete(false);
-		
 <?php
 		echo "\t\tvar server_select = \"";
 		if(isset($server_select)) { echo $server_select; }  else { echo "servertest"; }
 		echo "\";\xA";
-
 		echo "\t\tvar user_level = \"$user_level\";\xA";
 		echo "\t\tvar user_name = \"$user_name\";\xA";
 		//Things to only start doing after the page has finished loading
 		echo "\t\t$(document).ready(function() {\xA";
 		echo "\t\t\t$('#welcome_user').text(user_name);\xA";
-
 		// This is for displaying the server name & password in an input box
 		echo "\t\t\t$('#link_home').attr('href',\"index.php?d=\"+server_select);\xA";
 		echo "\t\t\t$('#link_logs').attr('href',\"logs.php?d=\"+server_select+\"#server_list-\"+server_select);\xA";

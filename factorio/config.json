@@ -1,9 +1,12 @@
 {
 	"token": "PUT_YOUR_BOT_TOKEN_HERE",
+	"clientid": "PUT_YOUR_BOT_CLIENT_ID_HERE",
+	"clientsecret": "PUT_YOUR_BOT_CLIENT_SECRET_HERE",
 	"guildid": "This is the ID of your guild",
 	"adminrole": "This is the name of the role you wish to allow the webserver's admin permissions and the bot's eval command to",
 	"modrole": "This is the name of the role you wish to lock the bot's admin commands to",
-        "clientid": "PUT_YOUR_BOT_CLIENT_ID_HERE",
-        "clientsecret": "PUT_YOUR_BOT_CLIENT_SECRET_HERE",
-	"gamemessage": "This is the bot's 'Currently Playing' message that appears below its name on Discord"
+	"smallmodrole": "false",
+	"gamemessage": "This is the bot's 'Currently Playing' message that appears below its name on Discord",
+	"banreason": "Contact the server owner to appeal your ban",
+	"update_descriptions": "false"
 }

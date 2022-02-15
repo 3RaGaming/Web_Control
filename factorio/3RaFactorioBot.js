@@ -1,6 +1,6 @@
 //Set up the Discord bot interface
 var Discord = require("discord.js");
-var bot = new Discord.Client({fetchAllMembers: true, disableEveryone: true});
+var bot = new Discord.Client({fetchAllMembers: true, disableEveryone: true, intents: ["GUILD_MESSAGES", "GUILDS"]});
 
 //Set up code for error detections
 process.on("unhandledRejection", (err) => {
@@ -67,7 +67,7 @@ if (!config.update_descriptions && typeof config.update_descriptions == 'undefin
 }
 
 if (config.token == "PUT_YOUR_BOT_TOKEN_HERE") {
-	console.log("DEBUG$Critical failure! The config file was not set up properly!");
+	console.log("DEBUG$Critical failure! The config file was not set up properly! Bot token required");
 	process.exit(1);
 }
 
@@ -1306,7 +1306,7 @@ bot.on('ready', () => {
 		bot.user.setGame(gamemessage);
 	}
 	//bot.guilds.forEach((guildobj, guildid, collection) => {
-	bot.guilds.forEach((guildobj, lguildid) => {
+	bot.guilds.cache.forEach((guildobj, lguildid) => {
 		if (lguildid != guildid) guildobj.leave();
 	});
 	//Set any currently existing PvP servers back up for fresh player lists

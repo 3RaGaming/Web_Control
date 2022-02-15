@@ -3,11 +3,6 @@
 	if(!isset($_SESSION['login'])) {
 		header("Location: ./login.php");
 		die();
-	} else {
-		if(isset($_SERVER["HTTPS"]) == false) {
-			header("Location: https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
-			die();
-		}
 	}
 	
 	if(isset($_SESSION['login']['level'])) { $user_level = $_SESSION['login']['level']; }  else { $user_level = "viewonly"; }
@@ -94,6 +89,7 @@
 		function return_bytes($val) {
 			$val = trim($val);
 			$last = strtolower($val[strlen($val)-1]);
+			$val = filter_var($val, FILTER_SANITIZE_NUMBER_INT);
 			switch($last)
 			{
 				case 'g':
