@@ -14,19 +14,20 @@ EXPOSE 34299/udp
 RUN apt update
 RUN apt upgrade -y
 RUN DEBIAN_FRONTEND=noninteractive TZ="US/Mountain" apt-get -y install tzdata
-RUN apt install -y sudo apt-utils curl wget zip nano gcc tar xz-utils screen cron nginx php7.4-fpm php-curl php-json php-zip
+RUN timedatectl set-timezone America/Denver
+RUN apt install -y sudo apt-utils curl wget zip nano gcc tar xz-utils screen cron nginx php8.3-fpm php-curl php-json php-zip
 #
 # install node
-RUN curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+RUN curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
 RUN bash /tmp/nodesource_setup.sh
 RUN apt install -y nodejs
-RUN npm install -g npm@8.5.0
+RUN npm install -g npm
 #
 # copy files
 COPY nginx_default /etc/nginx/sites-enabled/default
 COPY start.sh /tmp/start.sh
 COPY cronjob.txt /tmp/cronjob.txt
-COPY php.ini /etc/php/7.4/fpm/php.ini
+COPY php.ini /etc/php/8.3/fpm/php.ini
 COPY sudoers /etc/sudoers
 RUN chmod +x /tmp/start.sh
 #
