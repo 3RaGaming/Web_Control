@@ -1,4 +1,5 @@
 {
+	"botenabled": "false",
 	"token": "PUT_YOUR_BOT_TOKEN_HERE",
 	"clientid": "PUT_YOUR_BOT_CLIENT_ID_HERE",
 	"clientsecret": "PUT_YOUR_BOT_CLIENT_SECRET_HERE",

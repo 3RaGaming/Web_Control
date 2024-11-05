@@ -165,6 +165,7 @@ depend_arr+=("unzip");
 depend_arr+=("tar");
 depend_arr+=("rsync");
 depend_arr+=("gcc");
+depend_arr+=("libcjson-dev");
 depend_arr+=("screen");
 depend_arr+=("cron");
 depend_arr+=("wget");

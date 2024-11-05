@@ -2,38 +2,37 @@
 # Default server configuration
 #
 server {
-	listen 8080 default_server;
-	listen [::]:8080 default_server;
+    listen 8080 default_server;
+    listen [::]:8080 default_server;
 
-	# listen 443 ssl default_server;
-	# listen [::]:443 ssl default_server;
-	root /var/www/html;
-	index index.html index.php;
-	client_max_body_size 250M;
-	access_log /var/log/nginx/all.log;
-	error_log /var/log/nginx/all.log;
+    # listen 443 ssl default_server;
+    # listen [::]:443 ssl default_server;
+    root /var/www/html;
+    index index.html index.php;
+    client_max_body_size 250M;
+    access_log /var/log/nginx/all.log;
+    error_log /var/log/nginx/all.log;
 
-	server_name _;
+    server_name _;
 
-	location / {
-		try_files $uri $uri/ =404;
-	}
-	location ~ /assets/api/cpumeminfo.php {
-        access_log off;
-    }
-    location ~ /assets/api/console.php {
-        access_log off;
+    location / {
+        try_files $uri $uri/ =404;
     }
 
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
 
-	location ~ \.php$ {
-		include snippets/fastcgi-php.conf;
-	
-		# With php-fpm (or other unix sockets):
-		fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-	}
+        # With php-fpm (or other unix sockets):
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+    }
 
-	location ~ /\.ht {
-		deny all;
-	}
+    location ~ /assets/api/.*\.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        access_log off;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
 }

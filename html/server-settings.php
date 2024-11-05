@@ -99,7 +99,7 @@
 									if($key == "max_players") {
 										echo "Server Version:$col<select name=\"s_version\">";
 										foreach($server_installed_versions as $version => $path) {
-											if($server_settings_web['version'] == $version) {
+											if(isset($server_settings_web['version']) && $server_settings_web['version'] == $version) {
 												echo "<option value=\"$version\" selected>$version</option>";
 											} else {
 												echo "<option value=\"$version\">$version</option>";

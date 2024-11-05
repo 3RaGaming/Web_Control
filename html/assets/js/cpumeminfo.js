@@ -16,28 +16,26 @@ $( document ).ready(function() {
 
         if(data !== undefined) updateload(data);
 
-        setTimeout(loop,delay);
+        setInterval(() => {
+            getData();
+            var data = cpulog[cpulog.length - 1];
+            if (data !== undefined) updateload(data);
+        }, delay);
     }
 
-    function updateload(data){
-        //<div id="serverload" style="float: right; margin-right: 20px;">
-        //    <span id="cpu" style="padding: 6px;background-color: rgb(102, 255, 0);">00 %</span>
-        //    <span id="mem" style="padding: 6px;background-color: rgb(102, 255, 0);">0.00/0.00 GB</span>
-        //</div>
-
+    function updateload(data) {
         var cpuElem = $("#cpu");
         var memElem = $("#mem");
-
-
-
+    
         var cpu = Math.round(100 - parseInt(data.cpu.idle));
-        var mempercentage = parseFloat(data.mem.split("/")[0] / data.mem.split("/")[1]).toFixed(2);
-
-        cpuElem.text(cpu+" %");
+        var [usedMem, totalMem] = data.mem.split("/");
+        var memPercentage = (parseFloat(usedMem) / parseFloat(totalMem)).toFixed(2);
+    
+        cpuElem.text(cpu + " %");
         cpuElem.css("background-color", getColor(cpu / 100));
-
+    
         memElem.text(data.mem + " GB");
-        memElem.css("background-color", getColor(mempercentage));
+        memElem.css("background-color", getColor(memPercentage));
     }
 
     function getColor(value){
@@ -46,15 +44,14 @@ $( document ).ready(function() {
         return ["hsl(",hue,",100%,50%)"].join("");
     }
 
-    function getData(){
+    function getData() {
         $.ajax({
             dataType: "json",
-            url: "assets/api/cpumeminfo.php"
+            url: "/assets/api/cpumeminfo.php"
         }).done(function(data) {
-            if(cpulog.push(data) > 20) cpulog.shift();
+            if (cpulog.push(data) > 20) cpulog.shift();
         }).fail(function() {
-            if(cpulog.push(undefined) > 20) cpulog.shift();
-            console.log( "error: cpumeminfo get fail." );
+            console.error("error: cpumeminfo get fail.");
         });
     }
 });
