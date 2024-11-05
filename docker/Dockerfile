@@ -14,8 +14,9 @@ EXPOSE 34299/udp
 RUN apt update
 RUN apt upgrade -y
 RUN DEBIAN_FRONTEND=noninteractive TZ="US/Mountain" apt-get -y install tzdata
-RUN timedatectl set-timezone America/Denver
-RUN apt install -y sudo apt-utils curl wget zip nano gcc tar xz-utils screen cron nginx php8.3-fpm php-curl php-json php-zip
+RUN ln -sf /usr/share/zoneinfo/America/Denver /etc/localtime
+RUN echo "America/Denver" > /etc/timezone
+RUN apt install -y sudo apt-utils curl wget zip nano gcc libcjson-dev tar xz-utils screen cron nginx php8.3-fpm php-curl php-json php-zip
 #
 # install node
 RUN curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
@@ -43,7 +44,7 @@ RUN wget https://gitlab.com/3RaGaming/Web_Control/-/archive/master/Web_Control-m
 RUN unzip /tmp/master.zip -d /tmp/
 RUN mv /tmp/Web_Control-master/* /var/www/
 RUN rm -Rf /tmp/master.zip /tmp/Web_Control-master/
-RUN cd /var/www/factorio && gcc -o managepgm -std=gnu99 -pthread manage.c
+RUN cd /var/www/factorio && gcc -o managepgm -std=gnu99 -pthread -I/usr/include/cjson manage.c -L/usr/lib/x86_64-linux-gnu -lcjson
 RUN cd /var/www/factorio && npm i --save --no-optional discord.js
 #
 # set file permissions

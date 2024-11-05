@@ -26,15 +26,18 @@
 	//available exe versions
 	$program_dir = "/usr/share/factorio/";
 	//directory of installed
+	$GLOBALS['total_versions'] = [];
 	foreach(glob("$program_dir*", GLOB_ONLYDIR) as $dir) {
 		$dir = str_replace($program_dir, '', $dir);
 		$server_installed_versions[$dir] = "$program_dir$dir";
 		//total versions variable needed for comparing against available versions
-		$total_versions[]=$dir;
+		$GLOBALS['total_versions'][]=$dir;
 		if(!isset($server_default_version)) {
 			$server_default_version = $dir;
 		}
 	}
+	$GLOBALS['date'] = date('Y-m-d');
+	$GLOBALS['time'] = date('H:i:s');
 	//function used to get source of the download web pages for iteration.
 	//regex will search for the download link for use following function call.
 	function get_url($url) {
@@ -42,7 +45,7 @@
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$result = curl_exec($ch);
-		preg_match_all('/get-download(.*?)headless\/linux64/', $result, $matches);
+		preg_match_all('/\/download\/archive\/([\d\.]+)/', $result, $matches);
 		return $matches;
 		curl_close($ch);
 	}
@@ -56,7 +59,7 @@
 		$data = curl_exec($ch);
 		//echo $data;
 		preg_match("/location: (.*)\n/", $data, $filelocation);
-		preg_match("/(factorio_.*)\?.*/", trim($filelocation[1]), $filename);
+		preg_match("/(factorio[_-].*)\?.*/", trim($filelocation[1]), $filename);
 		$filename = preg_replace('/\.(?=.*\.)/', '_', preg_replace("/[^a-zA-Z0-9.-_]+/", "", $filename[1]));
 		return array(trim($filelocation[1]), $filename);
 	}
@@ -82,29 +85,23 @@
 	function install($version, $program_dir, $tmp_file) {
 		global $progress_file;
 		$progress_file = "/tmp/factorio-version-manager_progress.".$version.".txt";
-		file_put_contents($tmp_file, json_encode(array("action" => "install", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
+		file_put_contents($tmp_file, json_encode(array("action" => "install", "username" => $user_name, "time" => $GLOBALS['date'] ." ". $GLOBALS['time']), JSON_PRETTY_PRINT));
 		if(is_dir($program_dir)) {
 			unlink($tmp_file);
 			return "Install failed. Directory exists.";
 		} else {
-			$url = "https://www.factorio.com/download/archive";
+			$url = "https://www.factorio.com/download/archive/";
 			//run this script on each url in the array until a match is found
 			$server_matched_versions = get_url($url);
 			//if a download link is found, iterate the results
-			if(isset($server_matched_versions[0])) {
-				foreach($server_matched_versions[0] as $key => $value) {
-					//find the verion number in the link
-					preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
-					//print_r($output);
-					if($output[1]==$version) {
-						$direct_url = "https://www.factorio.com/$value";
-						break;
-					}
+			if(isset($server_matched_versions[1])) {
+				foreach($server_matched_versions[1] as $key => $value) {
+					$direct_url = "https://factorio.com/get-download/$version/headless/linux64";
 				}
 			}
 			if(isset($direct_url)) {
 				//create status files periodically so other users know whats going on. Should be able to use this for active user status updates as well
-				file_put_contents($tmp_file, json_encode(array("action" => "downloading", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
+				file_put_contents($tmp_file, json_encode(array("action" => "downloading", "username" => $user_name, "time" => $GLOBALS['date'] ." ". $GLOBALS['time']), JSON_PRETTY_PRINT));
 				//get's filename and download url, actually...
 				$file = getFilename($direct_url);
 				//make sure we get both in return
@@ -147,7 +144,7 @@
 						return 'Curl error: ' . __LINE__ . ' ' . curl_error($ch);
 					} //continue if successful
 					unlink($progress_file);
-					file_put_contents($tmp_file, json_encode(array("action" => "unpacking", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
+					file_put_contents($tmp_file, json_encode(array("action" => "unpacking", "username" => $user_name, "time" => $GLOBALS['date'] ." ". $GLOBALS['time']), JSON_PRETTY_PRINT));
 					if(is_dir($program_dir)) {
 						return "directory exists";
 					} else {
@@ -256,7 +253,7 @@
 		}
 	}
 	function delete($version, $program_dir, $tmp_file) {
-		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name, "time" => "$date $time"), JSON_PRETTY_PRINT));
+		file_put_contents($tmp_file, json_encode(array("action" => "deleting", "username" => $user_name, "time" => $GLOBALS['date'] ." ". $GLOBALS['time']), JSON_PRETTY_PRINT));
 		rrmdir($program_dir);
 		if(is_dir($program_dir)) {
 			unlink($tmp_file);
@@ -266,10 +263,8 @@
 			return "success";
 		}
 	}
-	$date = date('Y-m-d');
-	$time = date('H:i:s');
 	$log_dir = "/var/www/factorio/logs";
-	$log_path = "$log_dir/version-manager-$date.log";
+	$log_path = "$log_dir/version-manager-".$GLOBALS['date'].".log";
 	if(isset($_REQUEST)) {
 		if(isset($_REQUEST['status'])&&$_REQUEST['status']!="") {
 			if( $user_level == "viewonly" ) {
@@ -314,7 +309,7 @@
 				$result = "No Version provided";
 			}
 			echo $result;
-			$log_record = "$time $date $version $result : $username \xA";
+			$log_record = $GLOBALS['time'] ." ". $GLOBALS['date'] ." $version $result : $username \xA";
 			file_put_contents( $log_path, $log_record, FILE_APPEND );
 			die();
 		} elseif( isset( $_REQUEST['delete'] ) ) {
@@ -345,35 +340,35 @@
 				$result = "No Version provided";
 			}
 			echo $result;
-			$log_record = "$time $date $version $result : $username \xA";
+			$log_record = $GLOBALS['time'] ." ". $GLOBALS['date'] ." $version $result : $username \xA";
 			file_put_contents($log_path, $log_record, FILE_APPEND);
 			die();
 		} elseif(isset($_REQUEST['show'])) {
 			if($_REQUEST['show']=="true") {
 				//print_r($server_installed_versions);
 				echo "<br /><br />";
-				$url = "https://factorio.com/download/archive";
+				$url = "https://factorio.com/download/archive/";
 				$server_matched_versions = get_url($url);
 				//if a download link is found, iterate the results
-				if(isset($server_matched_versions[0])) {
-					foreach($server_matched_versions[0] as $key => $value) {
+				if(isset($server_matched_versions[1])) {
+					foreach($server_matched_versions[1] as $key => $value) {
 						//find the verion number in the link
-						preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
+						//preg_match('~/(.*?)/~', $server_matched_versions[1][$key], $output);
 						//create array to work with later
-						$server_available_versions[$output[1]] = $value;
+						$server_available_versions[$value] = $value;
 						//add to total versions to compare against installed versions
-						if(!in_array($output[1], $total_versions)) {
-							$total_versions[]=$output[1];
+						if(!in_array($value, $GLOBALS['total_versions'])) {
+							$GLOBALS['total_versions'][]=$value;
 						}
 					}
 				}
 				//display the table for installed and available versions
 				echo "<table><tr><td>Version</td><td></td><td>Control</td>\xA";
-				foreach($total_versions as $value) {
+				foreach($GLOBALS['total_versions'] as $value) {
 					$js_value = preg_replace('#\.#', '_', $value);
 					echo "<tr><td>$value</td><td>";
-					if(!isset($server_available_versions[$value])) {
-						echo "<span id=\"dev-$js_value\">".$server_available_versions[$value]."</span></td><td>";
+					if(isset($server_available_versions[$value])) {
+						echo "<span id=\"dev-$js_value\"></span></td><td>";
 					} else {
 						echo "<font color=red><span id=\"dev-$js_value\">depreciated</span></font></td><td>";
 					}
@@ -534,3 +529,4 @@
 </html>
 <?php
 die();
+?>

@@ -36,7 +36,6 @@ function move_logs() {
 	if [ -s "$1/factorio-current.log" ]; then
 		mv "$1/factorio-current.log" "$1/logs/factorio-current-${datetime}.log";
 	fi
-    
 }
 
 #global way to get status of server.
